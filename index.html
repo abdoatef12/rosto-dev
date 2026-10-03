@@ -11,583 +11,202 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
 <style>
   :root {
-    --bg: #0F1724; --surface: #172234; --surface2: #1E2C42;
-    --line: #26344A; --text: #ECE7DA; --muted: #8B98AD;
-    --accent: #E3A84B; --accent-ink: #1A1305;
-    --accent2: #6D8FFF; --accent3: #FF6B9D;
-    --danger: #F08A7A; --ok: #6DCF8F; --code-bg: #0A111C;
-    --glow: rgba(227,168,75,0.35);
-    --glow-soft: rgba(227,168,75,0.10);
-  }
-  [data-theme="light"] {
-    --bg: #F5F2EA; --surface: #FFFFFF; --surface2: #EFEBE0;
-    --line: #D8D2C2; --text: #1A1305; --muted: #6B6455;
-    --accent: #B8860B; --accent-ink: #FFFFFF; --code-bg: #F0EBDD;
-    --accent2: #4169E1; --accent3: #D6336C;
-  }
-  [data-theme="ocean"] {
-    --bg: #071A2B; --surface: #0E2A42; --surface2: #153654;
-    --line: #1E4A6E; --text: #E0F2FE; --muted: #7DA8C9;
-    --accent: #22D3EE; --accent-ink: #04212B; --code-bg: #051520;
-    --accent2: #38BDF8; --accent3: #818CF8;
-  }
-  [data-theme="forest"] {
-    --bg: #0B1E14; --surface: #142E20; --surface2: #1B3D2C;
-    --line: #24523A; --text: #E5F5E9; --muted: #8AB89A;
-    --accent: #34D399; --accent-ink: #052B1B; --code-bg: #061209;
-    --accent2: #6EE7B7; --accent3: #FBBF24;
-  }
-  [data-theme="royal"] {
-    --bg: #150A2E; --surface: #211440; --surface2: #2D1B54;
-    --line: #3F2A6B; --text: #EDE9FE; --muted: #A78BFA;
-    --accent: #C084FC; --accent-ink: #2A0A4D; --code-bg: #0D0620;
-    --accent2: #F472B6; --accent3: #60A5FA;
-  }
-  [data-theme="sunset"] {
-    --bg: #2A0F14; --surface: #3D1A22; --surface2: #4E2430;
-    --line: #6B3341; --text: #FFE4E6; --muted: #F0A5B4;
-    --accent: #FB7185; --accent-ink: #450A0A; --code-bg: #1A080C;
-    --accent2: #FDBA74; --accent3: #FDE047;
-  }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; margin: 0; }
-  body {
-    background: var(--bg); color: var(--text);
-    font-family: "Noto Sans Arabic", "Segoe UI", Tahoma, system-ui, sans-serif;
-    font-size: 16px; line-height: 1.75;
-    display: flex; flex-direction: column; height: 100dvh;
-    transition: background 0.4s ease, color 0.4s ease;
-  }
-  body::before {
-    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-    background:
-      radial-gradient(ellipse at 15% 15%, var(--glow), transparent 50%),
-      radial-gradient(ellipse at 85% 85%, var(--glow-soft), transparent 50%);
-    opacity: 0.7; transition: opacity 0.4s;
-  }
-  header {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 10px; padding: 10px 14px;
-    padding-top: max(10px, env(safe-area-inset-top));
-    border-bottom: 1px solid var(--line);
-    backdrop-filter: blur(12px);
-    background: rgba(15,23,36,0.85);
-    position: relative; z-index: 5;
-    flex-wrap: wrap;
-  }
-  [data-theme="light"] header { background: rgba(245,242,234,0.85); }
-  [data-theme="ocean"] header { background: rgba(7,26,43,0.85); }
-  [data-theme="forest"] header { background: rgba(11,30,20,0.85); }
-  [data-theme="royal"] header { background: rgba(21,10,46,0.85); }
-  [data-theme="sunset"] header { background: rgba(42,15,20,0.85); }
-  .brand { font-weight: 700; font-size: 17px; direction: ltr; }
-  .brand small { display: block; font-size: 10px; font-weight: 400; color: var(--muted); direction: rtl; line-height: 1.3; }
-  .brand small .dot { color: var(--accent); animation: pulseDot 1.8s infinite; }
-  @keyframes pulseDot { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-  .actions { display: flex; gap: 5px; flex-wrap: wrap; }
-  button { font: inherit; color: inherit; cursor: pointer; transition: all 0.2s ease; }
-  .ghost {
-    background: transparent; border: 1px solid var(--line); border-radius: 9px;
-    padding: 5px 9px; font-size: 13px; color: var(--muted);
-  }
-  .ghost:hover { color: var(--accent); border-color: var(--accent); }
-  .ghost:active { background: var(--surface); transform: scale(0.96); }
-  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  #chat {
-    flex: 1; overflow-y: auto; padding: 14px;
-    display: flex; flex-direction: column; gap: 16px;
-    scroll-behavior: smooth;
-  }
-  #chat::-webkit-scrollbar { width: 8px; }
-  #chat::-webkit-scrollbar-track { background: transparent; }
-  #chat::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
-  #chat::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-  .msg { max-width: 100%; word-wrap: break-word; overflow-wrap: anywhere; animation: fadeIn 0.4s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes pulseHighlight {
-    0% { box-shadow: 0 0 0 0 var(--accent); }
-    70% { box-shadow: 0 0 0 12px transparent; }
-    100% { box-shadow: 0 0 0 0 transparent; }
-  }
-  .msg.user {
-    align-self: flex-start;
-    background: linear-gradient(135deg, var(--surface), var(--surface2));
-    border-inline-start: 3px solid var(--accent);
-    border-radius: 4px 14px 14px 14px;
-    padding: 8px 14px; max-width: 88%;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  }
-  .msg.assistant { align-self: stretch; padding: 0 2px; }
-  .msg.err { color: var(--danger); }
-  .msg code {
-    font-family: ui-monospace, Menlo, Consolas, monospace;
-    font-size: 0.9em; background: var(--code-bg);
-    padding: 1px 6px; border-radius: 6px;
-    direction: ltr; unicode-bidi: embed;
-    color: var(--accent2);
-  }
-  .msg pre {
-    direction: ltr; text-align: left;
-    background: var(--code-bg); border: 1px solid var(--line);
-    border-radius: 12px; padding: 12px 14px; margin: 10px 0;
-    overflow-x: auto; line-height: 1.5; position: relative;
-    box-shadow: inset 0 0 0 1px var(--glow-soft);
-  }
-  .msg pre code { background: none; padding: 0; font-size: 13px; color: var(--text); }
-  .msg pre .copy-code {
-    position: absolute; top: 6px; right: 6px;
-    background: var(--surface2); border: 1px solid var(--line);
-    border-radius: 6px; padding: 2px 8px; font-size: 11px;
-    color: var(--muted); cursor: pointer;
-  }
-  .msg pre .copy-code:hover { color: var(--accent); border-color: var(--accent); }
-  .msg table { border-collapse: collapse; margin: 10px 0; width: 100%; font-size: 14px; }
-  .msg table th, .msg table td { border: 1px solid var(--line); padding: 6px 10px; }
-  .msg table th { background: var(--surface2); font-weight: 700; }
-  .msg ul, .msg ol { padding-inline-start: 22px; margin: 8px 0; }
-  .msg li { margin: 4px 0; }
-  .msg blockquote {
-    border-inline-start: 3px solid var(--accent);
-    padding: 4px 12px; margin: 8px 0;
-    background: var(--glow-soft);
-    color: var(--muted);
-    border-radius: 0 8px 8px 0;
-  }
-  .msg h1, .msg h2, .msg h3 { margin: 12px 0 6px; line-height: 1.3; }
-  .msg h1 { font-size: 1.4em; }
-  .msg h2 { font-size: 1.25em; }
-  .msg h3 { font-size: 1.1em; }
-  .msg a { color: var(--accent2); text-decoration: none; border-bottom: 1px dashed var(--accent2); }
-  .msg a:hover { color: var(--accent); border-bottom-color: var(--accent); }
-  .msg hr { border: 0; border-top: 1px solid var(--line); margin: 12px 0; }
-  .bubble-tools { display: flex; gap: 5px; margin-top: 8px; flex-wrap: wrap; }
-  .bubble-tools button {
-    background: var(--surface); border: 1px solid var(--line);
-    border-radius: 8px; padding: 3px 9px; font-size: 12px; color: var(--muted);
-  }
-  .bubble-tools button:hover { color: var(--accent); border-color: var(--accent); transform: translateY(-1px); }
-  .bubble-tools button.starred { color: var(--accent3); border-color: var(--accent3); }
-
-  .typing-anim { display: inline-flex; align-items: center; gap: 4px; padding: 6px 0; }
-  .typing-anim .dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--accent); animation: bounceDot 1.2s infinite ease-in-out;
-  }
-  .typing-anim .dot:nth-child(2) { animation-delay: 0.15s; background: var(--accent2); }
-  .typing-anim .dot:nth-child(3) { animation-delay: 0.3s; background: var(--accent3); }
-  @keyframes bounceDot {
-    0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
-    40% { transform: scale(1.2); opacity: 1; }
-  }
-  .typing-anim.wave { gap: 3px; }
-  .typing-anim.wave .dot {
-    width: 4px; height: 18px; border-radius: 2px;
-    animation: waveBar 1s infinite ease-in-out;
-  }
-  .typing-anim.wave .dot:nth-child(1) { animation-delay: 0s; background: var(--accent); }
-  .typing-anim.wave .dot:nth-child(2) { animation-delay: 0.1s; background: var(--accent2); }
-  .typing-anim.wave .dot:nth-child(3) { animation-delay: 0.2s; background: var(--accent3); }
-  .typing-anim.wave .dot:nth-child(4) { animation-delay: 0.3s; background: var(--accent); }
-  .typing-anim.wave .dot:nth-child(5) { animation-delay: 0.4s; background: var(--accent2); }
-  @keyframes waveBar {
-    0%, 100% { transform: scaleY(0.4); opacity: 0.6; }
-    50% { transform: scaleY(1); opacity: 1; }
-  }
-  .typing-anim.glow {
-    padding: 6px 14px; border-radius: 10px;
-    background: linear-gradient(90deg, transparent, var(--glow), transparent);
-    background-size: 200% 100%;
-    animation: glowSweep 2s infinite;
-    color: var(--accent); font-size: 13px; font-weight: 600;
-  }
-  @keyframes glowSweep {
-    0% { background-position: -100% 0; }
-    100% { background-position: 200% 0; }
-  }
-
-  .empty { margin: auto 0; padding: 8px 0; }
-  .empty h2 { margin: 0 0 4px; font-size: 24px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent3));
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-    font-weight: 800;
-  }
-  .empty .badge {
-    display: inline-block; font-size: 11px; padding: 3px 10px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: var(--accent-ink); border-radius: 20px;
-    font-weight: 700; margin-bottom: 10px;
-  }
-  .empty p { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
-  .chips { display: flex; flex-direction: column; gap: 7px; align-items: flex-start; }
-  .chip {
-    background: var(--surface); border: 1px solid var(--line);
-    border-radius: 12px; padding: 7px 14px; font-size: 14px;
-    position: relative; overflow: hidden;
-  }
-  .chip::before {
-    content: ""; position: absolute; inset: 0;
-    background: linear-gradient(90deg, transparent, var(--glow), transparent);
-    transform: translateX(-100%); transition: transform 0.5s;
-  }
-  .chip:hover { border-color: var(--accent); transform: translateX(-3px); }
-  .chip:hover::before { transform: translateX(100%); }
-  .chip:active { border-color: var(--accent); }
-
-  .composer {
-    display: flex; flex-direction: column; gap: 6px;
-    padding: 9px 12px;
-    padding-bottom: max(9px, env(safe-area-inset-bottom));
-    border-top: 1px solid var(--line);
-    background: rgba(15,23,36,0.92);
-    backdrop-filter: blur(12px);
-    position: relative;
-  }
-  [data-theme="light"] .composer { background: rgba(245,242,234,0.92); }
-  [data-theme="ocean"] .composer { background: rgba(7,26,43,0.92); }
-  [data-theme="forest"] .composer { background: rgba(11,30,20,0.92); }
-  [data-theme="royal"] .composer { background: rgba(21,10,46,0.92); }
-  [data-theme="sunset"] .composer { background: rgba(42,15,20,0.92); }
-  .composer-row { display: flex; align-items: flex-end; gap: 6px; }
-  textarea {
-    flex: 1; resize: none; max-height: 160px;
-    background: var(--surface); border: 1px solid var(--line);
-    border-radius: 14px; color: var(--text);
-    font: inherit; line-height: 1.5; padding: 10px 14px;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
-  textarea::placeholder { color: var(--muted); }
-  textarea.recording { border-color: var(--danger); animation: pulse 1.5s infinite; }
-  @keyframes pulse {
-    0%,100% { box-shadow: 0 0 0 0 rgba(240,138,122,0.4); }
-    50% { box-shadow: 0 0 0 8px rgba(240,138,122,0); }
-  }
-  .icon-btn {
-    flex: none; width: 42px; height: 42px;
-    border: 1px solid var(--line); border-radius: 12px;
-    background: var(--surface); color: var(--text);
-    font-size: 17px; display: flex; align-items: center; justify-content: center;
-    padding: 0;
-  }
-  .icon-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
-  .icon-btn:active { background: var(--surface2); border-color: var(--accent); transform: scale(0.95); }
-  .icon-btn.on { background: var(--danger); border-color: var(--danger); color: white; }
-  #send {
-    flex: none; min-width: 55px; height: 42px;
-    border: 0; border-radius: 12px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: var(--accent-ink);
-    font-weight: 700; font-size: 14px; padding: 0 12px;
-    box-shadow: 0 4px 14px var(--glow);
-  }
-  #send:hover { transform: translateY(-1px); box-shadow: 0 6px 20px var(--glow); }
-  #send:active { transform: scale(0.97); }
-  #send.stop { background: var(--surface); color: var(--text); border: 1px solid var(--line); box-shadow: none; }
-
-  .attach-preview {
-    display: none;
-    gap: 8px;
-    padding: 4px 0;
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    scrollbar-width: thin;
-  }
-  .attach-preview.show { display: flex; }
-  .attach-preview::-webkit-scrollbar { height: 4px; }
-  .attach-preview::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
-  .attach-card {
-    position: relative;
-    flex: none;
-    width: 80px;
-    height: 80px;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid var(--line);
-    background: var(--surface);
-    animation: fadeIn 0.3s;
-  }
-  .attach-card img { width: 100%; height: 100%; object-fit: cover; }
-  .attach-card .remove {
-    position: absolute; top: 3px; left: 3px;
-    background: var(--danger); color: white;
-    border: 0; border-radius: 50%;
-    width: 20px; height: 20px; font-size: 13px;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    line-height: 1; padding: 0;
-  }
-  .attach-card .size-badge {
-    position: absolute; bottom: 3px; right: 3px;
-    background: rgba(0,0,0,0.7); color: white;
-    font-size: 9px; padding: 1px 4px; border-radius: 4px;
-    direction: ltr;
-  }
-
-  .composer.drag-over { outline: 2px dashed var(--accent); outline-offset: -8px; }
-  .composer.drag-over::after {
-    content: "📎 أسقط الصور هنا";
-    position: absolute; inset: 8px;
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(15,23,36,0.9); color: var(--accent);
-    font-weight: 700; border-radius: 12px;
-    z-index: 3; pointer-events: none;
-  }
-
-  .msg.user .msg-images {
-    display: grid; grid-template-columns: repeat(2, 1fr);
-    gap: 6px; margin-top: 8px; max-width: 320px;
-  }
-  .msg.user .msg-images.single { grid-template-columns: 1fr; max-width: 240px; }
-  .msg-image-wrap {
-    border-radius: 10px; overflow: hidden; cursor: zoom-in;
-    position: relative; aspect-ratio: 1; background: var(--code-bg);
-  }
-  .msg-image-wrap img {
-    width: 100%; height: 100%; object-fit: cover;
-    display: block; transition: transform 0.3s;
-  }
-  .msg-image-wrap:hover img { transform: scale(1.05); }
-  .msg.user .msg-images.single .msg-image-wrap { aspect-ratio: auto; }
-  .msg.user .msg-images.single img { height: auto; object-fit: contain; }
-  .assistant-img { max-width: 100%; border-radius: 10px; margin-top: 8px; display: block; }
-
-  .img-viewer {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.95); z-index: 999;
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; transition: opacity 0.3s; padding: 20px;
-  }
-  .img-viewer.show { opacity: 1; }
-  .img-viewer img { max-width: 95%; max-height: 95%; object-fit: contain; border-radius: 12px; }
-  .img-viewer .close {
-    position: absolute; top: 20px; right: 20px;
-    background: rgba(255,255,255,0.15); color: white;
-    border: 0; width: 40px; height: 40px; border-radius: 50%;
-    font-size: 20px; cursor: pointer; backdrop-filter: blur(10px);
-  }
-
-  .overlay {
-    position: fixed; inset: 0;
-    background: rgba(5, 9, 16, 0.85);
-    backdrop-filter: blur(6px);
-    display: none; align-items: flex-end; justify-content: center;
-    z-index: 10;
-    animation: fadeIn 0.3s;
-  }
-  .overlay.open { display: flex; }
-  .sheet {
-    width: 100%; max-width: 560px;
-    background: var(--bg); border: 1px solid var(--line);
-    border-radius: 20px 20px 0 0;
-    padding: 16px 14px;
-    padding-bottom: max(16px, env(safe-area-inset-bottom));
-    max-height: 92dvh; overflow-y: auto;
-    animation: slideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  .sheet h3 { margin: 0 0 4px; font-size: 18px; }
-  .sheet p { margin: 0 0 10px; color: var(--muted); font-size: 13px; line-height: 1.6; }
-  .sheet label { display: block; font-size: 13px; margin: 10px 0 4px; color: var(--muted); }
-  .sheet input[type="text"], .sheet input[type="password"], .sheet select {
-    width: 100%; background: var(--surface); border: 1px solid var(--line);
-    border-radius: 10px; color: var(--text);
-    font: inherit; font-size: 14px; padding: 8px 12px;
-    direction: ltr; text-align: left;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .sheet input:focus, .sheet select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
-  .sheet textarea {
-    width: 100%; background: var(--surface); border: 1px solid var(--line);
-    border-radius: 10px; color: var(--text);
-    font: inherit; font-size: 14px; padding: 10px 12px;
-    direction: rtl; text-align: right; min-height: 100px; resize: vertical;
-    line-height: 1.6;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .sheet textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
-  .tabs {
-    display: flex; gap: 4px; margin-bottom: 12px;
-    border-bottom: 1px solid var(--line); overflow-x: auto;
-  }
-  .tab {
-    background: transparent; border: 0; border-bottom: 2px solid transparent;
-    padding: 8px 12px; font-size: 13px; color: var(--muted); white-space: nowrap;
-  }
-  .tab:hover { color: var(--text); }
-  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-  .tab-content { display: none; }
-  .tab-content.active { display: block; animation: fadeIn 0.3s; }
-  .switch-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px;
-  }
-  .switch-row:last-child { border: 0; }
-  .switch { position: relative; width: 44px; height: 24px; flex: none; }
-  .switch input { opacity: 0; width: 0; height: 0; }
-  .slider {
-    position: absolute; cursor: pointer; inset: 0;
-    background: var(--line); border-radius: 24px; transition: 0.2s;
-  }
-  .slider::before {
-    content: ""; position: absolute;
-    height: 18px; width: 18px; left: 3px; top: 3px;
-    background: var(--text); border-radius: 50%; transition: 0.2s;
-  }
-  .switch input:checked + .slider { background: linear-gradient(135deg, var(--accent), var(--accent2)); }
-  .switch input:checked + .slider::before { transform: translateX(20px); background: var(--accent-ink); }
-  .range-row { margin: 10px 0; }
-  .range-row label {
-    display: flex; justify-content: space-between; align-items: center;
-    font-size: 13px; color: var(--muted); margin-bottom: 4px;
-  }
-  .range-row label span { color: var(--accent); font-weight: 700; }
-  .range-row input[type="range"] { width: 100%; accent-color: var(--accent); }
-  .preset-btn {
-    display: block; width: 100%; text-align: right;
-    background: var(--surface); border: 1px solid var(--line);
-    border-radius: 10px; padding: 10px 14px; margin-bottom: 6px;
-    font-size: 14px; line-height: 1.4;
-    position: relative; overflow: hidden;
-  }
-  .preset-btn:hover { border-color: var(--accent); transform: translateX(-3px); }
-  .preset-btn:active { border-color: var(--accent); }
-  .preset-btn strong { color: var(--accent); }
-  .preset-btn small { display: block; color: var(--muted); font-size: 11px; margin-top: 3px; }
-  .row { display: flex; gap: 8px; margin-top: 14px; position: sticky; bottom: 0; background: var(--bg); padding-top: 10px; }
-  .row .primary {
-    flex: 1; height: 42px; border: 0; border-radius: 10px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: var(--accent-ink); font-weight: 700;
-    box-shadow: 0 4px 14px var(--glow);
-  }
-  .row .primary:hover { transform: translateY(-1px); }
-  .row .ghost { height: 42px; }
-  .row .danger { background: var(--danger); color: white; border: 0; }
-  .toast {
-    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-    background: var(--surface2); color: var(--text);
-    border: 1px solid var(--line);
-    padding: 10px 18px; border-radius: 12px;
-    font-size: 13px; z-index: 30;
-    opacity: 0; transition: opacity 0.3s, transform 0.3s;
-    pointer-events: none;
-    max-width: 90%; text-align: center;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-  }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
-  .theme-dots { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; }
-  .theme-dot {
-    width: 28px; height: 28px; border-radius: 50%;
-    border: 2px solid var(--line); cursor: pointer;
-    transition: transform 0.2s, border-color 0.2s;
-  }
-  .theme-dot:hover { transform: scale(1.15); }
-  .theme-dot.active { border-color: var(--accent); transform: scale(1.15); box-shadow: 0 0 0 3px var(--glow); }
-  .theme-dot[data-t="dark"] { background: linear-gradient(135deg, #0F1724, #E3A84B); }
-  .theme-dot[data-t="light"] { background: linear-gradient(135deg, #F5F2EA, #B8860B); }
-  .theme-dot[data-t="ocean"] { background: linear-gradient(135deg, #071A2B, #22D3EE); }
-  .theme-dot[data-t="forest"] { background: linear-gradient(135deg, #0B1E14, #34D399); }
-  .theme-dot[data-t="royal"] { background: linear-gradient(135deg, #150A2E, #C084FC); }
-  .theme-dot[data-t="sunset"] { background: linear-gradient(135deg, #2A0F14, #FB7185); }
-
-  .search-result-item {
-    cursor: pointer;
-    background: var(--surface); border: 1px solid var(--line);
-    border-radius: 10px; padding: 10px 14px; margin-bottom: 6px;
-    font-size: 13px; line-height: 1.5;
-    transition: border-color 0.2s, transform 0.2s;
-  }
-  .search-result-item:hover { border-color: var(--accent); transform: translateX(-3px); }
-  .search-result-item .role-badge {
-    display: inline-block; font-size: 10px; font-weight: 700;
-    padding: 1px 6px; border-radius: 4px; margin-inline-end: 6px;
-  }
-  .search-result-item .role-user { background: var(--accent2); color: white; }
-  .search-result-item .role-ai { background: var(--accent); color: var(--accent-ink); }
-  .search-result-item mark {
-    background: var(--accent); color: var(--accent-ink);
-    padding: 0 3px; border-radius: 3px;
-  }
-  .stats-grid {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
-    margin: 12px 0;
-  }
-  .stat-card {
-    background: var(--surface); border: 1px solid var(--line);
-    border-radius: 12px; padding: 14px; text-align: center;
-  }
-  .stat-card .val { font-size: 24px; font-weight: 800; color: var(--accent); }
-  .stat-card .lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
-
-  .quick-actions {
-    display: none; gap: 6px; flex-wrap: wrap; padding: 4px 0;
-  }
-  .quick-actions.show { display: flex; }
-  .quick-actions button {
-    background: var(--surface2); border: 1px solid var(--line);
-    border-radius: 20px; padding: 5px 12px; font-size: 12px; color: var(--text);
-  }
-  .quick-actions button:hover { border-color: var(--accent); color: var(--accent); }
-
-  .reasoning-box {
-    background: var(--code-bg);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    margin-bottom: 10px;
-    padding: 8px 12px;
-    font-size: 13px;
-  }
-  .reasoning-box summary {
-    cursor: pointer; color: var(--accent2);
-    font-weight: 600; user-select: none;
-  }
-  .reasoning-content {
-    margin-top: 8px; color: var(--muted);
-    white-space: pre-wrap; line-height: 1.5;
-    max-height: 300px; overflow-y: auto;
-  }
-
-  .msg.pinned { position: relative; }
-  .msg.pinned::after {
-    content: "📌";
-    position: absolute; top: -8px; inset-inline-end: -8px;
-    background: var(--accent3); color: white;
-    width: 22px; height: 22px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  }
-
-  .msg.assistant.streaming::after {
-    content: "▍"; color: var(--accent);
-    animation: blink 1s infinite; margin-inline-start: 2px;
-  }
-  @keyframes blink { 50% { opacity: 0; } }
-
-  .cmd-item {
-    display: flex; justify-content: space-between; align-items: center;
-    background: var(--surface); border: 1px solid var(--line);
-    border-radius: 10px; padding: 10px 14px; margin-bottom: 6px;
-    width: 100%; text-align: right;
-  }
-  .cmd-item:hover { border-color: var(--accent); transform: translateX(-3px); }
-  .cmd-item .cmd-keys {
-    font-family: ui-monospace, monospace; font-size: 11px;
-    color: var(--muted); background: var(--code-bg);
-    padding: 2px 6px; border-radius: 4px;
-    direction: ltr;
-  }
-
-  .branch-indicator {
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: 10px; color: var(--accent2);
-    background: var(--glow-soft); padding: 2px 8px;
-    border-radius: 10px; margin-inline-start: 8px;
-  }
-
-  @media (max-width: 480px) {
-    .brand { font-size: 15px; }
-    .actions .ghost { padding: 4px 7px; font-size: 12px; }
-    .empty h2 { font-size: 20px; }
-  }
+    --bg:#0F1724; --surface:#172234; --surface2:#1E2C42; --line:#26344A; --text:#ECE7DA; --muted:#8B98AD;
+    --accent:#E3A84B; --accent-ink:#1A1305; --accent2:#6D8FFF; --accent3:#FF6B9D;
+    --danger:#F08A7A; --ok:#6DCF8F; --code-bg:#0A111C;
+    --glow:rgba(227,168,75,0.35); --glow-soft:rgba(227,168,75,0.10); --hdr:rgba(15,23,36,0.85); --cmp:rgba(15,23,36,0.92);
+  }
+  [data-theme="light"]{--bg:#F5F2EA;--surface:#FFFFFF;--surface2:#EFEBE0;--line:#D8D2C2;--text:#1A1305;--muted:#6B6455;--accent:#B8860B;--accent-ink:#FFFFFF;--code-bg:#F0EBDD;--accent2:#4169E1;--accent3:#D6336C;--hdr:rgba(245,242,234,0.85);--cmp:rgba(245,242,234,0.92)}
+  [data-theme="ocean"]{--bg:#071A2B;--surface:#0E2A42;--surface2:#153654;--line:#1E4A6E;--text:#E0F2FE;--muted:#7DA8C9;--accent:#22D3EE;--accent-ink:#04212B;--code-bg:#051520;--accent2:#38BDF8;--accent3:#818CF8;--hdr:rgba(7,26,43,0.85);--cmp:rgba(7,26,43,0.92)}
+  [data-theme="forest"]{--bg:#0B1E14;--surface:#142E20;--surface2:#1B3D2C;--line:#24523A;--text:#E5F5E9;--muted:#8AB89A;--accent:#34D399;--accent-ink:#052B1B;--code-bg:#061209;--accent2:#6EE7B7;--accent3:#FBBF24;--hdr:rgba(11,30,20,0.85);--cmp:rgba(11,30,20,0.92)}
+  [data-theme="royal"]{--bg:#150A2E;--surface:#211440;--surface2:#2D1B54;--line:#3F2A6B;--text:#EDE9FE;--muted:#A78BFA;--accent:#C084FC;--accent-ink:#2A0A4D;--code-bg:#0D0620;--accent2:#F472B6;--accent3:#60A5FA;--hdr:rgba(21,10,46,0.85);--cmp:rgba(21,10,46,0.92)}
+  [data-theme="sunset"]{--bg:#2A0F14;--surface:#3D1A22;--surface2:#4E2430;--line:#6B3341;--text:#FFE4E6;--muted:#F0A5B4;--accent:#FB7185;--accent-ink:#450A0A;--code-bg:#1A080C;--accent2:#FDBA74;--accent3:#FDE047;--hdr:rgba(42,15,20,0.85);--cmp:rgba(42,15,20,0.92)}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;margin:0}
+  body{background:var(--bg);color:var(--text);font-family:"Noto Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif;font-size:16px;line-height:1.75;display:flex;flex-direction:column;height:100dvh;transition:background .4s ease,color .4s ease}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 15% 15%,var(--glow),transparent 50%),radial-gradient(ellipse at 85% 85%,var(--glow-soft),transparent 50%);opacity:.7}
+  header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));border-bottom:1px solid var(--line);backdrop-filter:blur(12px);background:var(--hdr);position:relative;z-index:5;flex-wrap:wrap}
+  .brand{font-weight:700;font-size:17px;direction:ltr}
+  .brand small{display:block;font-size:10px;font-weight:400;color:var(--muted);direction:rtl;line-height:1.3}
+  .brand small .dot{color:var(--accent);animation:pulseDot 1.8s infinite}
+  @keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.3}}
+  .actions{display:flex;gap:5px;flex-wrap:wrap}
+  button{font:inherit;color:inherit;cursor:pointer;transition:all .2s ease}
+  .ghost{background:transparent;border:1px solid var(--line);border-radius:9px;padding:5px 9px;font-size:13px;color:var(--muted)}
+  .ghost:hover{color:var(--accent);border-color:var(--accent)}
+  .ghost:active{background:var(--surface);transform:scale(.96)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  #chat{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:16px;scroll-behavior:smooth}
+  #chat::-webkit-scrollbar{width:8px}
+  #chat::-webkit-scrollbar-track{background:transparent}
+  #chat::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+  #chat::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+  .msg{max-width:100%;word-wrap:break-word;overflow-wrap:anywhere;animation:fadeIn .4s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes pulseHighlight{0%{box-shadow:0 0 0 0 var(--accent)}70%{box-shadow:0 0 0 12px transparent}100%{box-shadow:0 0 0 0 transparent}}
+  .msg.user{align-self:flex-start;background:linear-gradient(135deg,var(--surface),var(--surface2));border-inline-start:3px solid var(--accent);border-radius:4px 14px 14px 14px;padding:8px 14px;max-width:88%;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+  .msg.user.editing{width:88%}
+  .msg.assistant{align-self:stretch;padding:0 2px}
+  .msg.err{color:var(--danger)}
+  .msg code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em;background:var(--code-bg);padding:1px 6px;border-radius:6px;direction:ltr;unicode-bidi:embed;color:var(--accent2)}
+  .msg pre{direction:ltr;text-align:left;background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0;overflow-x:auto;line-height:1.5;position:relative;box-shadow:inset 0 0 0 1px var(--glow-soft)}
+  .msg pre code{background:none;padding:0;font-size:13px;color:var(--text)}
+  .msg pre .copy-code{position:absolute;top:6px;right:6px;background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:11px;color:var(--muted)}
+  .msg pre .copy-code:hover{color:var(--accent);border-color:var(--accent)}
+  .msg table{border-collapse:collapse;margin:10px 0;width:100%;font-size:14px;display:block;overflow-x:auto}
+  .msg table th,.msg table td{border:1px solid var(--line);padding:6px 10px}
+  .msg table th{background:var(--surface2);font-weight:700}
+  .msg ul,.msg ol{padding-inline-start:22px;margin:8px 0}
+  .msg li{margin:4px 0}
+  .msg blockquote{border-inline-start:3px solid var(--accent);padding:4px 12px;margin:8px 0;background:var(--glow-soft);color:var(--muted);border-radius:0 8px 8px 0}
+  .msg h1,.msg h2,.msg h3{margin:12px 0 6px;line-height:1.3}
+  .msg h1{font-size:1.4em}.msg h2{font-size:1.25em}.msg h3{font-size:1.1em}
+  .msg a{color:var(--accent2);text-decoration:none;border-bottom:1px dashed var(--accent2)}
+  .msg a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+  .msg hr{border:0;border-top:1px solid var(--line);margin:12px 0}
+  .bubble-tools{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;align-items:center}
+  .bubble-tools button{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:3px 9px;font-size:12px;color:var(--muted)}
+  .bubble-tools button:hover{color:var(--accent);border-color:var(--accent);transform:translateY(-1px)}
+  .bubble-tools button.starred{color:var(--accent3);border-color:var(--accent3)}
+  .bubble-tools button.del:hover{color:var(--danger);border-color:var(--danger)}
+  .usage-badge{font-size:11px;color:var(--muted);direction:ltr;margin-inline-start:auto;padding:0 4px}
+  .typing-anim{display:inline-flex;align-items:center;gap:4px;padding:6px 0}
+  .typing-anim .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:bounceDot 1.2s infinite ease-in-out}
+  .typing-anim .dot:nth-child(2){animation-delay:.15s;background:var(--accent2)}
+  .typing-anim .dot:nth-child(3){animation-delay:.3s;background:var(--accent3)}
+  @keyframes bounceDot{0%,80%,100%{transform:scale(.6);opacity:.5}40%{transform:scale(1.2);opacity:1}}
+  .typing-anim.wave{gap:3px}
+  .typing-anim.wave .dot{width:4px;height:18px;border-radius:2px;animation:waveBar 1s infinite ease-in-out}
+  .typing-anim.wave .dot:nth-child(1){animation-delay:0s;background:var(--accent)}
+  .typing-anim.wave .dot:nth-child(2){animation-delay:.1s;background:var(--accent2)}
+  .typing-anim.wave .dot:nth-child(3){animation-delay:.2s;background:var(--accent3)}
+  .typing-anim.wave .dot:nth-child(4){animation-delay:.3s;background:var(--accent)}
+  .typing-anim.wave .dot:nth-child(5){animation-delay:.4s;background:var(--accent2)}
+  @keyframes waveBar{0%,100%{transform:scaleY(.4);opacity:.6}50%{transform:scaleY(1);opacity:1}}
+  .typing-anim.glow{padding:6px 14px;border-radius:10px;background:linear-gradient(90deg,transparent,var(--glow),transparent);background-size:200% 100%;animation:glowSweep 2s infinite;color:var(--accent);font-size:13px;font-weight:600}
+  @keyframes glowSweep{0%{background-position:-100% 0}100%{background-position:200% 0}}
+  .empty{margin:auto 0;padding:8px 0}
+  .empty h2{margin:0 0 4px;font-size:24px;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+  .empty .badge{display:inline-block;font-size:11px;padding:3px 10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--accent-ink);border-radius:20px;font-weight:700;margin-bottom:10px}
+  .empty p{margin:0 0 14px;color:var(--muted);font-size:14px}
+  .chips{display:flex;flex-direction:column;gap:7px;align-items:flex-start}
+  .chip{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:7px 14px;font-size:14px;position:relative;overflow:hidden}
+  .chip::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--glow),transparent);transform:translateX(-100%);transition:transform .5s}
+  .chip:hover{border-color:var(--accent);transform:translateX(-3px)}
+  .chip:hover::before{transform:translateX(100%)}
+  .composer{display:flex;flex-direction:column;gap:6px;padding:9px 12px;padding-bottom:max(9px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--cmp);backdrop-filter:blur(12px);position:relative}
+  .composer-row{display:flex;align-items:flex-end;gap:6px}
+  textarea{flex:1;resize:none;max-height:160px;background:var(--surface);border:1px solid var(--line);border-radius:14px;color:var(--text);font:inherit;line-height:1.5;padding:10px 14px;transition:border-color .2s,box-shadow .2s}
+  textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
+  textarea::placeholder{color:var(--muted)}
+  textarea.recording{border-color:var(--danger);animation:pulse 1.5s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(240,138,122,.4)}50%{box-shadow:0 0 0 8px rgba(240,138,122,0)}}
+  .icon-btn{flex:none;width:42px;height:42px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--text);font-size:17px;display:flex;align-items:center;justify-content:center;padding:0}
+  .icon-btn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+  .icon-btn:active{background:var(--surface2);transform:scale(.95)}
+  .icon-btn.on{background:var(--danger);border-color:var(--danger);color:#fff}
+  #send{flex:none;min-width:55px;height:42px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--accent-ink);font-weight:700;font-size:14px;padding:0 12px;box-shadow:0 4px 14px var(--glow)}
+  #send:hover{transform:translateY(-1px)}
+  #send:active{transform:scale(.97)}
+  #send.stop{background:var(--surface);color:var(--text);border:1px solid var(--line);box-shadow:none}
+  .attach-preview{display:none;gap:8px;padding:4px 0;overflow-x:auto;flex-wrap:nowrap}
+  .attach-preview.show{display:flex}
+  .attach-card{position:relative;flex:none;width:80px;height:80px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--surface);animation:fadeIn .3s}
+  .attach-card img{width:100%;height:100%;object-fit:cover}
+  .attach-card .remove{position:absolute;top:3px;left:3px;background:var(--danger);color:#fff;border:0;border-radius:50%;width:20px;height:20px;font-size:13px;display:flex;align-items:center;justify-content:center;line-height:1;padding:0}
+  .attach-card .size-badge{position:absolute;bottom:3px;right:3px;background:rgba(0,0,0,.7);color:#fff;font-size:9px;padding:1px 4px;border-radius:4px;direction:ltr}
+  .composer.drag-over{outline:2px dashed var(--accent);outline-offset:-8px}
+  .composer.drag-over::after{content:"📎 أسقط الصور هنا";position:absolute;inset:8px;display:flex;align-items:center;justify-content:center;background:var(--cmp);color:var(--accent);font-weight:700;border-radius:12px;z-index:3;pointer-events:none}
+  .msg.user .msg-images{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px;max-width:320px}
+  .msg.user .msg-images.single{grid-template-columns:1fr;max-width:240px}
+  .msg-image-wrap{border-radius:10px;overflow:hidden;cursor:zoom-in;position:relative;aspect-ratio:1;background:var(--code-bg)}
+  .msg-image-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+  .msg-image-wrap:hover img{transform:scale(1.05)}
+  .msg.user .msg-images.single .msg-image-wrap{aspect-ratio:auto}
+  .msg.user .msg-images.single img{height:auto;object-fit:contain}
+  .assistant-img{max-width:100%;border-radius:10px;margin-top:8px;display:block}
+  .img-viewer{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:999;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;padding:20px}
+  .img-viewer.show{opacity:1}
+  .img-viewer img{max-width:95%;max-height:95%;object-fit:contain;border-radius:12px}
+  .img-viewer .close{position:absolute;top:20px;right:20px;background:rgba(255,255,255,.15);color:#fff;border:0;width:40px;height:40px;border-radius:50%;font-size:20px}
+  .overlay{position:fixed;inset:0;background:rgba(5,9,16,.85);backdrop-filter:blur(6px);display:none;align-items:flex-end;justify-content:center;z-index:10;animation:fadeIn .3s}
+  .overlay.open{display:flex}
+  .sheet{width:100%;max-width:560px;background:var(--bg);border:1px solid var(--line);border-radius:20px 20px 0 0;padding:16px 14px;padding-bottom:max(16px,env(safe-area-inset-bottom));max-height:92dvh;overflow-y:auto;animation:slideUp .35s cubic-bezier(.22,1,.36,1)}
+  @keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .sheet h3{margin:0 0 4px;font-size:18px}
+  .sheet p{margin:0 0 10px;color:var(--muted);font-size:13px;line-height:1.6}
+  .sheet label{display:block;font-size:13px;margin:10px 0 4px;color:var(--muted)}
+  .sheet input[type="text"],.sheet input[type="password"],.sheet select{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;color:var(--text);font:inherit;font-size:14px;padding:8px 12px;direction:ltr;text-align:left}
+  .sheet input:focus,.sheet select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
+  .sheet textarea{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;color:var(--text);font:inherit;font-size:14px;padding:10px 12px;direction:rtl;text-align:right;min-height:100px;resize:vertical;line-height:1.6}
+  .tabs{display:flex;gap:4px;margin-bottom:12px;border-bottom:1px solid var(--line);overflow-x:auto}
+  .tab{background:transparent;border:0;border-bottom:2px solid transparent;padding:8px 12px;font-size:13px;color:var(--muted);white-space:nowrap}
+  .tab:hover{color:var(--text)}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .tab-content{display:none}
+  .tab-content.active{display:block;animation:fadeIn .3s}
+  .switch-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .switch-row:last-child{border:0}
+  .switch{position:relative;width:44px;height:24px;flex:none;margin:0}
+  .switch input{opacity:0;width:0;height:0}
+  .slider{position:absolute;cursor:pointer;inset:0;background:var(--line);border-radius:24px;transition:.2s}
+  .slider::before{content:"";position:absolute;height:18px;width:18px;left:3px;top:3px;background:var(--text);border-radius:50%;transition:.2s}
+  .switch input:checked+.slider{background:linear-gradient(135deg,var(--accent),var(--accent2))}
+  .switch input:checked+.slider::before{transform:translateX(20px);background:var(--accent-ink)}
+  .range-row{margin:10px 0}
+  .range-row label{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-bottom:4px}
+  .range-row label span{color:var(--accent);font-weight:700}
+  .range-row input[type="range"]{width:100%;accent-color:var(--accent)}
+  .preset-btn{display:block;width:100%;text-align:right;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:6px;font-size:14px;line-height:1.4}
+  .preset-btn:hover{border-color:var(--accent);transform:translateX(-3px)}
+  .preset-btn strong{color:var(--accent)}
+  .preset-btn small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+  .row{display:flex;gap:8px;margin-top:14px;position:sticky;bottom:0;background:var(--bg);padding-top:10px}
+  .row .primary{flex:1;height:42px;border:0;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--accent-ink);font-weight:700;box-shadow:0 4px 14px var(--glow)}
+  .row .ghost{height:42px}
+  .row .danger{background:var(--danger);color:#fff;border:0}
+  .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--surface2);color:var(--text);border:1px solid var(--line);padding:10px 18px;border-radius:12px;font-size:13px;z-index:30;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;max-width:90%;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+  .theme-dots{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+  .theme-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);cursor:pointer;transition:transform .2s,border-color .2s}
+  .theme-dot:hover{transform:scale(1.15)}
+  .theme-dot.active{border-color:var(--accent);transform:scale(1.15);box-shadow:0 0 0 3px var(--glow)}
+  .theme-dot[data-t="dark"]{background:linear-gradient(135deg,#0F1724,#E3A84B)}
+  .theme-dot[data-t="light"]{background:linear-gradient(135deg,#F5F2EA,#B8860B)}
+  .theme-dot[data-t="ocean"]{background:linear-gradient(135deg,#071A2B,#22D3EE)}
+  .theme-dot[data-t="forest"]{background:linear-gradient(135deg,#0B1E14,#34D399)}
+  .theme-dot[data-t="royal"]{background:linear-gradient(135deg,#150A2E,#C084FC)}
+  .theme-dot[data-t="sunset"]{background:linear-gradient(135deg,#2A0F14,#FB7185)}
+  .search-result-item{cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:6px;font-size:13px;line-height:1.5;transition:border-color .2s,transform .2s}
+  .search-result-item:hover{border-color:var(--accent);transform:translateX(-3px)}
+  .search-result-item .role-badge{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;margin-inline-end:6px}
+  .search-result-item .role-user{background:var(--accent2);color:#fff}
+  .search-result-item .role-ai{background:var(--accent);color:var(--accent-ink)}
+  .search-result-item mark{background:var(--accent);color:var(--accent-ink);padding:0 3px;border-radius:3px}
+  .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0}
+  .stat-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+  .stat-card .val{font-size:24px;font-weight:800;color:var(--accent)}
+  .stat-card .lbl{font-size:12px;color:var(--muted);margin-top:2px}
+  .quick-actions{display:none;gap:6px;flex-wrap:wrap;padding:4px 0}
+  .quick-actions.show{display:flex}
+  .quick-actions button{background:var(--surface2);border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--text)}
+  .quick-actions button:hover{border-color:var(--accent);color:var(--accent)}
+  .reasoning-box{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;padding:8px 12px;font-size:13px}
+  .reasoning-box summary{cursor:pointer;color:var(--accent2);font-weight:600;user-select:none}
+  .reasoning-content{margin-top:8px;color:var(--muted);white-space:pre-wrap;line-height:1.5;max-height:300px;overflow-y:auto}
+  .msg.pinned{position:relative}
+  .msg.pinned::after{content:"📌";position:absolute;top:-8px;inset-inline-end:-8px;background:var(--accent3);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+  .msg.assistant.streaming::after{content:"▍";color:var(--accent);animation:blink 1s infinite;margin-inline-start:2px}
+  @keyframes blink{50%{opacity:0}}
+  .cmd-item{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:6px;width:100%;text-align:right}
+  .cmd-item:hover{border-color:var(--accent);transform:translateX(-3px)}
+  .cmd-item .cmd-keys{font-family:ui-monospace,monospace;font-size:11px;color:var(--muted);background:var(--code-bg);padding:2px 6px;border-radius:4px;direction:ltr}
+  .edit-box{width:100%;min-height:70px;max-height:200px;margin-bottom:6px}
+  .edit-row{display:flex;gap:6px}
+  .edit-row button{border-radius:8px;padding:4px 12px;font-size:13px;border:1px solid var(--line);background:var(--surface)}
+  .edit-row .ok{background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--accent-ink);border:0;font-weight:700}
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+  @media (max-width:480px){.brand{font-size:15px}.actions .ghost{padding:4px 7px;font-size:12px}.empty h2{font-size:20px}}
 </style>
 </head>
 <body data-theme="dark">
@@ -600,7 +219,7 @@
   <div class="actions">
     <button class="ghost" id="paletteBtn" title="لوحة الأوامر (Ctrl+K)">⌘</button>
     <button class="ghost" id="sessionsBtn" title="الجلسات (Ctrl+Shift+S)">📚</button>
-    <button class="ghost" id="searchBtn" title="بحث (Ctrl+F)">🔍</button>
+    <button class="ghost" id="searchBtn" title="بحث (Ctrl+Shift+F)">🔍</button>
     <button class="ghost" id="exportBtn" title="تصدير">💾</button>
     <button class="ghost" id="themeToggle" title="تغيير اللون">🎨</button>
     <button class="ghost" id="newChat">جديدة</button>
@@ -638,65 +257,34 @@
     </div>
 
     <div class="tab-content active" id="t-general">
-      <label>مفتاح Groq (يُشفَّر محلياً — AES-GCM)</label>
-      <input id="keyInput" type="password" placeholder="gsk_...">
+      <label>مفتاح Groq (يُحفظ مشفّراً بمفتاح غير قابل للاستخراج)</label>
+      <input id="keyInput" type="password" placeholder="gsk_..." autocomplete="off">
       <div style="font-size:11px;color:var(--muted);margin-top:4px">
-        🔐 المفتاح بيتخزن مشفر على جهازك بس، مفيش سيرفر وسيط.
+        🔐 المفتاح بيتخزن على جهازك بس. التشفير بيحميه من التسريب العرضي، مش من كود خبيث شغال في نفس الصفحة.
       </div>
 
-      <label>موديل النص</label>
+      <label>موديل النص <button class="ghost" id="reloadModels" style="padding:1px 8px;font-size:11px;margin-inline-start:6px">🔄 تحديث القائمة</button></label>
       <select id="modelSelect">
         <option value="llama-3.3-70b-versatile">Llama 3.3 70B (الأقوى)</option>
         <option value="llama-3.1-8b-instant">Llama 3.1 8B (الأسرع)</option>
         <option value="meta-llama/llama-4-scout-17b-16e-instruct">🖼 Llama 4 Scout (Vision - صور)</option>
-        <option value="meta-llama/llama-4-maverick-17b-128e-instruct">🖼 Llama 4 Maverick (Vision)</option>
-        <option value="llama-3.2-11b-vision-preview">🖼 Llama 3.2 11B Vision</option>
-        <option value="llama-3.2-90b-vision-preview">🖼 Llama 3.2 90B Vision</option>
-        <option value="qwen/qwen3-32b">Qwen3 32B</option>
-        <option value="deepseek-r1-distill-llama-70b">DeepSeek R1 70B (تفكير عميق)</option>
-        <option value="gemma2-9b-it">Gemma2 9B</option>
-        <option value="mixtral-8x7b-32768">Mixtral 8x7B (سياق 32K)</option>
+        <option value="qwen/qwen3-32b">Qwen3 32B (تفكير)</option>
+        <option value="openai/gpt-oss-120b">GPT-OSS 120B (تفكير)</option>
+        <option value="openai/gpt-oss-20b">GPT-OSS 20B (تفكير)</option>
       </select>
       <label>أو اكتب مخصص</label>
       <input id="modelInput" type="text" placeholder="اسم الموديل">
 
       <div style="margin-top:12px">
-        <div class="switch-row">
-          <div>🖼 التبديل التلقائي لموديل Vision</div>
-          <label class="switch"><input type="checkbox" id="autoVisionToggle" checked><span class="slider"></span></label>
-        </div>
-        <div class="switch-row">
-          <div>🗜 ضغط الصور تلقائياً</div>
-          <label class="switch"><input type="checkbox" id="compressToggle" checked><span class="slider"></span></label>
-        </div>
-        <div class="switch-row">
-          <div>🔊 الرد الصوتي التلقائي</div>
-          <label class="switch"><input type="checkbox" id="ttsToggle"><span class="slider"></span></label>
-        </div>
-        <div class="switch-row">
-          <div>🎤 الإرسال التلقائي بعد الصوت</div>
-          <label class="switch"><input type="checkbox" id="autoSendToggle" checked><span class="slider"></span></label>
-        </div>
-        <div class="switch-row">
-          <div>🌊 Streaming</div>
-          <label class="switch"><input type="checkbox" id="streamToggle" checked><span class="slider"></span></label>
-        </div>
-        <div class="switch-row">
-          <div>✨ أنيميشن الرد</div>
-          <label class="switch"><input type="checkbox" id="animToggle" checked><span class="slider"></span></label>
-        </div>
-        <div class="switch-row">
-          <div>🎨 Markdown Pro (highlight + tables)</div>
-          <label class="switch"><input type="checkbox" id="markdownProToggle" checked><span class="slider"></span></label>
-        </div>
-        <div class="switch-row">
-          <div>🔁 إعادة محاولة تلقائية عند الفشل</div>
-          <label class="switch"><input type="checkbox" id="retryToggle" checked><span class="slider"></span></label>
-        </div>
-        <div class="switch-row">
-          <div>🧠 عرض تفكير الموديل (Reasoning)</div>
-          <label class="switch"><input type="checkbox" id="reasoningToggle" checked><span class="slider"></span></label>
-        </div>
+        <div class="switch-row"><div>🖼 استخدام موديل Vision تلقائياً عند وجود صور</div><label class="switch"><input type="checkbox" id="autoVisionToggle" checked><span class="slider"></span></label></div>
+        <div class="switch-row"><div>🗜 ضغط الصور تلقائياً</div><label class="switch"><input type="checkbox" id="compressToggle" checked><span class="slider"></span></label></div>
+        <div class="switch-row"><div>🔊 الرد الصوتي التلقائي</div><label class="switch"><input type="checkbox" id="ttsToggle"><span class="slider"></span></label></div>
+        <div class="switch-row"><div>🎤 الإرسال التلقائي بعد الصوت</div><label class="switch"><input type="checkbox" id="autoSendToggle" checked><span class="slider"></span></label></div>
+        <div class="switch-row"><div>🌊 Streaming</div><label class="switch"><input type="checkbox" id="streamToggle" checked><span class="slider"></span></label></div>
+        <div class="switch-row"><div>✨ أنيميشن الرد</div><label class="switch"><input type="checkbox" id="animToggle" checked><span class="slider"></span></label></div>
+        <div class="switch-row"><div>🎨 Markdown Pro (highlight + tables)</div><label class="switch"><input type="checkbox" id="markdownProToggle" checked><span class="slider"></span></label></div>
+        <div class="switch-row"><div>🔁 إعادة محاولة تلقائية عند الفشل</div><label class="switch"><input type="checkbox" id="retryToggle" checked><span class="slider"></span></label></div>
+        <div class="switch-row"><div>🧠 عرض تفكير الموديل (Reasoning)</div><label class="switch"><input type="checkbox" id="reasoningToggle" checked><span class="slider"></span></label></div>
       </div>
     </div>
 
@@ -708,42 +296,15 @@
     </div>
 
     <div class="tab-content" id="t-advanced">
-      <div class="range-row">
-        <label>🌡 Temperature <span id="tempVal">0.7</span></label>
-        <input type="range" id="tempRange" min="0" max="2" step="0.05" value="0.7">
-      </div>
-      <div class="range-row">
-        <label>📏 Max Tokens <span id="maxTokVal">4096</span></label>
-        <input type="range" id="maxTokRange" min="256" max="8192" step="256" value="4096">
-      </div>
-      <div class="range-row">
-        <label>🎯 Top P <span id="topPVal">1.0</span></label>
-        <input type="range" id="topPRange" min="0.1" max="1" step="0.05" value="1">
-      </div>
-      <div class="range-row">
-        <label>🔁 Frequency Penalty <span id="freqVal">0</span></label>
-        <input type="range" id="freqRange" min="-2" max="2" step="0.1" value="0">
-      </div>
-      <div class="range-row">
-        <label>🔁 Presence Penalty <span id="presVal">0</span></label>
-        <input type="range" id="presRange" min="-2" max="2" step="0.1" value="0">
-      </div>
-      <div class="range-row">
-        <label>📜 عدد الرسائل في السياق <span id="histVal">15</span></label>
-        <input type="range" id="histRange" min="2" max="40" step="1" value="15">
-      </div>
-      <div class="range-row">
-        <label>🗜 جودة ضغط الصور <span id="imgQVal">82</span>%</label>
-        <input type="range" id="imgQRange" min="50" max="95" step="5" value="82">
-      </div>
-      <div class="range-row">
-        <label>📐 أقصى أبعاد للصورة <span id="imgDimVal">1280</span>px</label>
-        <input type="range" id="imgDimRange" min="640" max="2048" step="64" value="1280">
-      </div>
-      <div class="range-row">
-        <label>⏱ حد الطلبات بالدقيقة (Rate Limit) <span id="rpmVal">25</span></label>
-        <input type="range" id="rpmRange" min="5" max="60" step="5" value="25">
-      </div>
+      <div class="range-row"><label>🌡 Temperature <span id="tempVal">0.7</span></label><input type="range" id="tempRange" min="0" max="2" step="0.05" value="0.7"></div>
+      <div class="range-row"><label>📏 Max Tokens <span id="maxTokVal">4096</span></label><input type="range" id="maxTokRange" min="256" max="8192" step="256" value="4096"></div>
+      <div class="range-row"><label>🎯 Top P <span id="topPVal">1.0</span></label><input type="range" id="topPRange" min="0.1" max="1" step="0.05" value="1"></div>
+      <div class="range-row"><label>🔁 Frequency Penalty <span id="freqVal">0</span></label><input type="range" id="freqRange" min="-2" max="2" step="0.1" value="0"></div>
+      <div class="range-row"><label>🔁 Presence Penalty <span id="presVal">0</span></label><input type="range" id="presRange" min="-2" max="2" step="0.1" value="0"></div>
+      <div class="range-row"><label>📜 عدد الرسائل في السياق <span id="histVal">15</span></label><input type="range" id="histRange" min="2" max="40" step="1" value="15"></div>
+      <div class="range-row"><label>🗜 جودة ضغط الصور <span id="imgQVal">82</span>%</label><input type="range" id="imgQRange" min="50" max="95" step="5" value="82"></div>
+      <div class="range-row"><label>📐 أقصى أبعاد للصورة <span id="imgDimVal">1280</span>px</label><input type="range" id="imgDimRange" min="640" max="2048" step="64" value="1280"></div>
+      <div class="range-row"><label>⏱ حد الطلبات بالدقيقة <span id="rpmVal">25</span></label><input type="range" id="rpmRange" min="5" max="60" step="5" value="25"></div>
     </div>
 
     <div class="tab-content" id="t-presets">
@@ -763,48 +324,29 @@
       </div>
       <div style="margin-top:20px">
         <label>شدة التوهج (Glow)</label>
-        <input type="range" id="glowRange" min="0" max="100" step="5" value="60">
+        <input type="range" id="glowRange" min="0" max="100" step="5" value="60" style="width:100%;accent-color:var(--accent)">
       </div>
     </div>
 
     <div class="tab-content" id="t-stats">
       <p>إحصائيات الجلسة الحالية:</p>
       <div class="stats-grid" id="statsGrid"></div>
-      <button class="preset-btn" onclick="exportChat('txt')">
-        <strong>📄 تصدير المحادثة (TXT)</strong>
-        <small>ملف نصي مقروء</small>
-      </button>
-      <button class="preset-btn" onclick="exportChat('json')">
-        <strong>🗂 تصدير المحادثة (JSON)</strong>
-        <small>نسخة احتياطية كاملة</small>
-      </button>
-      <button class="preset-btn" onclick="exportChat('md')">
-        <strong>📝 تصدير المحادثة (Markdown)</strong>
-        <small>منسق للـ GitHub/Notion</small>
-      </button>
+      <button class="preset-btn" onclick="exportChat('txt')"><strong>📄 تصدير المحادثة (TXT)</strong><small>ملف نصي مقروء</small></button>
+      <button class="preset-btn" onclick="exportChat('json')"><strong>🗂 تصدير المحادثة (JSON)</strong><small>نسخة احتياطية كاملة</small></button>
+      <button class="preset-btn" onclick="exportChat('md')"><strong>📝 تصدير المحادثة (Markdown)</strong><small>منسق للـ GitHub/Notion</small></button>
     </div>
 
     <div class="tab-content" id="t-data">
       <p>إدارة البيانات المحلية:</p>
-      <button class="preset-btn" id="backupAllBtn">
-        <strong>💾 نسخة احتياطية كاملة</strong>
-        <small>كل الجلسات + الإعدادات</small>
-      </button>
-      <button class="preset-btn" id="restoreAllBtn">
-        <strong>📥 استعادة من نسخة</strong>
-        <small>اختر ملف .json</small>
-      </button>
-      <button class="preset-btn" id="clearAllBtn" style="border-color:var(--danger)">
-        <strong style="color:var(--danger)">🗑 مسح كل شيء</strong>
-        <small>لا يمكن التراجع</small>
-      </button>
+      <button class="preset-btn" id="backupAllBtn"><strong>💾 نسخة احتياطية كاملة</strong><small>كل الجلسات + الإعدادات (بدون المفتاح)</small></button>
+      <button class="preset-btn" id="restoreAllBtn"><strong>📥 استعادة من نسخة</strong><small>اختر ملف .json</small></button>
+      <button class="preset-btn" id="clearAllBtn" style="border-color:var(--danger)"><strong style="color:var(--danger)">🗑 مسح كل شيء</strong><small>لا يمكن التراجع</small></button>
       <input type="file" id="restoreFile" accept=".json" hidden>
     </div>
 
     <div class="row">
-      <button class="ghost danger" id="clearAll">🗑 مسح الكل</button>
-      <button class="primary" id="saveSettings">حفظ</button>
       <button class="ghost" id="closeSettings">إغلاق</button>
+      <button class="primary" id="saveSettings">حفظ</button>
     </div>
   </div>
 </div>
@@ -812,23 +354,18 @@
 <div class="overlay" id="searchOverlay">
   <div class="sheet" style="max-width:520px">
     <h3>🔍 بحث في المحادثة</h3>
-    <input id="searchInput" type="text" placeholder="اكتب كلمة للبحث…"
-           style="width:100%;background:var(--surface);border:1px solid var(--line);
-                  border-radius:10px;color:var(--text);padding:10px 14px;font:inherit;margin-bottom:12px">
+    <input id="searchInput" type="text" placeholder="اكتب كلمة للبحث…" style="width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:10px 14px;font:inherit;margin-bottom:12px">
     <div id="searchResults" style="max-height:50dvh;overflow-y:auto"></div>
-    <div class="row">
-      <button class="ghost" onclick="document.getElementById('searchOverlay').classList.remove('open')">إغلاق</button>
-    </div>
+    <div class="row"><button class="ghost" id="closeSearch">إغلاق</button></div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<!-- Highlight.js + Marked من CDN -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-dark.min.css" id="hljsTheme">
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/common.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 <script>
 "use strict";
 
@@ -836,14 +373,10 @@
 const DEFAULT_MODEL = "llama-3.3-70b-versatile";
 const VISION_MODEL_DEFAULT = "meta-llama/llama-4-scout-17b-16e-instruct";
 const API_URL = "https://api.groq.com/openai/v1/chat/completions";
-
-const VISION_MODELS = [
-  "meta-llama/llama-4-scout-17b-16e-instruct",
-  "meta-llama/llama-4-maverick-17b-128e-instruct",
-  "llama-3.2-11b-vision-preview",
-  "llama-3.2-90b-vision-preview"
-];
-const isVisionModel = (m) => VISION_MODELS.includes(m);
+const MODELS_URL = "https://api.groq.com/openai/v1/models";
+const REASONING_MODELS = /qwen3|deepseek-r1|gpt-oss/;
+const isVisionModel = (m) => /llama-4|vision/.test(m || "");
+const MAX_IMAGES = 5;
 
 const DEFAULT_SYSTEM = `أنت ROSTO AI، مساعد ذكي عربي متقدم.
 - ترد بالعربية الفصحى المبسطة
@@ -958,111 +491,160 @@ const PRESETS = {
 const $ = (id) => document.getElementById(id);
 const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch { return d; } },
-  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {
-    if (e.name === "QuotaExceededError") {
-      try { localStorage.removeItem("rosto_sessions"); localStorage.setItem(k, v); } catch {}
-    }
-  }},
+  set(k, v) {
+    try { localStorage.setItem(k, v); return true; }
+    catch (e) { toast("⚠ مساحة التخزين ممتلئة — احذف جلسات قديمة أو خد نسخة احتياطية", 4000); return false; }
+  },
   del(k) { try { localStorage.removeItem(k); } catch {} }
 };
-const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c => 
+const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c =>
   ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const esc = escapeHtml;
 
-// ===================== التشفير الآمن للمفتاح =====================
-async function getDeviceKey() {
-  const fp = navigator.userAgent + screen.width + screen.height + 
-             Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const salt = store.get("rosto_salt") || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()));
-  store.set("rosto_salt", salt);
-
-  const enc = new TextEncoder();
-  const baseKey = await crypto.subtle.importKey(
-    "raw", enc.encode(fp + salt), "PBKDF2", false, ["deriveKey"]
-  );
-  return crypto.subtle.deriveKey(
-    { name: "PBKDF2", salt: enc.encode(salt), iterations: 100000, hash: "SHA-256" },
-    baseKey,
-    { name: "AES-GCM", length: 256 },
-    false, ["encrypt", "decrypt"]
-  );
+function msgText(m) {
+  if (!m) return "";
+  if (typeof m.content === "string") return m.content;
+  if (Array.isArray(m.content)) return m.content.find(c => c.type === "text")?.text || "";
+  return "";
+}
+function msgImgs(m) {
+  return Array.isArray(m?.content)
+    ? m.content.filter(c => c.type === "image_url").map(c => c.image_url.url) : [];
 }
 
+// ===================== تخزين المفتاح (IndexedDB + مفتاح غير قابل للاستخراج) =====================
+const idb = {
+  open() {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open("rosto", 1);
+      r.onupgradeneeded = () => r.result.createObjectStore("kv");
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+  },
+  async get(k) {
+    const db = await this.open();
+    return new Promise((res, rej) => {
+      const q = db.transaction("kv").objectStore("kv").get(k);
+      q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error);
+    });
+  },
+  async set(k, v) {
+    const db = await this.open();
+    return new Promise((res, rej) => {
+      const t = db.transaction("kv", "readwrite");
+      t.objectStore("kv").put(v, k);
+      t.oncomplete = () => res(); t.onerror = () => rej(t.error);
+    });
+  },
+  async clear() {
+    const db = await this.open();
+    return new Promise((res) => {
+      const t = db.transaction("kv", "readwrite");
+      t.objectStore("kv").clear(); t.oncomplete = () => res(); t.onerror = () => res();
+    });
+  }
+};
+const b64 = {
+  enc: (u8) => btoa(String.fromCharCode(...u8)),
+  dec: (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0))
+};
+async function getDeviceKey() {
+  let k = await idb.get("devkey");
+  if (!k) {
+    k = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+    await idb.set("devkey", k);
+  }
+  return k;
+}
 async function saveSecureKey(plain) {
-  if (!plain) { store.del("rosto_key_enc"); return; }
+  if (!plain) { store.del("rosto_key_v2"); store.del("rosto_key_enc"); store.del("rosto_key"); return; }
   try {
     const key = await getDeviceKey();
     const iv = crypto.getRandomValues(new Uint8Array(12));
-    const ct = await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv }, key, new TextEncoder().encode(plain)
-    );
-    const ivB64 = btoa(String.fromCharCode(...iv));
-    const ctB64 = btoa(String.fromCharCode(...new Uint8Array(ct)));
-    store.set("rosto_key_enc", ivB64 + "." + ctB64);
-    store.del("rosto_key");
+    const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(plain));
+    store.set("rosto_key_v2", b64.enc(iv) + "." + b64.enc(new Uint8Array(ct)));
+    store.del("rosto_key_enc"); store.del("rosto_key");
   } catch (e) {
-    console.warn("فشل التشفير، تخزين مؤقت بدون تشفير:", e);
-    store.set("rosto_key", plain);
+    console.warn("فشل التشفير:", e);
+    toast("⚠ التشفير مش متاح هنا — المفتاح هيفضل للجلسة دي بس", 3500);
   }
 }
-
+// فك تشفير النسخة القديمة (للترحيل التلقائي)
+async function legacyDecrypt(blob) {
+  const fp = navigator.userAgent + screen.width + screen.height + Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const salt = store.get("rosto_salt");
+  if (!salt) throw new Error("no salt");
+  const enc = new TextEncoder();
+  const base = await crypto.subtle.importKey("raw", enc.encode(fp + salt), "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt: enc.encode(salt), iterations: 100000, hash: "SHA-256" },
+    base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+  const [iv, ct] = blob.split(".").map(b64.dec);
+  return new TextDecoder().decode(await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct));
+}
 async function loadSecureKey() {
-  if (store.get("rosto_key_enc")) {
+  const v2 = store.get("rosto_key_v2");
+  if (v2) {
     try {
-      const blob = store.get("rosto_key_enc");
-      const [ivB64, ctB64] = blob.split(".");
-      const iv = Uint8Array.from(atob(ivB64), c => c.charCodeAt(0));
-      const ct = Uint8Array.from(atob(ctB64), c => c.charCodeAt(0));
-      const key = await getDeviceKey();
-      const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
+      const [iv, ct] = v2.split(".").map(b64.dec);
+      const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, await getDeviceKey(), ct);
       return new TextDecoder().decode(pt);
-    } catch (e) {
-      console.warn("فشل فك التشفير:", e);
-      return "";
-    }
+    } catch (e) { console.warn("فشل فك التشفير:", e); return ""; }
   }
-  return store.get("rosto_key", "");
+  const old = store.get("rosto_key_enc");
+  if (old) {
+    try { const k = await legacyDecrypt(old); await saveSecureKey(k); return k; }
+    catch { return ""; }
+  }
+  const plain = store.get("rosto_key", "");
+  if (plain) { await saveSecureKey(plain); return plain; }
+  return "";
 }
 
 // ===================== Rate Limiter =====================
 class RateLimiter {
-  constructor(rpm = 25) {
-    this.rpm = rpm;
-    this.timestamps = [];
-  }
+  constructor(rpm = 25) { this.rpm = rpm; this.timestamps = []; }
   setRpm(rpm) { this.rpm = rpm; }
-  async wait() {
-    const now = Date.now();
-    this.timestamps = this.timestamps.filter(t => now - t < 60000);
-    if (this.timestamps.length >= this.rpm) {
+  async wait(signal) {
+    for (;;) {
+      const now = Date.now();
+      this.timestamps = this.timestamps.filter(t => now - t < 60000);
+      if (this.timestamps.length < this.rpm) { this.timestamps.push(now); return; }
       const waitMs = 60000 - (now - this.timestamps[0]) + 200;
-      toast(`⏳ Rate limit — انتظر ${Math.ceil(waitMs/1000)}ث…`);
-      await new Promise(r => setTimeout(r, waitMs));
-      return this.wait();
+      toast(`⏳ Rate limit — انتظر ${Math.ceil(waitMs / 1000)}ث…`);
+      await new Promise((r) => setTimeout(r, waitMs));
+      if (signal?.aborted) throw new DOMException("aborted", "AbortError");
     }
-    this.timestamps.push(now);
   }
 }
 
 // ===================== Fetch with Retry =====================
-async function fetchRetry(url, opts, maxRetries = 3) {
-  let lastErr;
+// ملاحظة: ما بنمررش AbortSignal لـ fetch لأن بيئة المعاينة (iframe) بتفشل في نسخه (DataCloneError)
+function abortable(p, ctl) {
+  return new Promise((res, rej) => {
+    if (!ctl) return p.then(res, rej);
+    const onAbort = () => rej(new DOMException("aborted", "AbortError"));
+    if (ctl.signal.aborted) return onAbort();
+    ctl.signal.addEventListener("abort", onAbort, { once: true });
+    p.then(res, rej);
+  });
+}
+async function fetchRetry(url, opts, maxRetries = 3, ctl = null) {
   for (let i = 0; i <= maxRetries; i++) {
     try {
-      const res = await fetch(url, opts);
+      const res = await abortable(fetch(url, opts), ctl);
       if (res.ok || (res.status < 500 && res.status !== 429)) return res;
       if (i === maxRetries) return res;
-      const retryAfter = parseInt(res.headers.get("retry-after") || "0");
-      const delay = retryAfter ? retryAfter * 1000 : Math.min(1000 * 2 ** i, 8000);
-      toast(`⏳ إعادة المحاولة بعد ${Math.round(delay/1000)}ث…`);
-      await new Promise(r => setTimeout(r, delay));
+      const retryAfter = parseFloat(res.headers.get("retry-after") || "0");
+      const delay = retryAfter ? Math.min(retryAfter * 1000, 20000) : Math.min(1000 * 2 ** i, 8000);
+      toast(`⏳ إعادة المحاولة بعد ${Math.round(delay / 1000)}ث…`);
+      await abortable(new Promise((r) => setTimeout(r, delay)), ctl);
     } catch (e) {
-      lastErr = e;
-      if (e.name === "AbortError") throw e;
-      if (i === maxRetries) throw e;
-      await new Promise(r => setTimeout(r, 1000 * 2 ** i));
+      if (e.name === "AbortError" || i === maxRetries) throw e;
+      await abortable(new Promise((r) => setTimeout(r, 1000 * 2 ** i)), ctl);
     }
   }
-  throw lastErr;
 }
 
 // ===================== الحالة العامة =====================
@@ -1107,28 +689,17 @@ const limiter = new RateLimiter(rpmLimit);
 const Sessions = {
   KEY: "rosto_sessions",
   CURRENT: "rosto_current_session",
-  all() {
-    try { return JSON.parse(store.get(this.KEY) || "{}"); }
-    catch { return {}; }
-  },
-  save(all) {
-    try { store.set(this.KEY, JSON.stringify(all)); }
-    catch { toast("⚠ مساحة التخزين امتلت"); }
-  },
+  all() { try { return JSON.parse(store.get(this.KEY) || "{}"); } catch { return {}; } },
+  save(all) { store.set(this.KEY, JSON.stringify(all)); },
   current() {
     let c = store.get(this.CURRENT, "");
-    if (!c || !this.all()[c]) {
-      c = this.create();
-    }
+    if (!c || !this.all()[c]) c = this.create();
     return c;
   },
   create(name = "محادثة جديدة") {
     const id = "s_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
     const all = this.all();
-    all[id] = {
-      id, name, createdAt: Date.now(), updatedAt: Date.now(),
-      messages: [], pinned: false
-    };
+    all[id] = { id, name, createdAt: Date.now(), updatedAt: Date.now(), messages: [], pinned: false };
     this.save(all);
     store.set(this.CURRENT, id);
     return id;
@@ -1143,23 +714,23 @@ const Sessions = {
     const all = this.all();
     delete all[id];
     this.save(all);
-    const remaining = Object.keys(all);
     if (store.get(this.CURRENT) === id) {
-      store.set(this.CURRENT, remaining[0] || this.create());
+      const remaining = Object.keys(all);
+      if (remaining.length) store.set(this.CURRENT, remaining[0]); else this.create();
     }
   },
   rename(id, name) { this.update(id, { name }); },
-  pin(id) { this.update(id, { pinned: !this.all()[id]?.pinned }); },
+  pin(id) { this.update(id, { pinned: this.all()[id]?.pinned !== true }); },
   list() {
     return Object.values(this.all())
-      .sort((a, b) => (b.pinned - a.pinned) || (b.updatedAt - a.updatedAt));
+      .sort((a, b) => ((b.pinned === true) - (a.pinned === true)) || (b.updatedAt - a.updatedAt));
   },
   load(id) {
     const s = this.all()[id];
     if (!s) return;
+    if (controller) controller.abort();
     store.set(this.CURRENT, id);
     messages = s.messages || [];
-    chat.innerHTML = "";
     restore();
   }
 };
@@ -1174,16 +745,8 @@ function toast(msg, ms = 2500) {
 }
 
 // ===================== Markdown Pro =====================
-let markedReady = typeof window.marked !== "undefined";
-let hljsReady = typeof window.hljs !== "undefined";
-
-if (markedReady && window.marked) {
-  marked.setOptions({ breaks: true, gfm: true });
-}
-
-function esc(s) {
-  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
+const markedReady = typeof window.marked !== "undefined";
+if (markedReady) marked.setOptions({ breaks: true, gfm: true });
 
 function renderSimple(text) {
   return String(text).split("```").map((part, i) => {
@@ -1199,28 +762,22 @@ function renderSimple(text) {
 }
 
 function render(text) {
-  if (!markdownPro || !markedReady || !window.marked) return renderSimple(text);
+  if (!markdownPro || !markedReady || !window.DOMPurify) return renderSimple(text);
   try {
-    marked.setOptions({ breaks: true, gfm: true });
-    const html = marked.parse(text);
-    const tmp = document.createElement("div");
-    tmp.innerHTML = html;
-    tmp.querySelectorAll("script, iframe, object, embed").forEach(el => el.remove());
-    tmp.querySelectorAll("*").forEach(el => {
-      [...el.attributes].forEach(a => {
-        if (a.name.startsWith("on")) el.removeAttribute(a.name);
-        if ((a.name === "href" || a.name === "src") && /^javascript:/i.test(a.value)) {
-          el.removeAttribute(a.name);
-        }
-      });
+    const clean = DOMPurify.sanitize(marked.parse(String(text)), {
+      FORBID_TAGS: ["style", "form", "img", "iframe", "object", "embed", "input", "button"],
+      FORBID_ATTR: ["style", "onclick", "onerror"],
+      ADD_ATTR: ["target"]
     });
+    const tmp = document.createElement("div");
+    tmp.innerHTML = clean;
+    tmp.querySelectorAll("a[href]").forEach(a => { a.target = "_blank"; a.rel = "noopener noreferrer nofollow"; });
     tmp.querySelectorAll("pre code").forEach(el => {
-      try { if (hljsReady && window.hljs) window.hljs.highlightElement(el); } catch {}
+      try { if (window.hljs) window.hljs.highlightElement(el); } catch {}
       const btn = document.createElement("button");
       btn.className = "copy-code";
       btn.textContent = "نسخ";
-      btn.onclick = () => navigator.clipboard.writeText(el.textContent)
-        .then(() => { btn.textContent = "✓"; setTimeout(() => btn.textContent = "نسخ", 1200); });
+      btn.setAttribute("onclick", "copyCode(this)"); // attribute يسلم من التحويل لـ innerHTML
       el.parentElement.appendChild(btn);
     });
     return tmp.innerHTML;
@@ -1230,7 +787,7 @@ function render(text) {
   }
 }
 
-window.copyCode = function(btn) {
+window.copyCode = function (btn) {
   const code = btn.parentElement.querySelector("code").textContent;
   navigator.clipboard.writeText(code).then(() => {
     btn.textContent = "✓";
@@ -1240,97 +797,138 @@ window.copyCode = function(btn) {
 
 function scrollDown() { chat.scrollTop = chat.scrollHeight; }
 
+// يفصل <think> لو الموديل رجّعها داخل المحتوى
+function splitThink(t) {
+  const m = t.match(/^\s*<think>([\s\S]*?)(<\/think>|$)/);
+  if (!m) return { think: "", body: t };
+  return { think: m[1].trim(), body: t.slice(m[0].length).trim() };
+}
+
 // ===================== Typing Animation =====================
-const ANIM_TYPES = ["dots", "wave", "glow"];
 function makeTypingAnim() {
   const wrap = document.createElement("div");
-  if (!animEnabled) {
-    wrap.className = "typing-anim";
-    wrap.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
-    return wrap;
-  }
-  const type = ANIM_TYPES[Math.floor(Math.random() * 3)];
-  if (type === "wave") {
-    wrap.className = "typing-anim wave";
-    wrap.innerHTML = '<span class="dot"></span>'.repeat(5);
-  } else if (type === "glow") {
-    wrap.className = "typing-anim glow";
-    wrap.textContent = "💬 ROSTO يفكر…";
-  } else {
-    wrap.className = "typing-anim";
-    wrap.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
-  }
+  const dots = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+  if (!animEnabled) { wrap.className = "typing-anim"; wrap.innerHTML = dots; return wrap; }
+  const type = ["dots", "wave", "glow"][Math.floor(Math.random() * 3)];
+  if (type === "wave") { wrap.className = "typing-anim wave"; wrap.innerHTML = '<span class="dot"></span>'.repeat(5); }
+  else if (type === "glow") { wrap.className = "typing-anim glow"; wrap.textContent = "💬 ROSTO يفكر…"; }
+  else { wrap.className = "typing-anim"; wrap.innerHTML = dots; }
   return wrap;
 }
 
-// ===================== Bubbles =====================
+// ===================== الرسائل (رسم + أدوات) =====================
 function addBubble(role, text) {
   const el = document.createElement("div");
   el.className = "msg " + role;
-  if (role === "user") el.textContent = text || "";
-  else el.innerHTML = render(text);
+  if (role === "user") el.textContent = text || ""; else el.innerHTML = render(text);
   chat.appendChild(el);
   scrollDown();
   return el;
 }
 
-function addAssistantTools(el, text, msgIdx) {
+function mkBtn(label, onclick, cls = "") {
+  const b = document.createElement("button");
+  b.textContent = label;
+  if (cls) b.className = cls;
+  b.onclick = onclick;
+  return b;
+}
+
+function addUserTools(el, idx) {
   const tools = document.createElement("div");
   tools.className = "bubble-tools";
-
-  const copyBtn = document.createElement("button");
-  copyBtn.textContent = "📋 نسخ";
-  copyBtn.onclick = () => navigator.clipboard.writeText(text).then(() => toast("تم النسخ ✅"));
-
-  const speakBtn = document.createElement("button");
-  speakBtn.textContent = "🔊 نطق";
-  speakBtn.onclick = () => speak(text);
-
-  const regenBtn = document.createElement("button");
-  regenBtn.textContent = "🔄 إعادة";
-  regenBtn.onclick = () => {
-    if (messages.length >= 2 && messages[messages.length - 1].role === "assistant") {
-      messages.pop();
-      const lastUser = messages[messages.length - 1];
-      if (lastUser) {
-        messages.pop();
-        chat.innerHTML = "";
-        restore();
-        const t = typeof lastUser.content === "string" ? lastUser.content : "";
-        send(t);
-      }
-    }
-  };
-
-  const pinBtn = document.createElement("button");
-  const isPinned = msgIdx !== undefined && Sessions.all()[Sessions.current()]?.pinned?.[msgIdx];
-  pinBtn.textContent = isPinned ? "📌 مثبّت" : "📌";
-  if (isPinned) pinBtn.classList.add("starred");
-  pinBtn.onclick = () => {
-    if (msgIdx === undefined) return;
-    const s = Sessions.all()[Sessions.current()];
-    if (!s) return;
-    s.pinned = s.pinned || {};
-    s.pinned[msgIdx] = !s.pinned[msgIdx];
-    Sessions.update(s.id, { pinned: s.pinned });
-    pinBtn.textContent = s.pinned[msgIdx] ? "📌 مثبّت" : "📌";
-    pinBtn.classList.toggle("starred", !!s.pinned[msgIdx]);
-    el.classList.toggle("pinned", !!s.pinned[msgIdx]);
-    toast(s.pinned[msgIdx] ? "📌 تم التثبيت" : "تم إلغاء التثبيت");
-  };
-
-  tools.appendChild(copyBtn);
-  tools.appendChild(speakBtn);
-  tools.appendChild(regenBtn);
-  tools.appendChild(pinBtn);
+  tools.append(
+    mkBtn("✏ تعديل", () => editMessage(idx, el)),
+    mkBtn("📋", () => navigator.clipboard.writeText(msgText(messages[idx])).then(() => toast("تم النسخ ✅"))),
+    mkBtn("🗑", () => deleteMessage(idx), "del")
+  );
   el.appendChild(tools);
 }
 
-// ===================== عرض صور المستخدم =====================
-function renderUserMessage(text, imgs = [], target = null) {
-  const el = target || document.createElement("div");
-  el.className = "msg user";
+function addAssistantTools(el, text, idx) {
+  const tools = document.createElement("div");
+  tools.className = "bubble-tools";
+  const m = messages[idx];
+  tools.append(
+    mkBtn("📋 نسخ", () => navigator.clipboard.writeText(text).then(() => toast("تم النسخ ✅"))),
+    mkBtn("🔊 نطق", () => speak(text))
+  );
+  if (idx === messages.length - 1) tools.append(mkBtn("🔄 إعادة", () => regenerate(idx)));
+  const pinBtn = mkBtn(m?.pinned ? "📌 مثبّت" : "📌", () => togglePin(idx, el, pinBtn), m?.pinned ? "starred" : "");
+  tools.append(pinBtn, mkBtn("🗑", () => deleteMessage(idx), "del"));
+  if (m?.usage?.t) {
+    const u = document.createElement("span");
+    u.className = "usage-badge";
+    u.title = `prompt ${m.usage.p ?? "?"} • completion ${m.usage.c ?? "?"}`;
+    u.textContent = `⚡ ${m.usage.t.toLocaleString()} tok`;
+    tools.appendChild(u);
+  }
+  el.appendChild(tools);
+}
+
+function togglePin(idx, el, btn) {
+  const m = messages[idx];
+  if (!m) return;
+  m.pinned = !m.pinned;
+  el.classList.toggle("pinned", !!m.pinned);
+  btn.textContent = m.pinned ? "📌 مثبّت" : "📌";
+  btn.classList.toggle("starred", !!m.pinned);
+  saveChat();
+  toast(m.pinned ? "📌 تم التثبيت" : "تم إلغاء التثبيت");
+}
+
+function deleteMessage(idx) {
+  if (controller) return toast("استنى لحد ما الرد يخلص");
+  if (!messages[idx]) return;
+  if (!confirm("حذف الرسالة دي؟")) return;
+  messages.splice(idx, 1);
+  saveChat();
+  restore();
+  toast("🗑 تم الحذف");
+}
+
+function regenerate(idx) {
+  if (controller) return;
+  if (messages[idx]?.role !== "assistant" || idx !== messages.length - 1) return;
+  messages.splice(idx);
+  const u = messages.pop();
+  if (!u || u.role !== "user") { restore(); return; }
+  resendFrom(u, msgText(u));
+}
+
+function resendFrom(userMsg, text) {
+  attachments = msgImgs(userMsg).map((url, i) => ({ dataUrl: url, name: "img" + (i + 1), size: Math.round(url.length / 1024) }));
+  restore();
+  renderAttachPreview();
+  renderQuickActions();
+  send(text);
+}
+
+function editMessage(idx, el) {
+  if (controller) return toast("استنى لحد ما الرد يخلص");
+  const m = messages[idx];
+  if (!m) return;
+  el.classList.add("editing");
   el.innerHTML = "";
+  const ta = document.createElement("textarea");
+  ta.className = "edit-box";
+  ta.value = msgText(m);
+  const row = document.createElement("div");
+  row.className = "edit-row";
+  const ok = mkBtn("حفظ وإرسال", () => {
+    const t = ta.value.trim();
+    if (!t && !msgImgs(m).length) return;
+    messages.splice(idx);
+    resendFrom(m, t);
+  }, "ok");
+  row.append(ok, mkBtn("إلغاء", () => restore()));
+  el.append(ta, row);
+  ta.focus();
+}
+
+function renderUserMessage(text, imgs = []) {
+  const el = document.createElement("div");
+  el.className = "msg user";
   if (text) {
     const p = document.createElement("div");
     p.textContent = text;
@@ -1342,13 +940,42 @@ function renderUserMessage(text, imgs = [], target = null) {
     imgs.forEach(a => {
       const wrap = document.createElement("div");
       wrap.className = "msg-image-wrap";
-      wrap.innerHTML = `<img src="${a.dataUrl}" alt="${escapeHtml(a.name || "")}">`;
+      const im = document.createElement("img");
+      im.src = a.dataUrl; im.alt = a.name || "";
+      wrap.appendChild(im);
       wrap.onclick = () => openImageViewer(a.dataUrl);
       grid.appendChild(wrap);
     });
     el.appendChild(grid);
   }
-  if (!target) { chat.appendChild(el); scrollDown(); }
+  chat.appendChild(el);
+  scrollDown();
+  return el;
+}
+
+function drawMessage(m, idx) {
+  const text = msgText(m);
+  let el;
+  if (m.role === "user") {
+    el = renderUserMessage(text, msgImgs(m).map(u => ({ dataUrl: u })));
+    addUserTools(el, idx);
+  } else {
+    const sp = splitThink(text);
+    const think = m.reasoning || sp.think, body = sp.body;
+    el = document.createElement("div");
+    el.className = "msg assistant";
+    if (think && reasoningEnabled) {
+      el.innerHTML = '<details class="reasoning-box"><summary>🧠 تفكير الموديل</summary><div class="reasoning-content"></div></details>';
+      el.querySelector(".reasoning-content").textContent = think;
+    }
+    const c = document.createElement("div");
+    c.innerHTML = render(body || text);
+    el.appendChild(c);
+    chat.appendChild(el);
+    addAssistantTools(el, body || text, idx);
+  }
+  el.dataset.idx = idx;
+  if (m.pinned) el.classList.add("pinned");
   return el;
 }
 
@@ -1360,19 +987,12 @@ function showEmpty() {
   box.innerHTML = `
     <span class="badge">💬 مساعد تطوير</span>
     <h2>ROSTO DEV</h2>
-    <p>مساعد تقني عربي — للمطورين. برمجة، DevOps، تطبيقات موبايل وويب وElectron، تحليل بيانات، وأكتر.</p>
-  `;
+    <p>مساعد تقني عربي — للمطورين. برمجة، DevOps، تطبيقات موبايل وويب وElectron، تحليل بيانات، وأكتر.</p>`;
   const chips = document.createElement("div");
   chips.className = "chips";
-  [
-    "🖼 حلل الصورة دي بالتفصيل",
-    "🚀 مشروع Electron كامل",
-    "🌐 مشروع ويب Next.js كامل",
-    "📱 تطبيق React Native مع APK",
-    "⛓ Smart Contract + Hardhat",
-    "🎮 لعبة Unity كاملة",
-    "🧠 حلل البيانات دي بـ Pandas"
-  ].forEach((t) => {
+  ["🖼 حلل الصورة دي بالتفصيل", "🚀 مشروع Electron كامل", "🌐 مشروع ويب Next.js كامل",
+   "📱 تطبيق React Native مع APK", "⛓ Smart Contract + Hardhat", "🎮 لعبة Unity كاملة",
+   "🧠 حلل البيانات دي بـ Pandas"].forEach((t) => {
     const b = document.createElement("button");
     b.className = "chip";
     b.textContent = t;
@@ -1386,65 +1006,30 @@ function showEmpty() {
 function restore() {
   chat.innerHTML = "";
   if (!messages.length) return showEmpty();
-
-  const s = Sessions.all()[Sessions.current()];
-  const pinned = s?.pinned || {};
-
-  messages.forEach((m, idx) => {
-    if (typeof m.content === "string") {
-      const el = addBubble(m.role, m.content);
-      if (m.role === "assistant") addAssistantTools(el, m.content, idx);
-      if (pinned[idx]) el.classList.add("pinned");
-    } else if (Array.isArray(m.content)) {
-      const textPart = m.content.find(c => c.type === "text");
-      const imgParts = m.content.filter(c => c.type === "image_url");
-
-      if (m.role === "user") {
-        const el = renderUserMessage(
-          textPart?.text || "",
-          imgParts.map(p => ({ dataUrl: p.image_url.url }))
-        );
-        if (pinned[idx]) el.classList.add("pinned");
-      } else {
-        const el = document.createElement("div");
-        el.className = "msg assistant";
-        el.innerHTML = render(textPart?.text || "");
-        imgParts.forEach(p => {
-          const img = document.createElement("img");
-          img.src = p.image_url.url;
-          img.className = "assistant-img";
-          el.appendChild(img);
-        });
-        chat.appendChild(el);
-        addAssistantTools(el, textPart?.text || "", idx);
-        if (pinned[idx]) el.classList.add("pinned");
-      }
-    }
-  });
+  messages.forEach((m, idx) => { if (m && m.content) drawMessage(m, idx); });
   scrollDown();
 }
 
 function sanitizeForStorage(m) {
-  if (Array.isArray(m.content)) {
-    const hasImgs = m.content.some(c => c.type === "image_url");
-    if (hasImgs) {
-      const txt = m.content.find(c => c.type === "text")?.text || "";
-      const imgCount = m.content.filter(c => c.type === "image_url").length;
-      return { role: m.role, content: txt + `\n[${imgCount} صورة مرفقة - لم تُحفظ]` };
-    }
+  const out = { role: m.role, content: m.content };
+  if (m.pinned) out.pinned = true;
+  if (m.usage) out.usage = m.usage;
+  if (Array.isArray(m.content) && m.content.some(c => c.type === "image_url")) {
+    const n = m.content.filter(c => c.type === "image_url").length;
+    out.content = msgText(m) + `\n[${n} صورة مرفقة - لم تُحفظ]`;
   }
-  return m;
+  return out;
 }
 
 function saveChat() {
   const sid = Sessions.current();
-  const clean = messages.filter(m => m && m.content);
-  const toSave = clean.slice(-30).map(sanitizeForStorage);
-  const title = typeof messages[0]?.content === "string"
-    ? messages[0].content.slice(0, 40)
-    : (messages[0]?.content?.find?.(c => c.type === "text")?.text || "محادثة").slice(0, 40);
-
-  Sessions.update(sid, { messages: toSave, name: title || "محادثة" });
+  const cur = Sessions.all()[sid];
+  if (!cur) return;
+  const toSave = messages.filter(m => m && m.content).slice(-60).map(sanitizeForStorage);
+  const first = messages.find(m => m && m.role === "user");
+  const title = msgText(first).replace(/\s+/g, " ").slice(0, 40);
+  const isDefault = !cur.name || cur.name === "محادثة جديدة";
+  Sessions.update(sid, { messages: toSave, name: isDefault && title ? title : cur.name });
 }
 
 function setBusy(busy) {
@@ -1479,20 +1064,16 @@ function initRecognition() {
     let finalText = "", interim = "";
     for (let i = e.resultIndex; i < e.results.length; i++) {
       const t = e.results[i][0].transcript;
-      if (e.results[i].isFinal) finalText += t;
-      else interim += t;
+      if (e.results[i].isFinal) finalText += t; else interim += t;
     }
     input.value = finalText || interim;
     autoGrow();
-    if (finalText && autoSend) {
-      setTimeout(() => { if (input.value.trim()) send(input.value); }, 400);
-    }
+    if (finalText && autoSend) setTimeout(() => { if (input.value.trim()) send(input.value); }, 400);
   };
   r.onerror = () => stopRecording();
   r.onend = () => stopRecording();
   return r;
 }
-
 function startRecording() {
   if (!recognition) recognition = initRecognition();
   if (!recognition) return toast("المتصفح مش بيدعم الإدخال الصوتي");
@@ -1504,7 +1085,6 @@ function startRecording() {
     input.placeholder = "🎤 بتسمع…";
   } catch { toast("الميكروفون مشغول"); }
 }
-
 function stopRecording() {
   isRecording = false;
   $("micBtn").classList.remove("on");
@@ -1531,17 +1111,17 @@ async function compressImage(file, maxDim = imgMaxDim, quality = imgQuality / 10
       let { width, height } = img;
       if (width > maxDim || height > maxDim) {
         const ratio = Math.min(maxDim / width, maxDim / height);
-        width = Math.round(width * ratio);
-        height = Math.round(height * ratio);
+        width = Math.round(width * ratio); height = Math.round(height * ratio);
       }
       const canvas = document.createElement("canvas");
       canvas.width = width; canvas.height = height;
       const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, width, height); // PNG شفاف → خلفية بيضاء بدل الأسود
       ctx.imageSmoothingQuality = "high";
       ctx.drawImage(img, 0, 0, width, height);
       resolve(canvas.toDataURL("image/jpeg", quality));
     };
-    img.onerror = reject;
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("bad image")); };
     img.src = url;
   });
 }
@@ -1550,14 +1130,10 @@ async function attachImages(files) {
   const filesArr = [...files].filter(f => f.type.startsWith("image/"));
   if (!filesArr.length) return;
   for (const file of filesArr) {
-    if (attachments.length >= 5) { toast("الحد الأقصى 5 صور"); break; }
+    if (attachments.length >= MAX_IMAGES) { toast("الحد الأقصى " + MAX_IMAGES + " صور"); break; }
     try {
       const dataUrl = await compressImage(file);
-      attachments.push({
-        dataUrl, name: file.name,
-        size: Math.round(dataUrl.length / 1024),
-        originalSize: Math.round(file.size / 1024)
-      });
+      attachments.push({ dataUrl, name: file.name, size: Math.round(dataUrl.length / 1024) });
     } catch { toast("فشل تحميل: " + file.name); }
   }
   renderAttachPreview();
@@ -1566,24 +1142,19 @@ async function attachImages(files) {
 
 function renderAttachPreview() {
   const box = $("attachPreview");
-  if (!attachments.length) {
-    box.classList.remove("show"); box.innerHTML = ""; return;
-  }
+  if (!attachments.length) { box.classList.remove("show"); box.innerHTML = ""; return; }
   box.classList.add("show"); box.innerHTML = "";
   attachments.forEach((att, i) => {
     const card = document.createElement("div");
     card.className = "attach-card";
-    card.innerHTML = `
-      <img src="${att.dataUrl}" alt="">
-      <button class="remove" data-i="${i}" title="حذف">×</button>
-      <span class="size-badge">${att.size}KB</span>
-    `;
-    card.querySelector(".remove").onclick = (e) => {
-      e.stopPropagation();
-      attachments.splice(i, 1);
-      renderAttachPreview();
-      renderQuickActions();
-    };
+    const im = document.createElement("img");
+    im.src = att.dataUrl; im.alt = "";
+    const rm = document.createElement("button");
+    rm.className = "remove"; rm.title = "حذف"; rm.textContent = "×";
+    rm.onclick = (e) => { e.stopPropagation(); attachments.splice(i, 1); renderAttachPreview(); renderQuickActions(); };
+    const sz = document.createElement("span");
+    sz.className = "size-badge"; sz.textContent = att.size + "KB";
+    card.append(im, rm, sz);
     box.appendChild(card);
   });
 }
@@ -1596,12 +1167,9 @@ const QUICK_IMAGE_ACTIONS = [
   { label: "🌐 ترجمة", prompt: "ترجم كل النص في الصورة للعربية" },
   { label: "🎯 prompt لتوليد", prompt: "اكتبلي prompt مفصل بالإنجليزي لتوليد صورة مشابهة" }
 ];
-
 function renderQuickActions() {
   const box = $("quickActions");
-  if (!attachments.length) {
-    box.classList.remove("show"); box.innerHTML = ""; return;
-  }
+  if (!attachments.length) { box.classList.remove("show"); box.innerHTML = ""; return; }
   box.classList.add("show"); box.innerHTML = "";
   QUICK_IMAGE_ACTIONS.forEach(a => {
     const btn = document.createElement("button");
@@ -1611,43 +1179,45 @@ function renderQuickActions() {
   });
 }
 
+// ===================== تجهيز السياق =====================
+// بيشيل أي حقول زيادة (pinned/usage) وبيحتفظ بصور آخر رسالة فيها صور بس
+function prepareHistory() {
+  const h = messages.slice(-maxHistory);
+  const lastImg = h.map(m => Array.isArray(m.content)).lastIndexOf(true);
+  return h.map((m, i) => ({
+    role: m.role,
+    content: Array.isArray(m.content) && i !== lastImg
+      ? msgText(m) + " [صورة سابقة]"
+      : m.content
+  }));
+}
+
 // ===================== الإرسال =====================
 async function send(raw) {
   if (controller) return;
   const text = (raw || "").trim();
   if (!text && !attachments.length) return;
-
   if (!apiKey) { openSettings(); return toast("أضف مفتاح Groq أولاً", 3000); }
 
-  if (attachments.length && !isVisionModel(model)) {
-    if (autoVision) {
-      model = VISION_MODEL_DEFAULT;
-      store.set("rosto_model", model);
-      toast("🖼 تم التبديل لـ Llama 4 Scout");
-    } else {
-      if (!confirm("⚠ الموديل مش بيدعم الصور!\n\nتحب أبدّل لـ Llama 4 Scout؟")) return;
-      model = VISION_MODEL_DEFAULT;
-      store.set("rosto_model", model);
-    }
-  }
-
   messages = messages.filter(m => m && m.content);
-  if (!messages.length) chat.innerHTML = "";
 
-  const imgsSnapshot = attachments.slice();
-
-  let userContent;
-  if (imgsSnapshot.length) {
-    userContent = [
-      { type: "text", text: text || "حلل الصور دي" },
-      ...imgsSnapshot.map(a => ({ type: "image_url", image_url: { url: a.dataUrl } }))
-    ];
-  } else {
-    userContent = text;
+  // الموديل المستخدم للطلب ده بس — اختيارك الأصلي ما بيتغيرش
+  const needsVision = attachments.length > 0 || messages.slice(-maxHistory).some(m => msgImgs(m).length);
+  let useModel = model;
+  if (needsVision && !isVisionModel(model)) {
+    if (!autoVision) return toast("⚠ الموديل مش بيدعم الصور — فعّل التبديل التلقائي أو اختار موديل Vision", 4000);
+    useModel = VISION_MODEL_DEFAULT;
+    toast("🖼 الطلب ده هيتبعت لـ Llama 4 Scout");
   }
 
+  const imgs = attachments.slice();
+  const userContent = imgs.length
+    ? [{ type: "text", text: text || "حلل الصور دي" }, ...imgs.map(a => ({ type: "image_url", image_url: { url: a.dataUrl } }))]
+    : text;
+
+  if (!messages.length) chat.innerHTML = "";
   messages.push({ role: "user", content: userContent });
-  renderUserMessage(text, imgsSnapshot);
+  drawMessage(messages[messages.length - 1], messages.length - 1);
 
   attachments = [];
   renderAttachPreview();
@@ -1656,135 +1226,144 @@ async function send(raw) {
   store.del("rosto_draft");
   autoGrow();
 
-  const el = addBubble("assistant", "");
-  el.classList.add("streaming");
-  const anim = makeTypingAnim();
-  el.appendChild(anim);
+  // فقاعة الرد: حاوية للتفكير + حاوية للمحتوى (عشان التحديث ما يمسحش التفكير)
+  const el = document.createElement("div");
+  el.className = "msg assistant streaming";
+  const rBox = document.createElement("div");
+  const cBox = document.createElement("div");
+  cBox.appendChild(makeTypingAnim());
+  el.append(rBox, cBox);
+  chat.appendChild(el);
+  scrollDown();
+
   setBusy(true);
   controller = new AbortController();
-  let partial = "";
-  let reasoningBuf = "";
-  let firstChunk = true;
+  const ctl = controller;
+  let activeReader = null;
+  let partial = "", reasoningBuf = "", usage = null, finishReason = "";
+
+  const paint = () => {
+    const sp = splitThink(partial);
+    const rt = reasoningBuf || sp.think;
+    if (rt && reasoningEnabled) {
+      if (!rBox.firstChild) {
+        rBox.innerHTML = '<details class="reasoning-box"><summary>🧠 تفكير الموديل</summary><div class="reasoning-content"></div></details>';
+      }
+      rBox.querySelector(".reasoning-content").textContent = rt;
+    }
+    if (sp.body) cBox.innerHTML = render(sp.body);
+    scrollDown();
+  };
 
   const fail = (msg) => {
-    messages.pop();
-    el.innerHTML = "";
-    el.classList.remove("streaming");
-    el.classList.add("err");
-    el.textContent = msg;
-    setBusy(false);
+    messages.pop(); // رسالة المستخدم
+    input.value = text; autoGrow();
+    if (imgs.length) { attachments = imgs; renderAttachPreview(); renderQuickActions(); }
+    restore();
+    const e = document.createElement("div");
+    e.className = "msg assistant err";
+    e.textContent = msg;
+    chat.appendChild(e);
+    scrollDown();
   };
 
   const body = {
-    model: model,
-    messages: [{ role: "system", content: systemPrompt }].concat(messages.slice(-maxHistory)),
+    model: useModel,
+    messages: [{ role: "system", content: systemPrompt }, ...prepareHistory()],
     max_tokens: maxTokens,
-    temperature: temperature,
-    top_p: topP,
+    temperature, top_p: topP,
     frequency_penalty: freqPenalty,
     presence_penalty: presPenalty,
     stream: streamEnabled
   };
+  if (REASONING_MODELS.test(useModel)) body.reasoning_format = "parsed";
 
   try {
-    await limiter.wait();
-
+    await limiter.wait(ctl.signal);
     const fetchOpts = {
       method: "POST",
-      signal: controller.signal,
-      headers: {
-        "Authorization": "Bearer " + apiKey,
-        "Content-Type": "application/json"
-      },
+      headers: { "Authorization": "Bearer " + apiKey, "Content-Type": "application/json" },
       body: JSON.stringify(body)
     };
-
-    const res = retryEnabled
-      ? await fetchRetry(API_URL, fetchOpts, 3)
-      : await fetch(API_URL, fetchOpts);
+    const res = retryEnabled ? await fetchRetry(API_URL, fetchOpts, 3, ctl) : await abortable(fetch(API_URL, fetchOpts), ctl);
 
     if (!res.ok) {
       let detail = "";
-      try {
-        const j = await res.json();
-        detail = j.error?.message || JSON.stringify(j).slice(0, 200);
-      } catch { detail = await res.text().catch(() => ""); }
-      return fail("خطأ " + res.status + ": " + detail);
+      try { const j = await abortable(res.json(), ctl); detail = j.error?.message || JSON.stringify(j).slice(0, 200); }
+      catch { detail = ""; }
+      const hint = res.status === 401 ? " — تأكد من مفتاح Groq في الإعدادات"
+        : res.status === 429 ? " — وصلت للحد المسموح، استنى شوية"
+        : (res.status === 400 && /model|decommission/i.test(detail)) ? " — جرّب 🔄 تحديث قائمة الموديلات في الإعدادات" : "";
+      return fail("خطأ " + res.status + ": " + detail + hint);
     }
 
     if (!streamEnabled) {
-      const data = await res.json();
-      partial = data.choices[0].message.content || "";
-      el.innerHTML = render(partial);
-      scrollDown();
+      const data = await abortable(res.json(), ctl);
+      const msg = data.choices?.[0]?.message || {};
+      partial = msg.content || "";
+      reasoningBuf = msg.reasoning || msg.reasoning_content || "";
+      usage = data.usage || null;
+      finishReason = data.choices?.[0]?.finish_reason || "";
+      paint();
     } else {
       const reader = res.body.getReader();
+      activeReader = reader;
       const dec = new TextDecoder("utf-8");
-      let buf = "";
+      let buf = "", streamErr = "";
       while (true) {
-        const { done, value } = await reader.read();
+        const { done, value } = await abortable(reader.read(), ctl);
         if (done) break;
         buf += dec.decode(value, { stream: true });
         const lines = buf.split("\n");
         buf = lines.pop();
         for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          const data = line.slice(6).trim();
-          if (data === "[DONE]") continue;
-          try {
-            const json = JSON.parse(data);
-            if (json.error) {
-              console.error("Stream error:", json.error);
-              if (!partial) return fail("خطأ: " + (json.error.message || "غير معروف"));
-              break;
-            }
-            const delta = json.choices?.[0]?.delta;
-            if (!delta) continue;
-
-            if (delta.reasoning_content && reasoningEnabled) {
-              reasoningBuf += delta.reasoning_content;
-              let r = el.querySelector(".reasoning-box");
-              if (!r) {
-                r = document.createElement("details");
-                r.className = "reasoning-box";
-                r.innerHTML = `<summary>🧠 تفكير الموديل</summary><div class="reasoning-content"></div>`;
-                el.prepend(r);
-              }
-              r.querySelector(".reasoning-content").textContent = reasoningBuf;
-            }
-
-            if (delta.content) {
-              if (firstChunk) { el.innerHTML = ""; firstChunk = false; }
-              partial += delta.content;
-              el.innerHTML = render(partial);
-              el.querySelectorAll("pre code:not(.hljs)").forEach(codeEl => {
-                try { if (hljsReady && window.hljs) window.hljs.highlightElement(codeEl); } catch {}
-              });
-              scrollDown();
-            }
-          } catch {}
+          if (!line.startsWith("data:")) continue;
+          const data = line.slice(5).trim();
+          if (!data || data === "[DONE]") continue;
+          let json;
+          try { json = JSON.parse(data); } catch { continue; }
+          if (json.error) { streamErr = json.error.message || "غير معروف"; continue; }
+          usage = json.x_groq?.usage || json.usage || usage;
+          const ch = json.choices?.[0];
+          if (!ch) continue;
+          if (ch.finish_reason) finishReason = ch.finish_reason;
+          const delta = ch.delta;
+          if (!delta) continue;
+          let changed = false;
+          const rs = delta.reasoning_content ?? delta.reasoning;
+          if (rs) { reasoningBuf += rs; changed = true; }
+          if (delta.content) { partial += delta.content; changed = true; }
+          if (changed) paint();
         }
       }
+      if (streamErr && !partial) return fail("خطأ: " + streamErr);
     }
 
-    if (!partial) return fail("ماجاش رد، جرب تاني.");
-    el.classList.remove("streaming");
-    messages.push({ role: "assistant", content: partial });
+    const sp = splitThink(partial);
+    const finalText = sp.body || partial;
+    if (!finalText.trim()) return fail("ماجاش رد، جرب تاني.");
+    el.remove();
+    const msg = { role: "assistant", content: finalText };
+    if (reasoningBuf || sp.think) msg.reasoning = reasoningBuf || sp.think;
+    if (usage?.total_tokens) msg.usage = { p: usage.prompt_tokens, c: usage.completion_tokens, t: usage.total_tokens };
+    messages.push(msg);
+    drawMessage(msg, messages.length - 1);
+    // الرد السابق كان آخر رسالة: حدّث أزرار "إعادة" بإعادة الرسم
+    restore();
     saveChat();
-    addAssistantTools(el, partial, messages.length - 1);
-    if (ttsEnabled) speak(partial);
+    if (finishReason === "length") toast("⚠ الرد اتقطع — زوّد Max Tokens من الإعدادات", 4000);
+    if (ttsEnabled) speak(finalText);
 
   } catch (e) {
-    el.classList.remove("streaming");
     if (e.name === "AbortError") {
-      if (partial) {
-        messages.push({ role: "assistant", content: partial });
+      try { activeReader?.cancel(); } catch {}
+      const sp = splitThink(partial);
+      const finalText = sp.body || partial;
+      if (finalText.trim()) {
+        messages.push({ role: "assistant", content: finalText });
         saveChat();
-        addAssistantTools(el, partial, messages.length - 1);
-      } else {
-        messages.pop();
-        el.remove();
       }
+      restore();
     } else {
       console.error(e);
       fail("مشكلة في الاتصال: " + e.message);
@@ -1799,10 +1378,12 @@ async function send(raw) {
 function openImageViewer(src) {
   const overlay = document.createElement("div");
   overlay.className = "img-viewer";
-  overlay.innerHTML = `<button class="close">✕</button><img src="${src}" alt="">`;
-  overlay.onclick = (e) => {
-    if (e.target === overlay || e.target.classList.contains("close")) overlay.remove();
-  };
+  const close = document.createElement("button");
+  close.className = "close"; close.textContent = "✕";
+  const im = document.createElement("img");
+  im.src = src; im.alt = "";
+  overlay.append(close, im);
+  overlay.onclick = (e) => { if (e.target === overlay || e.target === close) overlay.remove(); };
   document.body.appendChild(overlay);
   requestAnimationFrame(() => overlay.classList.add("show"));
 }
@@ -1810,22 +1391,14 @@ function openImageViewer(src) {
 // ===================== Theme =====================
 function applyTheme() {
   document.body.setAttribute("data-theme", theme);
-  const glowColors = {
-    dark: [227,168,75], light: [184,134,11], ocean: [34,211,238],
-    forest: [52,211,153], royal: [192,132,252], sunset: [251,113,133]
-  };
+  const glowColors = { dark: [227,168,75], light: [184,134,11], ocean: [34,211,238], forest: [52,211,153], royal: [192,132,252], sunset: [251,113,133] };
   const [r, g, b] = glowColors[theme] || glowColors.dark;
   const alpha = (glowLevel / 100).toFixed(2);
-  document.documentElement.style.setProperty("--glow", `rgba(${r}, ${g}, ${b}, ${alpha})`);
-  document.documentElement.style.setProperty("--glow-soft", `rgba(${r}, ${g}, ${b}, ${(alpha * 0.3).toFixed(2)})`);
-
-  const hljsTheme = $("hljsTheme");
-  if (hljsTheme) {
-    const isLight = theme === "light";
-    hljsTheme.href = isLight
-      ? "https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-light.min.css"
-      : "https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-dark.min.css";
-  }
+  const root = document.documentElement.style;
+  root.setProperty("--glow", `rgba(${r}, ${g}, ${b}, ${alpha})`);
+  root.setProperty("--glow-soft", `rgba(${r}, ${g}, ${b}, ${(alpha * 0.3).toFixed(2)})`);
+  const hl = $("hljsTheme");
+  if (hl) hl.href = "https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-" + (theme === "light" ? "light" : "dark") + ".min.css";
 }
 
 // ===================== Personas & Presets =====================
@@ -1840,7 +1413,6 @@ function buildPersonaList() {
     list.appendChild(btn);
   });
 }
-
 function buildPresetList() {
   const list = $("presetList");
   list.innerHTML = "";
@@ -1848,13 +1420,10 @@ function buildPresetList() {
     const btn = document.createElement("button");
     btn.className = "preset-btn";
     btn.innerHTML = `<strong>${escapeHtml(name)}</strong><small>${escapeHtml(text.slice(0, 70))}...</small>`;
-    btn.onclick = () => {
-      input.value = text; autoGrow(); closeSettings(); input.focus();
-    };
+    btn.onclick = () => { input.value = text; autoGrow(); closeSettings(); input.focus(); };
     list.appendChild(btn);
   });
 }
-
 function buildThemeDots() {
   document.querySelectorAll(".theme-dot").forEach(dot => {
     dot.classList.toggle("active", dot.dataset.t === theme);
@@ -1872,160 +1441,134 @@ function buildThemeDots() {
 function buildStats() {
   const userMsgs = messages.filter(m => m.role === "user").length;
   const aiMsgs = messages.filter(m => m.role === "assistant").length;
-  let imgCount = 0;
-  const totalChars = messages.reduce((s, m) => {
-    if (typeof m.content === "string") return s + m.content.length;
-    if (Array.isArray(m.content)) {
-      imgCount += m.content.filter(c => c.type === "image_url").length;
-      return s + m.content.filter(c => c.type === "text").reduce((a, c) => a + c.text.length, 0);
-    }
-    return s;
-  }, 0);
-  const estTokens = Math.round(totalChars / 3.5) + imgCount * 850;
-  const statsGrid = $("statsGrid");
-  if (statsGrid) {
-    statsGrid.innerHTML = `
-      <div class="stat-card"><div class="val">${userMsgs}</div><div class="lbl">رسائل المستخدم</div></div>
-      <div class="stat-card"><div class="val">${aiMsgs}</div><div class="lbl">ردود ROSTO</div></div>
-      <div class="stat-card"><div class="val">${imgCount}</div><div class="lbl">صور مُرسلة</div></div>
-      <div class="stat-card"><div class="val">~${estTokens.toLocaleString()}</div><div class="lbl">توكن تقديري</div></div>
-    `;
-  }
+  let imgCount = 0, chars = 0, real = 0;
+  messages.forEach(m => {
+    chars += msgText(m).length;
+    imgCount += msgImgs(m).length;
+    real += m.usage?.t || 0;
+  });
+  const est = Math.round(chars / 3.5) + imgCount * 850;
+  $("statsGrid").innerHTML = `
+    <div class="stat-card"><div class="val">${userMsgs}</div><div class="lbl">رسائل المستخدم</div></div>
+    <div class="stat-card"><div class="val">${aiMsgs}</div><div class="lbl">ردود ROSTO</div></div>
+    <div class="stat-card"><div class="val">${imgCount}</div><div class="lbl">صور مُرسلة</div></div>
+    <div class="stat-card"><div class="val">${real ? real.toLocaleString() : "~" + est.toLocaleString()}</div><div class="lbl">${real ? "توكن فعلي (من Groq)" : "توكن تقديري"}</div></div>`;
 }
 
 // ===================== Export =====================
-window.exportChat = function(format = "txt") {
+window.exportChat = function (format = "txt") {
   if (!messages.length) return toast("لا توجد رسائل");
+  const textOf = (m) => {
+    const n = msgImgs(m).length;
+    return msgText(m) + (n ? `\n[${n} صورة مرفقة]` : "");
+  };
   let content, mime, ext;
-
   if (format === "json") {
-    content = JSON.stringify({
-      app: "ROSTO DEV",
-      date: new Date().toISOString(),
-      model: model,
-      messages: messages
-    }, null, 2);
+    content = JSON.stringify({ app: "ROSTO DEV", date: new Date().toISOString(), model, messages: messages.map(sanitizeForStorage) }, null, 2);
     mime = "application/json"; ext = "json";
   } else if (format === "md") {
     content = `# ROSTO DEV — محادثة\n\n**الموديل:** ${model}  \n**التاريخ:** ${new Date().toLocaleString("ar-EG")}\n\n---\n\n`;
-    content += messages.map(m => {
-      const role = m.role === "user" ? "## 👤 أنت" : "## 💬 ROSTO";
-      let text = "";
-      if (typeof m.content === "string") text = m.content;
-      else if (Array.isArray(m.content)) {
-        const tp = m.content.find(c => c.type === "text");
-        const ip = m.content.filter(c => c.type === "image_url").length;
-        text = (tp?.text || "") + (ip ? `\n\n> [${ip} صورة مرفقة]` : "");
-      }
-      return `${role}\n\n${text}\n\n---\n`;
-    }).join("\n");
+    content += messages.map(m => `${m.role === "user" ? "## 👤 أنت" : "## 💬 ROSTO"}\n\n${textOf(m)}\n\n---\n`).join("\n");
     mime = "text/markdown;charset=utf-8"; ext = "md";
   } else {
     content = `ROSTO DEV — تصدير محادثة\nالموديل: ${model}\nالتاريخ: ${new Date().toLocaleString("ar-EG")}\n${"═".repeat(50)}\n\n`;
-    content += messages.map(m => {
-      const role = m.role === "user" ? "👤 أنت" : "💬 ROSTO";
-      let text = "";
-      if (typeof m.content === "string") text = m.content;
-      else if (Array.isArray(m.content)) {
-        const tp = m.content.find(c => c.type === "text");
-        const ip = m.content.filter(c => c.type === "image_url").length;
-        text = (tp?.text || "") + (ip ? `\n[${ip} صورة مرفقة]` : "");
-      }
-      return `${role}:\n${text}\n${"─".repeat(50)}\n`;
-    }).join("\n");
+    content += messages.map(m => `${m.role === "user" ? "👤 أنت" : "💬 ROSTO"}:\n${textOf(m)}\n${"─".repeat(50)}\n`).join("\n");
     mime = "text/plain;charset=utf-8"; ext = "txt";
   }
-
-  const blob = new Blob([content], { type: mime });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `rosto-chat-${Date.now()}.${ext}`;
-  a.click();
-  URL.revokeObjectURL(url);
+  download(content, mime, `rosto-chat-${Date.now()}.${ext}`);
   toast("✅ تم التصدير");
 };
 
-$("exportBtn").onclick = () => {
-  if (!messages.length) return toast("لا توجد رسائل");
-  exportChat("txt");
-};
-
-// ===================== Backup All =====================
-async function backupAll() {
-  const data = {
-    version: 1,
-    date: new Date().toISOString(),
-    sessions: Sessions.all(),
-    current: Sessions.current(),
-    settings: {
-      model, systemPrompt, ttsEnabled, autoSend, streamEnabled,
-      animEnabled, autoVision, compressOn, theme, glowLevel, temperature,
-      maxTokens, topP, freqPenalty, presPenalty, maxHistory,
-      imgQuality, imgMaxDim, markdownPro, retryEnabled, reasoningEnabled, rpmLimit
-    }
-  };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
+function download(content, mime, name) {
+  const url = URL.createObjectURL(new Blob([content], { type: mime }));
   const a = document.createElement("a");
-  a.href = url;
-  a.download = `rosto-backup-${Date.now()}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+$("exportBtn").onclick = () => exportChat("txt");
+
+// ===================== Backup / Restore =====================
+const SETTING_KEYS = {
+  model: "model", systemPrompt: "system", ttsEnabled: "tts", autoSend: "autosend", streamEnabled: "stream",
+  animEnabled: "anim", autoVision: "autovision", compressOn: "compress", markdownPro: "mdpro",
+  retryEnabled: "retry", reasoningEnabled: "reasoning", theme: "theme", glowLevel: "glow",
+  temperature: "temp", maxTokens: "maxtok", topP: "topp", freqPenalty: "freq", presPenalty: "pres",
+  maxHistory: "hist", imgQuality: "imgq", imgMaxDim: "imgdim", rpmLimit: "rpm"
+};
+function backupAll() {
+  const data = {
+    version: 2, date: new Date().toISOString(),
+    sessions: Sessions.all(), current: Sessions.current(),
+    settings: { model, systemPrompt, ttsEnabled, autoSend, streamEnabled, animEnabled, autoVision, compressOn, theme, glowLevel,
+      temperature, maxTokens, topP, freqPenalty, presPenalty, maxHistory, imgQuality, imgMaxDim, markdownPro, retryEnabled, reasoningEnabled, rpmLimit }
+  };
+  download(JSON.stringify(data, null, 2), "application/json", `rosto-backup-${Date.now()}.json`);
   toast("💾 تم إنشاء النسخة");
 }
-
 async function restoreAll(file) {
   try {
-    const text = await file.text();
-    const data = JSON.parse(text);
-    if (!data.sessions) throw new Error("ملف غير صالح");
+    const data = JSON.parse(await file.text());
+    if (!data.sessions || typeof data.sessions !== "object") throw new Error("ملف غير صالح");
+    if (!confirm("الاستعادة هتستبدل كل الجلسات الحالية. متأكد؟")) return;
     Sessions.save(data.sessions);
-    if (data.current) store.set(Sessions.CURRENT, data.current);
-    if (data.settings) {
-      const s = data.settings;
-      Object.entries(s).forEach(([k, v]) => {
-        if (v === undefined) return;
-        store.set("rosto_" + k.replace(/[A-Z]/g, c => c.toLowerCase()), typeof v === "boolean" ? (v ? "1" : "0") : String(v));
-      });
-    }
+    if (data.current && data.sessions[data.current]) store.set(Sessions.CURRENT, data.current);
+    Object.entries(data.settings || {}).forEach(([k, v]) => {
+      const sk = SETTING_KEYS[k];
+      if (!sk || v === undefined || v === null) return;
+      store.set("rosto_" + sk, typeof v === "boolean" ? (v ? "1" : "0") : String(v));
+    });
     toast("✅ تم الاستعادة — إعادة تحميل…");
     setTimeout(() => location.reload(), 800);
-  } catch (e) {
-    toast("❌ فشل: " + e.message);
-  }
+  } catch (e) { toast("❌ فشل: " + e.message); }
 }
+
+// ===================== الموديلات (قائمة حيّة من Groq) =====================
+async function loadModels(silent = true) {
+  if (!apiKey) return;
+  try {
+    const r = await fetch(MODELS_URL, { headers: { Authorization: "Bearer " + apiKey } });
+    if (!r.ok) throw new Error(r.status);
+    const { data } = await r.json();
+    const list = (data || [])
+      .filter(m => m.active !== false && !/whisper|tts|guard|orpheus|playai|distil-whisper/i.test(m.id))
+      .sort((a, b) => a.id.localeCompare(b.id));
+    if (!list.length) return;
+    const sel = $("modelSelect");
+    sel.innerHTML = "";
+    list.forEach(m => {
+      const o = document.createElement("option");
+      o.value = m.id;
+      o.textContent = (isVisionModel(m.id) ? "🖼 " : REASONING_MODELS.test(m.id) ? "🧠 " : "") + m.id;
+      sel.appendChild(o);
+    });
+    if (!list.some(m => m.id === model)) {
+      const o = document.createElement("option");
+      o.value = model; o.textContent = model + " (غير متاح؟)";
+      sel.prepend(o);
+    }
+    sel.value = model;
+    if (!silent) toast(`✅ ${list.length} موديل متاح`);
+  } catch (e) { if (!silent) toast("❌ فشل تحميل الموديلات"); }
+}
+$("reloadModels").onclick = () => loadModels(false);
 
 // ===================== Settings =====================
 function openSettings() {
   $("keyInput").value = apiKey;
   $("modelInput").value = model;
   $("systemInput").value = systemPrompt;
-  $("ttsToggle").checked = ttsEnabled;
-  $("autoSendToggle").checked = autoSend;
-  $("streamToggle").checked = streamEnabled;
-  $("animToggle").checked = animEnabled;
-  $("autoVisionToggle").checked = autoVision;
-  $("compressToggle").checked = compressOn;
-  $("markdownProToggle").checked = markdownPro;
-  $("retryToggle").checked = retryEnabled;
-  $("reasoningToggle").checked = reasoningEnabled;
-  $("tempRange").value = temperature; $("tempVal").textContent = temperature;
-  $("maxTokRange").value = maxTokens; $("maxTokVal").textContent = maxTokens;
-  $("topPRange").value = topP; $("topPVal").textContent = topP;
-  $("freqRange").value = freqPenalty; $("freqVal").textContent = freqPenalty;
-  $("presRange").value = presPenalty; $("presVal").textContent = presPenalty;
-  $("histRange").value = maxHistory; $("histVal").textContent = maxHistory;
-  $("imgQRange").value = imgQuality; $("imgQVal").textContent = imgQuality;
-  $("imgDimRange").value = imgMaxDim; $("imgDimVal").textContent = imgMaxDim;
-  $("rpmRange").value = rpmLimit; $("rpmVal").textContent = rpmLimit;
+  const T = { ttsToggle: ttsEnabled, autoSendToggle: autoSend, streamToggle: streamEnabled, animToggle: animEnabled,
+    autoVisionToggle: autoVision, compressToggle: compressOn, markdownProToggle: markdownPro, retryToggle: retryEnabled, reasoningToggle: reasoningEnabled };
+  Object.entries(T).forEach(([id, v]) => $(id).checked = v);
+  const R = { temp: temperature, maxTok: maxTokens, topP, freq: freqPenalty, pres: presPenalty, hist: maxHistory, imgQ: imgQuality, imgDim: imgMaxDim, rpm: rpmLimit };
+  Object.entries(R).forEach(([k, v]) => { $(k + "Range").value = v; $(k + "Val").textContent = v; });
   $("glowRange").value = glowLevel;
   $("modelSelect").value = model;
   $("settings").classList.add("open");
   buildThemeDots();
   buildStats();
 }
-
 function closeSettings() { $("settings").classList.remove("open"); }
 
 $("openSettings").onclick = openSettings;
@@ -2034,10 +1577,8 @@ $("settings").onclick = (e) => { if (e.target.id === "settings") closeSettings()
 
 $("saveSettings").onclick = async () => {
   const newKey = $("keyInput").value.trim();
-  if (newKey !== apiKey) {
-    await saveSecureKey(newKey);
-    apiKey = newKey;
-  }
+  const keyChanged = newKey !== apiKey;
+  if (keyChanged) { await saveSecureKey(newKey); apiKey = newKey; }
   model = $("modelInput").value.trim() || $("modelSelect").value || DEFAULT_MODEL;
   systemPrompt = $("systemInput").value.trim() || DEFAULT_SYSTEM;
   ttsEnabled = $("ttsToggle").checked;
@@ -2059,59 +1600,33 @@ $("saveSettings").onclick = async () => {
   imgMaxDim = parseInt($("imgDimRange").value);
   rpmLimit = parseInt($("rpmRange").value);
   glowLevel = parseInt($("glowRange").value);
-
   limiter.setRpm(rpmLimit);
 
-  store.set("rosto_model", model);
-  store.set("rosto_system", systemPrompt);
-  store.set("rosto_tts", ttsEnabled ? "1" : "0");
-  store.set("rosto_autosend", autoSend ? "1" : "0");
-  store.set("rosto_stream", streamEnabled ? "1" : "0");
-  store.set("rosto_anim", animEnabled ? "1" : "0");
-  store.set("rosto_autovision", autoVision ? "1" : "0");
-  store.set("rosto_compress", compressOn ? "1" : "0");
-  store.set("rosto_mdpro", markdownPro ? "1" : "0");
-  store.set("rosto_retry", retryEnabled ? "1" : "0");
-  store.set("rosto_reasoning", reasoningEnabled ? "1" : "0");
-  store.set("rosto_temp", temperature);
-  store.set("rosto_maxtok", maxTokens);
-  store.set("rosto_topp", topP);
-  store.set("rosto_freq", freqPenalty);
-  store.set("rosto_pres", presPenalty);
-  store.set("rosto_hist", maxHistory);
-  store.set("rosto_imgq", imgQuality);
-  store.set("rosto_imgdim", imgMaxDim);
-  store.set("rosto_rpm", rpmLimit);
-  store.set("rosto_glow", glowLevel);
+  const S = { model, system: systemPrompt, tts: ttsEnabled ? "1" : "0", autosend: autoSend ? "1" : "0", stream: streamEnabled ? "1" : "0",
+    anim: animEnabled ? "1" : "0", autovision: autoVision ? "1" : "0", compress: compressOn ? "1" : "0", mdpro: markdownPro ? "1" : "0",
+    retry: retryEnabled ? "1" : "0", reasoning: reasoningEnabled ? "1" : "0", temp: temperature, maxtok: maxTokens, topp: topP,
+    freq: freqPenalty, pres: presPenalty, hist: maxHistory, imgq: imgQuality, imgdim: imgMaxDim, rpm: rpmLimit, glow: glowLevel };
+  Object.entries(S).forEach(([k, v]) => store.set("rosto_" + k, v));
 
   applyTheme();
   closeSettings();
+  restore();
   toast("تم الحفظ ✅");
+  if (keyChanged) loadModels();
 };
 
-$("clearAll").onclick = () => {
-  if (!confirm("مسح كل شيء؟ (المحادثات + الإعدادات)")) return;
-  const keys = [
-    "rosto_chat","rosto_key","rosto_key_enc","rosto_salt","rosto_model","rosto_system",
-    "rosto_tts","rosto_autosend","rosto_stream","rosto_theme","rosto_temp",
-    "rosto_maxtok","rosto_topp","rosto_freq","rosto_pres","rosto_hist",
-    "rosto_anim","rosto_glow","rosto_draft","rosto_stars",
-    "rosto_autovision","rosto_compress","rosto_imgq","rosto_imgdim",
-    "rosto_mdpro","rosto_retry","rosto_reasoning","rosto_rpm",
-    "rosto_sessions","rosto_current_session"
-  ];
-  keys.forEach(store.del);
-  location.reload();
-};
+function clearEverything() {
+  if (!confirm("مسح كل شيء؟ (المحادثات + الإعدادات + المفتاح)")) return;
+  try {
+    Object.keys(localStorage).filter(k => k.startsWith("rosto_")).forEach(k => localStorage.removeItem(k));
+  } catch {}
+  idb.clear().finally(() => location.reload());
+}
 
 $("backupAllBtn").onclick = backupAll;
 $("restoreAllBtn").onclick = () => $("restoreFile").click();
-$("restoreFile").onchange = (e) => {
-  if (e.target.files[0]) restoreAll(e.target.files[0]);
-  e.target.value = "";
-};
-$("clearAllBtn").onclick = () => $("clearAll").click();
-
+$("restoreFile").onchange = (e) => { if (e.target.files[0]) restoreAll(e.target.files[0]); e.target.value = ""; };
+$("clearAllBtn").onclick = clearEverything;
 $("modelSelect").onchange = (e) => { $("modelInput").value = e.target.value; };
 
 document.querySelectorAll(".tab").forEach(tab => {
@@ -2125,69 +1640,46 @@ document.querySelectorAll(".tab").forEach(tab => {
   };
 });
 
-$("tempRange").oninput = (e) => $("tempVal").textContent = e.target.value;
-$("maxTokRange").oninput = (e) => $("maxTokVal").textContent = e.target.value;
-$("topPRange").oninput = (e) => $("topPVal").textContent = e.target.value;
-$("freqRange").oninput = (e) => $("freqVal").textContent = e.target.value;
-$("presRange").oninput = (e) => $("presVal").textContent = e.target.value;
-$("histRange").oninput = (e) => $("histVal").textContent = e.target.value;
-$("imgQRange").oninput = (e) => $("imgQVal").textContent = e.target.value;
-$("imgDimRange").oninput = (e) => $("imgDimVal").textContent = e.target.value;
-$("rpmRange").oninput = (e) => $("rpmVal").textContent = e.target.value;
+[["temp", "tempRange"], ["maxTok", "maxTokRange"], ["topP", "topPRange"], ["freq", "freqRange"], ["pres", "presRange"],
+ ["hist", "histRange"], ["imgQ", "imgQRange"], ["imgDim", "imgDimRange"], ["rpm", "rpmRange"]]
+  .forEach(([k, id]) => { $(id).oninput = (e) => $(k + "Val").textContent = e.target.value; });
 $("glowRange").oninput = (e) => { glowLevel = parseInt(e.target.value); applyTheme(); };
 
 $("themeToggle").onclick = () => {
   const themes = ["dark", "light", "ocean", "forest", "royal", "sunset"];
-  const idx = themes.indexOf(theme);
-  theme = themes[(idx + 1) % themes.length];
+  theme = themes[(themes.indexOf(theme) + 1) % themes.length];
   store.set("rosto_theme", theme);
   applyTheme();
   toast("🎨 " + theme);
 };
-
 $("micBtn").onclick = () => isRecording ? stopRecording() : startRecording();
 
 // ============ مرفقات ============
 $("attachBtn").onclick = () => $("fileInput").click();
 $("fileInput").onchange = async (e) => { await attachImages(e.target.files); e.target.value = ""; };
-
 let attachPressTimer;
-$("attachBtn").addEventListener("touchstart", () => {
-  attachPressTimer = setTimeout(() => $("cameraInput").click(), 600);
-});
+$("attachBtn").addEventListener("touchstart", () => { attachPressTimer = setTimeout(() => $("cameraInput").click(), 600); }, { passive: true });
 $("attachBtn").addEventListener("touchend", () => clearTimeout(attachPressTimer));
-$("attachBtn").addEventListener("touchmove", () => clearTimeout(attachPressTimer));
+$("attachBtn").addEventListener("touchmove", () => clearTimeout(attachPressTimer), { passive: true });
 $("cameraInput").onchange = async (e) => { await attachImages(e.target.files); e.target.value = ""; };
 
-// ============ Drag & Drop ============
-["dragenter", "dragover"].forEach(evt => {
-  composer.addEventListener(evt, (e) => {
-    e.preventDefault(); e.stopPropagation();
-    if (e.dataTransfer?.types?.includes("Files")) composer.classList.add("drag-over");
-  });
-});
-["dragleave", "drop"].forEach(evt => {
-  composer.addEventListener(evt, (e) => {
-    e.preventDefault(); e.stopPropagation();
-    if (evt === "drop" && e.dataTransfer?.files?.length) attachImages(e.dataTransfer.files);
-    composer.classList.remove("drag-over");
-  });
-});
+["dragenter", "dragover"].forEach(evt => composer.addEventListener(evt, (e) => {
+  e.preventDefault(); e.stopPropagation();
+  if (e.dataTransfer?.types?.includes("Files")) composer.classList.add("drag-over");
+}));
+["dragleave", "drop"].forEach(evt => composer.addEventListener(evt, (e) => {
+  e.preventDefault(); e.stopPropagation();
+  if (evt === "drop" && e.dataTransfer?.files?.length) attachImages(e.dataTransfer.files);
+  composer.classList.remove("drag-over");
+}));
 
-// ============ Paste ============
 document.addEventListener("paste", async (e) => {
   if (!e.clipboardData) return;
-  const items = [...e.clipboardData.items];
-  const imageFiles = items.filter(it => it.type.startsWith("image/"))
-    .map(it => it.getAsFile()).filter(Boolean);
-  if (imageFiles.length) {
-    e.preventDefault();
-    await attachImages(imageFiles);
-    toast(`📎 تم لصق ${imageFiles.length} صورة`);
-  }
+  const files = [...e.clipboardData.items].filter(it => it.type.startsWith("image/")).map(it => it.getAsFile()).filter(Boolean);
+  if (files.length) { e.preventDefault(); await attachImages(files); toast(`📎 تم لصق ${files.length} صورة`); }
 });
 
-$("newChat").onclick = () => {
+function newChat() {
   if (controller) controller.abort();
   if (messages.length) saveChat();
   Sessions.create();
@@ -2198,159 +1690,112 @@ $("newChat").onclick = () => {
   store.del("rosto_draft");
   showEmpty();
   toast("✨ محادثة جديدة");
-};
+}
+$("newChat").onclick = newChat;
 
-sendBtn.onclick = () => {
-  if (controller) controller.abort();
-  else send(input.value);
-};
+sendBtn.onclick = () => { if (controller) controller.abort(); else send(input.value); };
 
-// ===================== Draft Auto-save =====================
 input.addEventListener("input", () => {
   autoGrow();
   clearTimeout(draftTimer);
   draftTimer = setTimeout(() => {
-    if (input.value.trim()) store.set("rosto_draft", input.value);
-    else store.del("rosto_draft");
+    if (input.value.trim()) store.set("rosto_draft", input.value); else store.del("rosto_draft");
   }, 500);
 });
-
 input.addEventListener("keydown", (e) => {
   const desktop = window.matchMedia("(pointer: fine)").matches;
-  if (e.key === "Enter" && !e.shiftKey && desktop) {
-    e.preventDefault();
-    send(input.value);
-  }
+  if (e.key === "Enter" && !e.shiftKey && !e.isComposing && desktop) { e.preventDefault(); send(input.value); }
 });
 
 // ===================== Search =====================
-$("searchBtn").onclick = () => {
-  $("searchOverlay").classList.add("open");
-  setTimeout(() => $("searchInput").focus(), 100);
-};
-
+$("searchBtn").onclick = () => { $("searchOverlay").classList.add("open"); setTimeout(() => $("searchInput").focus(), 100); };
+$("closeSearch").onclick = () => $("searchOverlay").classList.remove("open");
 $("searchInput").oninput = (e) => {
   const q = e.target.value.trim().toLowerCase();
   const box = $("searchResults");
-  if (!q) { box.innerHTML = ""; return; }
-
-  const results = messages
-    .map((m, i) => ({ ...m, idx: i }))
-    .filter(m => {
-      const txt = typeof m.content === "string" ? m.content :
-        Array.isArray(m.content) ? m.content.filter(c => c.type === "text").map(c => c.text).join(" ") : "";
-      return txt.toLowerCase().includes(q);
-    });
-
-  if (!results.length) {
-    box.innerHTML = '<p style="color:var(--muted);text-align:center">لا نتائج</p>';
-    return;
-  }
-
-  box.innerHTML = results.map(r => {
-    const txt = typeof r.content === "string" ? r.content :
-      Array.isArray(r.content) ? r.content.filter(c => c.type === "text").map(c => c.text).join(" ") : "";
-    const snippet = txt.length > 200 ? txt.slice(0, 200) + "…" : txt;
-    const roleClass = r.role === "user" ? "role-user" : "role-ai";
-    const roleLabel = r.role === "user" ? "أنت" : "ROSTO";
-    const highlighted = escapeHtml(snippet).replace(
-      new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, "gi"),
-      '<mark>$1</mark>'
-    );
-    return `<div class="search-result-item" onclick="jumpToMsg(${r.idx})">
-      <span class="role-badge ${roleClass}">${roleLabel}</span>
-      <span style="color:var(--muted);font-size:11px">#${r.idx + 1}</span>
-      <div style="margin-top:5px">${highlighted}</div>
-    </div>`;
-  }).join("");
+  box.innerHTML = "";
+  if (!q) return;
+  const results = messages.map((m, i) => ({ m, idx: i })).filter(({ m }) => msgText(m).toLowerCase().includes(q));
+  if (!results.length) { box.innerHTML = '<p style="color:var(--muted);text-align:center">لا نتائج</p>'; return; }
+  const re = new RegExp("(" + q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")", "gi");
+  results.forEach(({ m, idx }) => {
+    const txt = msgText(m);
+    const pos = Math.max(0, txt.toLowerCase().indexOf(q) - 60);
+    const snippet = (pos > 0 ? "…" : "") + txt.slice(pos, pos + 200) + (txt.length > pos + 200 ? "…" : "");
+    const item = document.createElement("div");
+    item.className = "search-result-item";
+    item.innerHTML = `<span class="role-badge ${m.role === "user" ? "role-user" : "role-ai"}">${m.role === "user" ? "أنت" : "ROSTO"}</span>
+      <span style="color:var(--muted);font-size:11px">#${idx + 1}</span>
+      <div style="margin-top:5px">${escapeHtml(snippet).replace(re, "<mark>$1</mark>")}</div>`;
+    item.onclick = () => jumpToMsg(idx);
+    box.appendChild(item);
+  });
 };
-
-window.jumpToMsg = (idx) => {
-  const bubbles = chat.querySelectorAll(".msg");
-  if (bubbles[idx]) {
-    bubbles[idx].scrollIntoView({ behavior: "smooth", block: "center" });
-    bubbles[idx].style.animation = "none";
-    void bubbles[idx].offsetHeight;
-    bubbles[idx].style.animation = "pulseHighlight 1.5s ease";
-    $("searchOverlay").classList.remove("open");
-  }
-};
+function jumpToMsg(idx) {
+  const b = chat.querySelector(`.msg[data-idx="${idx}"]`);
+  if (!b) return;
+  $("searchOverlay").classList.remove("open");
+  b.scrollIntoView({ behavior: "smooth", block: "center" });
+  b.style.animation = "none"; void b.offsetHeight;
+  b.style.animation = "pulseHighlight 1.5s ease";
+}
 
 // ===================== Sessions UI =====================
 $("sessionsBtn").onclick = showSessions;
-
 function showSessions() {
   const overlay = document.createElement("div");
   overlay.className = "overlay open";
   overlay.innerHTML = `
     <div class="sheet">
       <h3>📚 المحادثات</h3>
-      <button class="preset-btn" id="newSessionBtn" 
-        style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--accent-ink);border:0">
+      <button class="preset-btn" id="newSessionBtn" style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--accent-ink);border:0">
         <strong style="color:var(--accent-ink)">+ محادثة جديدة</strong>
       </button>
       <div id="sessionList" style="margin-top:10px"></div>
-      <div class="row">
-        <button class="ghost" onclick="this.closest('.overlay').remove()">إغلاق</button>
-      </div>
+      <div class="row"><button class="ghost" id="closeSessions">إغلاق</button></div>
     </div>`;
   document.body.appendChild(overlay);
-
+  overlay.querySelector("#closeSessions").onclick = () => overlay.remove();
   const box = overlay.querySelector("#sessionList");
-  const render = () => {
+
+  const draw = () => {
     const list = Sessions.list();
     const current = Sessions.current();
     box.innerHTML = list.map(s => {
-      const isCurrent = s.id === current;
-      return `<div class="search-result-item" data-sid="${s.id}"
-        style="${isCurrent ? 'border-color:var(--accent);box-shadow:0 0 0 2px var(--glow)' : ''}">
+      const isCur = s.id === current;
+      return `<div class="search-result-item" data-sid="${s.id}" style="${isCur ? "border-color:var(--accent);box-shadow:0 0 0 2px var(--glow)" : ""}">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-          <strong style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-            ${s.pinned ? "📌 " : ""}${escapeHtml(s.name)}
-          </strong>
+          <strong style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.pinned === true ? "📌 " : ""}${escapeHtml(s.name)}</strong>
           <div style="display:flex;gap:4px">
             <button class="ghost" data-act="pin" data-sid="${s.id}" style="padding:2px 8px">📌</button>
             <button class="ghost" data-act="rename" data-sid="${s.id}" style="padding:2px 8px">✏</button>
             <button class="ghost" data-act="del" data-sid="${s.id}" style="padding:2px 8px;color:var(--danger)">🗑</button>
           </div>
         </div>
-        <small style="color:var(--muted)">
-          ${(s.messages || []).length} رسالة • ${new Date(s.updatedAt).toLocaleDateString("ar-EG")}
-          ${isCurrent ? ' • <span style="color:var(--accent)">الحالية</span>' : ''}
-        </small>
+        <small style="color:var(--muted)">${(s.messages || []).length} رسالة • ${new Date(s.updatedAt).toLocaleDateString("ar-EG")}${isCur ? ' • <span style="color:var(--accent)">الحالية</span>' : ""}</small>
       </div>`;
     }).join("") || '<p style="color:var(--muted);text-align:center;padding:20px">مفيش محادثات محفوظة</p>';
   };
-  render();
+  draw();
 
-  overlay.querySelector("#newSessionBtn").onclick = () => {
-    if (messages.length) saveChat();
-    Sessions.create();
-    messages = [];
-    chat.innerHTML = "";
-    restore();
-    overlay.remove();
-    toast("✨ جلسة جديدة");
-  };
+  overlay.querySelector("#newSessionBtn").onclick = () => { overlay.remove(); newChat(); };
 
   box.onclick = (e) => {
     const actBtn = e.target.closest("[data-act]");
     if (actBtn) {
       e.stopPropagation();
-      const sid = actBtn.dataset.sid;
-      const act = actBtn.dataset.act;
-      if (act === "pin") { Sessions.pin(sid); render(); }
+      const { sid, act } = actBtn.dataset;
+      if (act === "pin") { Sessions.pin(sid); draw(); }
       else if (act === "rename") {
         const s = Sessions.all()[sid];
-        const newName = prompt("اسم جديد:", s.name);
-        if (newName) { Sessions.rename(sid, newName.slice(0, 60)); render(); }
-      } else if (act === "del") {
-        if (confirm("حذف الجلسة؟")) {
-          const wasCurrent = sid === Sessions.current();
-          Sessions.delete(sid);
-          if (wasCurrent) { messages = []; chat.innerHTML = ""; restore(); }
-          render();
-        }
+        const n = prompt("اسم جديد:", s.name);
+        if (n) { Sessions.rename(sid, n.slice(0, 60)); draw(); }
+      } else if (act === "del" && confirm("حذف الجلسة؟")) {
+        const wasCur = sid === Sessions.current();
+        if (wasCur && controller) controller.abort();
+        Sessions.delete(sid);
+        if (wasCur) { messages = (Sessions.all()[Sessions.current()]?.messages) || []; restore(); }
+        draw();
       }
       return;
     }
@@ -2363,142 +1808,93 @@ function showSessions() {
     overlay.remove();
     toast("✅ تم التبديل");
   };
-
   overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
 }
 
 // ===================== Command Palette =====================
 const COMMANDS = [
-  { id: "new",      label: "✨ محادثة جديدة",       keys: "Ctrl+Shift+N", run: () => $("newChat").click() },
-  { id: "sessions", label: "📚 قائمة الجلسات",       keys: "Ctrl+Shift+S", run: showSessions },
-  { id: "search",   label: "🔍 بحث في المحادثة",     keys: "Ctrl+F",       run: () => $("searchBtn").click() },
-  { id: "export",   label: "💾 تصدير TXT",           keys: "",             run: () => exportChat("txt") },
-  { id: "md",       label: "📝 تصدير Markdown",      keys: "",             run: () => exportChat("md") },
-  { id: "json",     label: "🗂 تصدير JSON",          keys: "",             run: () => exportChat("json") },
-  { id: "backup",   label: "💾 نسخة احتياطية كاملة",  keys: "",             run: backupAll },
-  { id: "settings", label: "⚙ الإعدادات",           keys: "",             run: openSettings },
-  { id: "theme",    label: "🎨 تغيير الثيم",          keys: "",             run: () => $("themeToggle").click() },
-  { id: "voice",    label: "🎤 بدء الإدخال الصوتي",   keys: "",             run: () => startRecording() },
-  { id: "attach",   label: "📎 إرفاق صور",            keys: "",             run: () => $("attachBtn").click() },
-  { id: "clear",    label: "🗑 مسح كل البيانات",      keys: "",             run: () => $("clearAll").click() },
+  { id: "new", label: "✨ محادثة جديدة", keys: "Ctrl+Shift+N", run: newChat },
+  { id: "sessions", label: "📚 قائمة الجلسات", keys: "Ctrl+Shift+S", run: showSessions },
+  { id: "search", label: "🔍 بحث في المحادثة", keys: "Ctrl+Shift+F", run: () => $("searchBtn").click() },
+  { id: "export", label: "💾 تصدير TXT", keys: "", run: () => exportChat("txt") },
+  { id: "md", label: "📝 تصدير Markdown", keys: "", run: () => exportChat("md") },
+  { id: "json", label: "🗂 تصدير JSON", keys: "", run: () => exportChat("json") },
+  { id: "backup", label: "💾 نسخة احتياطية كاملة", keys: "", run: backupAll },
+  { id: "models", label: "🔄 تحديث قائمة الموديلات", keys: "", run: () => loadModels(false) },
+  { id: "settings", label: "⚙ الإعدادات", keys: "Ctrl+,", run: openSettings },
+  { id: "theme", label: "🎨 تغيير الثيم", keys: "", run: () => $("themeToggle").click() },
+  { id: "voice", label: "🎤 بدء الإدخال الصوتي", keys: "", run: startRecording },
+  { id: "attach", label: "📎 إرفاق صور", keys: "", run: () => $("attachBtn").click() },
+  { id: "clear", label: "🗑 مسح كل البيانات", keys: "", run: clearEverything }
 ];
-
 function showCommandPalette() {
   const overlay = document.createElement("div");
   overlay.className = "overlay open";
   overlay.innerHTML = `
     <div class="sheet" style="max-width:520px">
       <h3 style="margin-bottom:10px">⌘ لوحة الأوامر</h3>
-      <input id="cmdInput" placeholder="اكتب أمر…" 
-        style="width:100%;background:var(--surface);border:1px solid var(--line);
-               border-radius:10px;padding:12px;font:inherit;color:var(--text);margin-bottom:10px">
+      <input id="cmdInput" placeholder="اكتب أمر…" style="width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;color:var(--text);margin-bottom:10px">
       <div id="cmdList" style="max-height:55dvh;overflow-y:auto"></div>
     </div>`;
   document.body.appendChild(overlay);
-
   const inp = overlay.querySelector("#cmdInput");
   const list = overlay.querySelector("#cmdList");
-  let selectedIdx = 0;
-  let filtered = [...COMMANDS];
-
-  function renderList() {
+  let sel = 0, filtered = [...COMMANDS];
+  const run = (c) => { overlay.remove(); c?.run(); };
+  function draw() {
     list.innerHTML = filtered.map((c, i) => `
-      <button class="cmd-item" data-cmd="${c.id}" style="${i === selectedIdx ? 'border-color:var(--accent)' : ''}">
-        <span>${c.label}</span>
-        ${c.keys ? `<span class="cmd-keys">${c.keys}</span>` : ""}
-      </button>
-    `).join("") || `<p style="color:var(--muted);text-align:center;padding:20px">لا نتائج</p>`;
-    list.querySelectorAll("[data-cmd]").forEach(b => {
-      b.onclick = () => {
-        COMMANDS.find(c => c.id === b.dataset.cmd)?.run();
-        overlay.remove();
-      };
-    });
+      <button class="cmd-item" data-cmd="${c.id}" style="${i === sel ? "border-color:var(--accent)" : ""}">
+        <span>${c.label}</span>${c.keys ? `<span class="cmd-keys">${c.keys}</span>` : ""}
+      </button>`).join("") || '<p style="color:var(--muted);text-align:center;padding:20px">لا نتائج</p>';
+    list.querySelectorAll("[data-cmd]").forEach(b => { b.onclick = () => run(COMMANDS.find(c => c.id === b.dataset.cmd)); });
   }
-
-  function filterList() {
+  inp.oninput = () => {
     const q = inp.value.toLowerCase().trim();
     filtered = COMMANDS.filter(c => c.label.toLowerCase().includes(q) || c.id.includes(q));
-    selectedIdx = 0;
-    renderList();
-  }
-
-  inp.oninput = filterList;
-  renderList();
+    sel = 0; draw();
+  };
+  draw();
   setTimeout(() => inp.focus(), 50);
-
   overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
-
   inp.onkeydown = (e) => {
     if (e.key === "Escape") overlay.remove();
-    else if (e.key === "ArrowDown") {
-      e.preventDefault();
-      selectedIdx = Math.min(selectedIdx + 1, filtered.length - 1);
-      renderList();
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      selectedIdx = Math.max(selectedIdx - 1, 0);
-      renderList();
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (filtered[selectedIdx]) {
-        filtered[selectedIdx].run();
-        overlay.remove();
-      }
-    }
+    else if (e.key === "ArrowDown") { e.preventDefault(); sel = Math.min(sel + 1, filtered.length - 1); draw(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); sel = Math.max(sel - 1, 0); draw(); }
+    else if (e.key === "Enter") { e.preventDefault(); run(filtered[sel]); }
   };
 }
-
 $("paletteBtn").onclick = showCommandPalette;
 
 // ===================== Keyboard Shortcuts =====================
 document.addEventListener("keydown", (e) => {
-  const isMac = navigator.platform.toLowerCase().includes("mac");
-  const mod = isMac ? e.metaKey : e.ctrlKey;
-
-  if (mod && e.key === "k") { e.preventDefault(); showCommandPalette(); }
-  else if (mod && e.shiftKey && e.key.toLowerCase() === "n") { e.preventDefault(); $("newChat").click(); }
-  else if (mod && e.shiftKey && e.key.toLowerCase() === "s") { e.preventDefault(); showSessions(); }
-  else if (mod && e.key === "f") { e.preventDefault(); $("searchBtn").click(); }
-  else if (mod && e.key === ",") { e.preventDefault(); openSettings(); }
+  const mod = navigator.platform.toLowerCase().includes("mac") ? e.metaKey : e.ctrlKey;
+  const k = e.key.toLowerCase();
+  if (mod && !e.shiftKey && k === "k") { e.preventDefault(); showCommandPalette(); }
+  else if (mod && e.shiftKey && k === "n") { e.preventDefault(); newChat(); }
+  else if (mod && e.shiftKey && k === "s") { e.preventDefault(); showSessions(); }
+  else if (mod && e.shiftKey && k === "f") { e.preventDefault(); $("searchBtn").click(); }
+  else if (mod && k === ",") { e.preventDefault(); openSettings(); }
   else if (e.key === "Escape") {
     $("searchOverlay").classList.remove("open");
     closeSettings();
-    document.querySelectorAll(".overlay.open").forEach(o => {
-      if (o.id !== "settings" && o.id !== "searchOverlay") o.remove();
-    });
+    document.querySelectorAll(".overlay.open").forEach(o => { if (o.id !== "settings" && o.id !== "searchOverlay") o.remove(); });
   }
 });
 
 // ===================== Init =====================
 (async function init() {
-  apiKey = await loadSecureKey();
-
-  const sid = Sessions.current();
-  const s = Sessions.all()[sid];
-  if (s?.messages?.length) {
-    messages = s.messages;
-  }
-
+  try { apiKey = await loadSecureKey(); } catch { apiKey = ""; }
+  const s = Sessions.all()[Sessions.current()];
+  if (s?.messages?.length) messages = s.messages;
   buildPersonaList();
   buildPresetList();
   buildThemeDots();
   applyTheme();
   restore();
-
   const draft = store.get("rosto_draft", "");
   if (draft) { input.value = draft; autoGrow(); }
-
-  if (!apiKey) {
-    setTimeout(() => {
-      toast("⚠ أضف مفتاح Groq من الإعدادات", 4000);
-      openSettings();
-    }, 800);
-  }
-
-  if ("serviceWorker" in navigator && location.protocol !== "file:") {
-    navigator.serviceWorker.register("./sw.js").catch(() => {});
-  }
+  if (apiKey) loadModels();
+  else setTimeout(() => { toast("⚠ أضف مفتاح Groq من الإعدادات", 4000); openSettings(); }, 800);
 })();
 </script>
 </body>
