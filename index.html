@@ -42,7 +42,6 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--ds-border); border-radius: 3px; }
 
-  /* Sidebar */
   .sidebar { width: 260px; background: var(--ds-sidebar); border-inline-end: 1px solid var(--ds-border); display: flex; flex-direction: column; flex-shrink: 0; transition: transform .3s cubic-bezier(.22,1,.36,1), margin .3s cubic-bezier(.22,1,.36,1); z-index: 20; }
   .sidebar.collapsed { margin-inline-start: -260px; }
   .sidebar-header { padding: 12px; display: flex; align-items: center; gap: 8px; }
@@ -75,7 +74,6 @@
   .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--ds-primary), #7C4DFF); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; }
   .user-name { font-size: 13px; font-weight: 500; }
 
-  /* Main */
   .main { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
   .topbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; padding-top: max(8px, env(safe-area-inset-top)); background: var(--ds-bg); z-index: 10; flex-shrink: 0; min-height: 56px; }
   .topbar-left, .topbar-right { display: flex; align-items: center; gap: 6px; }
@@ -100,7 +98,6 @@
   #chat { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 12px 0 24px; }
   .chat-inner { max-width: 820px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; gap: 26px; min-height: 100%; }
 
-  /* Welcome */
   .welcome { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 8px; text-align: center; }
   .welcome-logo { width: 72px; height: 72px; color: var(--ds-primary); margin-bottom: 18px; }
   .welcome-logo svg { width: 100%; height: 100%; }
@@ -113,7 +110,6 @@
   .suggestion-title { font-size: 14px; font-weight: 600; }
   .suggestion-desc { font-size: 12px; color: var(--ds-text-secondary); line-height: 1.5; }
 
-  /* Messages */
   .msg { display: flex; gap: 14px; width: 100%; animation: msgFadeIn .25s ease-out; }
   @keyframes msgFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
   .msg-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
@@ -127,7 +123,6 @@
   .msg-content { font-size: 15px; line-height: 1.8; overflow-wrap: anywhere; }
   .msg.user .msg-content { background: var(--ds-user-bubble); padding: 10px 16px; border-radius: 14px; display: inline-block; max-width: 100%; white-space: pre-wrap; }
 
-  /* DeepThink box */
   .reasoning { margin-bottom: 12px; font-size: 13px; }
   .reasoning summary { cursor: pointer; color: var(--ds-text-secondary); font-weight: 500; display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; list-style: none; user-select: none; background: var(--ds-bg-tertiary); border-radius: 18px; }
   .reasoning summary::-webkit-details-marker { display: none; }
@@ -138,7 +133,6 @@
   @keyframes pulse { 50% { opacity: .35; } }
   .reasoning-content { color: var(--ds-think-text); white-space: pre-wrap; line-height: 1.7; max-height: 320px; overflow-y: auto; margin-top: 8px; padding: 2px 14px 2px 0; border-inline-start: 2px solid var(--ds-border); padding-inline-start: 14px; font-size: 13px; }
 
-  /* Code */
   .msg-content code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .88em; background: var(--ds-code-bg); padding: 2px 6px; border-radius: 4px; direction: ltr; unicode-bidi: embed; color: #D63384; border: 1px solid var(--ds-border); }
   [data-theme="dark"] .msg-content code { color: #F08A7A; }
   .msg-content pre { direction: ltr; text-align: left; background: var(--ds-code-bg); border: 1px solid var(--ds-border); border-radius: 12px; padding: 14px 16px; margin: 12px 0; overflow-x: auto; line-height: 1.55; position: relative; font-size: 13px; }
@@ -157,7 +151,6 @@
   .msg-content hr { border: 0; border-top: 1px solid var(--ds-border); margin: 16px 0; }
   .msg-content p { margin: 6px 0; }
 
-  /* Message actions */
   .msg-actions { display: flex; gap: 2px; margin-top: 8px; flex-wrap: wrap; align-items: center; }
   .msg-actions button { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--ds-text-tertiary); }
   .msg-actions button:hover { background: var(--ds-bg-tertiary); color: var(--ds-text); }
@@ -171,12 +164,10 @@
   @keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0); opacity: .4; } 30% { transform: translateY(-6px); opacity: 1; } }
   .msg.error .msg-content { color: var(--ds-danger); background: rgba(239,68,68,.08); padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(239,68,68,.2); }
 
-  /* Generated image */
   .gen-fig { max-width: 420px; }
   .gen-fig img { width: 100%; border-radius: 14px; display: block; cursor: zoom-in; background: var(--ds-bg-tertiary); min-height: 120px; }
   .gen-cap { font-size: 12px; color: var(--ds-text-tertiary); margin-top: 6px; direction: ltr; text-align: left; }
 
-  /* Composer */
   .composer-wrap { padding: 8px 24px; padding-bottom: max(14px, env(safe-area-inset-bottom)); background: var(--ds-bg); flex-shrink: 0; }
   .composer-inner { max-width: 820px; margin: 0 auto; }
   .composer { background: var(--ds-bg-secondary); border: 1px solid var(--ds-border); border-radius: 24px; padding: 12px 14px; transition: all .2s; }
@@ -214,7 +205,6 @@
   .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 15; opacity: 0; pointer-events: none; transition: opacity .3s; }
   .sidebar-overlay.open { opacity: 1; pointer-events: auto; }
 
-  /* Modal */
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
   .modal-overlay.open { display: flex; }
   .modal { width: 100%; max-width: 560px; background: var(--ds-bg); border-radius: 18px; padding: 24px; max-height: 90dvh; overflow-y: auto; box-shadow: var(--ds-shadow-lg); }
@@ -388,8 +378,8 @@
 
     <div class="modal-tab-content active" id="t-general">
       <label>🔑 مفتاح Google Gemini API</label>
-      <input id="keyInput" type="password" placeholder="AQ.Ab8..." autocomplete="off" spellcheck="false">
-      <div class="hint">🔐 يُحفظ مشفّراً على جهازك فقط. احصل على مفتاح من <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--ds-primary)">Google AI Studio</a></div>
+      <input id="keyInput" type="password" placeholder="AIza..." autocomplete="off" spellcheck="false">
+      <div class="hint">🔐 احصل على مفتاح مجاني من <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--ds-primary)">Google AI Studio</a> — يبدأ بـ AIza</div>
       <label>🤖 الموديل
         <button id="reloadModels" style="padding:2px 8px;font-size:11px;color:var(--ds-primary);margin-inline-start:6px;background:var(--ds-primary-light);border-radius:6px">🔄 تحديث</button>
       </label>
@@ -475,10 +465,9 @@
 /* ═══════════════════════════════════════════════════════════════════
    إعدادات Google Gemini API
    ═══════════════════════════════════════════════════════════════════ */
-const GEMINI_API_KEY_BUILTIN = "AQ.Ab8RN6ImekXVvidAF4US_XSyCAYB5vh5CZWENDThQRJo_GXssg";
+const GEMINI_API_KEY_BUILTIN = "ضع_مفتاحك_هنا";
 
 const API_BASE = "https://generativelanguage.googleapis.com/v1beta";
-const KEY_PREFIX = "AQ.";
 
 const DEFAULT_MODEL = "gemini-2.5-flash";
 const DEFAULT_VISION = "gemini-2.5-flash";
@@ -1229,10 +1218,10 @@ function buildGeminiBody(useModel, history) {
 }
 
 function apiErrorText(status, detail) {
-  if (status === 400 && /API key not valid|API_KEY_INVALID/i.test(detail || "")) return "المفتاح غير صالح. تأكد من مفتاح Google AI Studio.";
-  if (status === 401 || status === 403) return "المفتاح غير مصرح أو منتهي. راجع الإعدادات.";
-  if (status === 429) return "تجاوزت حد الاستخدام، انتظر قليلاً.";
+  if (status === 400 && /API key not valid|API_KEY_INVALID/i.test(detail || "")) return "المفتاح غير صالح. تأكد من مفتاح Google AI Studio (يبدأ بـ AIza).";
+  if (status === 401 || status === 403) return "المفتاح غير مصرح أو منتهي. اعمل مفتاح جديد من aistudio.google.com/apikey";
   if (status === 404) return "الموديل غير موجود أو غير متاح لمفتاحك.";
+  if (status === 429) return "تجاوزت حد الاستخدام، انتظر قليلاً.";
   return "خطأ " + status + (detail ? ": " + detail : "");
 }
 
@@ -1599,28 +1588,25 @@ function buildModelMenu() {
     box.innerHTML = "";
     const q = menuFilter.trim().toLowerCase();
     const ids = availableModels.filter(id => !q || id.toLowerCase().includes(q));
-    [["موديلات Gemini", ids]].forEach(([label, arr]) => {
-      if (!arr.length) return;
-      const l = document.createElement("div");
-      l.className = "mm-label"; l.textContent = label;
-      box.appendChild(l);
-      arr.forEach(id => {
-        const b = document.createElement("button");
-        b.className = "mm-item" + (id === model ? " active" : "");
-        const tags = (isReasoningModel(id) ? '<span class="mm-tag">تفكير</span>' : "") + (isVisionModel(id) ? '<span class="mm-tag">رؤية</span>' : "");
-        b.innerHTML = `<span class="mm-name">${esc(id)}</span>${tags}`;
-        b.onclick = () => {
-          model = id;
-          store.set("rosto_model", model);
-          if (isVisionModel(id)) { visionModel = id; store.set("rosto_vision", id); }
-          updateModelBadge();
-          closeModelMenu();
-          toast("✓ " + shortModel(id));
-        };
-        box.appendChild(b);
-      });
+    if (!ids.length) { box.innerHTML = '<div class="mm-label">لا نتائج</div>'; return; }
+    const l = document.createElement("div");
+    l.className = "mm-label"; l.textContent = "موديلات Gemini";
+    box.appendChild(l);
+    ids.forEach(id => {
+      const b = document.createElement("button");
+      b.className = "mm-item" + (id === model ? " active" : "");
+      const tags = (isReasoningModel(id) ? '<span class="mm-tag">تفكير</span>' : "") + (isVisionModel(id) ? '<span class="mm-tag">رؤية</span>' : "");
+      b.innerHTML = `<span class="mm-name">${esc(id)}</span>${tags}`;
+      b.onclick = () => {
+        model = id;
+        store.set("rosto_model", model);
+        if (isVisionModel(id)) { visionModel = id; store.set("rosto_vision", id); }
+        updateModelBadge();
+        closeModelMenu();
+        toast("✓ " + shortModel(id));
+      };
+      box.appendChild(b);
     });
-    if (!box.firstChild) box.innerHTML = '<div class="mm-label">لا نتائج</div>';
   };
   inp.oninput = () => { menuFilter = inp.value; draw(); };
   draw();
@@ -1699,7 +1685,7 @@ function closeSidebar() { $("sidebar").classList.remove("open"); $("sidebarOverl
 
 /* ═══ الإعدادات ═══ */
 function openSettings() {
-  $("keyInput").value = apiKey.startsWith(KEY_PREFIX) ? apiKey : "";
+  $("keyInput").value = apiKey && apiKey.length > 20 ? apiKey : "";
   fillSelect($("modelSelect"), availableModels, model);
   fillSelect($("visionSelect"), availableModels.filter(isVisionModel).length ? availableModels.filter(isVisionModel) : [DEFAULT_VISION], visionModel);
   $("modelInput").value = "";
@@ -1970,8 +1956,9 @@ document.addEventListener("keydown", (e) => {
 (async function init() {
   let savedKey = "";
   try { savedKey = await loadSecureKey(); } catch {}
-  if (savedKey && savedKey.startsWith(KEY_PREFIX)) apiKey = savedKey;
-  else if (GEMINI_API_KEY_BUILTIN && GEMINI_API_KEY_BUILTIN !== "ضع_مفتاحك_هنا" && GEMINI_API_KEY_BUILTIN.startsWith(KEY_PREFIX)) {
+  // نقبل أي مفتاح طويل (AIza... أو غيره)
+  if (savedKey && savedKey.length > 20) apiKey = savedKey;
+  else if (GEMINI_API_KEY_BUILTIN && GEMINI_API_KEY_BUILTIN !== "ضع_مفتاحك_هنا" && GEMINI_API_KEY_BUILTIN.length > 20) {
     apiKey = GEMINI_API_KEY_BUILTIN;
     try { await saveSecureKey(apiKey); } catch {}
   }
@@ -1991,4 +1978,4 @@ document.addEventListener("keydown", (e) => {
 })();
 </script>
 </body>
-              </html>
+  </html>
