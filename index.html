@@ -479,10 +479,9 @@
 const THEHIVE_KEY_BUILTIN = "sk-bb2fc14011954e15864bbb4fbb545958";
 
 // الـ Base URL الرسمي
-const API_BASE = "https://api.thehive.ai/api/v3";
-
-// Chat endpoint (OpenAI-compatible)
-const CHAT_URL = API_BASE + "/chat/completions";
+cconst API_BASE = "https://corsproxy.io/?url=" + encodeURIComponent("https://api-cdn.thehive.ai/api/v3");
+  
+// Chat endpoint (OpenAI-compatible)const CHAT_URL = "https://corsproxy.io/?url=" + encodeURIComponent(API_BASE + "/chat/completions");
 
 // Image generation endpoints
 const IMAGE_ENDPOINTS = {
