@@ -317,7 +317,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
       </button>
       <div class="model-badge" id="modelBadge" role="button" tabindex="0" aria-haspopup="true">
-        <span class="model-badge-name" id="modelBadgeName">gpt-oss-120b</span>
+        <span class="model-badge-name" id="modelBadgeName">gemini-2.5-flash</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
       </div>
     </div>
@@ -342,7 +342,7 @@
       <div class="composer" id="composer">
         <textarea class="composer-input" id="input" rows="1" placeholder="أرسل رسالة إلى ROSTO..." aria-label="نص الرسالة"></textarea>
         <div class="composer-bottom">
-          <button class="mode-btn" id="thinkBtn" title="تفكير عميق بنموذج استدلال">
+          <button class="mode-btn" id="thinkBtn" title="تفكير عميق">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2z"/></svg>
             <span>DeepThink</span>
           </button>
@@ -387,15 +387,15 @@
     </div>
 
     <div class="modal-tab-content active" id="t-general">
-      <label>🔑 مفتاح OpenRouter</label>
-      <input id="keyInput" type="password" placeholder="sk-or-v1-..." autocomplete="off" spellcheck="false">
-      <div class="hint">🔐 يُحفظ مشفّراً على جهازك فقط</div>
+      <label>🔑 مفتاح Google Gemini API</label>
+      <input id="keyInput" type="password" placeholder="AQ.Ab8..." autocomplete="off" spellcheck="false">
+      <div class="hint">🔐 يُحفظ مشفّراً على جهازك فقط. احصل على مفتاح من <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--ds-primary)">Google AI Studio</a></div>
       <label>🤖 الموديل
         <button id="reloadModels" style="padding:2px 8px;font-size:11px;color:var(--ds-primary);margin-inline-start:6px;background:var(--ds-primary-light);border-radius:6px">🔄 تحديث</button>
       </label>
       <select id="modelSelect"></select>
       <label>✏️ أو اكتب مخصص</label>
-      <input id="modelInput" type="text" placeholder="model-name" spellcheck="false">
+      <input id="modelInput" type="text" placeholder="gemini-2.5-flash" spellcheck="false">
       <div style="margin-top:12px">
         <div class="switch-row"><div>🔊 النطق التلقائي</div><label class="switch"><input type="checkbox" id="ttsToggle"><span class="slider"></span></label></div>
         <div class="switch-row"><div>🌊 Streaming</div><label class="switch"><input type="checkbox" id="streamToggle" checked><span class="slider"></span></label></div>
@@ -416,7 +416,7 @@
         <option value="9:16">طولي 9:16</option>
         <option value="4:3">4:3</option>
       </select>
-      <div class="hint">التوليد عبر OpenRouter بنفس المفتاح. الموديلات اللي بتولّد صور بتظهر في القائمة تلقائياً.</div>
+      <div class="hint">التوليد عبر Google (Imagen أو Gemini Image).</div>
       <div style="margin-top:12px">
         <div class="switch-row"><div>✨ تحسين الوصف تلقائياً (ترجمة للإنجليزية)</div><label class="switch"><input type="checkbox" id="enhanceToggle" checked><span class="slider"></span></label></div>
         <div class="switch-row"><div>🖼 Vision تلقائي</div><label class="switch"><input type="checkbox" id="autoVisionToggle" checked><span class="slider"></span></label></div>
@@ -472,26 +472,45 @@
 <script>
 "use strict";
 
-/* المفتاح: أدخله من الإعدادات (لا تكتبه داخل الكود، خصوصاً لو الملف على GitHub) */
-const GEMINI_API_KEY = "AQ.Ab8RN6ImekXVvidAF4US_XSyCAYB5vh5CZWENDThQRJo_GXssg";
-  
+/* ═══════════════════════════════════════════════════════════════════
+   إعدادات Google Gemini API
+   ═══════════════════════════════════════════════════════════════════ */
+const GEMINI_API_KEY_BUILTIN = "AQ.Ab8RN6ImekXVvidAF4US_XSyCAYB5vh5CZWENDThQRJo_GXssg";
+
+const API_BASE = "https://generativelanguage.googleapis.com/v1beta";
+const KEY_PREFIX = "AQ.";
+
 const DEFAULT_MODEL = "gemini-2.5-flash";
-const API_URL = "https://generativelanguage.googleapis.com/v1beta";
 const DEFAULT_VISION = "gemini-2.5-flash";
 const DEFAULT_GEN = "imagen-4.0-generate-001";
-const THINK_MODEL = "gemini-2.5-flash";
+const THINK_MODEL = "gemini-2.5-pro";
 const ENHANCE_MODEL = "gemini-2.5-flash";
-const KEY_PREFIX = "AQ.";
-const modelMeta = {};
-let modelsLoaded = false;
-const isVisionModel = (m) => modelMeta[m] ? modelMeta[m].vision : /gemini|gpt-4o|gpt-5|claude|llama-4|vision|[-\/]vl\b|vl-/i.test(m || "");
-const isReasoningModel = (m) => modelMeta[m] ? modelMeta[m].reasoning : /qwen3|deepseek-r1|gpt-oss|thinking/i.test(m || "");
-const MAX_IMAGES = 5;
 
 const DEFAULT_MODELS = [
-  "openai/gpt-oss-120b:free", "openai/gpt-oss-120b", "openai/gpt-oss-20b:free",
-  "google/gemini-2.5-flash", "meta-llama/llama-3.3-70b-instruct:free"
+  "gemini-2.5-flash",
+  "gemini-2.5-pro",
+  "gemini-2.5-flash-lite",
+  "gemini-2.0-flash",
+  "gemini-2.0-flash-lite",
+  "gemini-1.5-flash",
+  "gemini-1.5-pro"
 ];
+
+const IMAGE_MODELS = [
+  "imagen-4.0-generate-001",
+  "imagen-4.0-fast-generate-001",
+  "imagen-4.0-ultra-generate-001",
+  "gemini-2.5-flash-image",
+  "gemini-2.0-flash-preview-image-generation"
+];
+
+const modelMeta = {};
+let modelsLoaded = true;
+
+const isVisionModel = (m) => /gemini-(1\.5|2\.|2-)/i.test(m || "");
+const isReasoningModel = (m) => /gemini-2\.5|thinking/i.test(m || "");
+
+const MAX_IMAGES = 5;
 
 const PERSONAS = {
   "💻 مطور عام": "أنت مساعد مطور عربي محترف. تجيب بوضوح، تعطي كود كامل، تشرح بإيجاز مع أمثلة عملية.",
@@ -568,16 +587,16 @@ async function getDeviceKey() {
   return k;
 }
 async function saveSecureKey(plain) {
-  if (!plain) { store.del("rosto_key_or"); return; }
+  if (!plain) { store.del("rosto_key_gem"); return; }
   try {
     const key = await getDeviceKey();
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(plain));
-    store.set("rosto_key_or", b64.enc(iv) + "." + b64.enc(new Uint8Array(ct)));
+    store.set("rosto_key_gem", b64.enc(iv) + "." + b64.enc(new Uint8Array(ct)));
   } catch (e) { console.warn("Encrypt failed:", e); }
 }
 async function loadSecureKey() {
-  const v3 = store.get("rosto_key_or");
+  const v3 = store.get("rosto_key_gem");
   if (!v3) return "";
   try {
     const [iv, ct] = v3.split(".").map(b64.dec);
@@ -586,7 +605,6 @@ async function loadSecureKey() {
   } catch { return ""; }
 }
 
-/* بعض البيئات (معاينة الملفات) لا تقبل تمرير signal إلى fetch، فنوقف يدوياً */
 function raceAbort(promise, signal) {
   if (!signal) return promise;
   return new Promise((resolve, reject) => {
@@ -598,27 +616,13 @@ function raceAbort(promise, signal) {
   });
 }
 
-async function fetchRetry(url, makeOpts, maxRetries = 3) {
-  for (let i = 0; i <= maxRetries; i++) {
-    try {
-      const res = await fetch(url, makeOpts());
-      if (res.ok || (res.status < 500 && res.status !== 429)) return res;
-      if (i === maxRetries) return res;
-      await new Promise(r => setTimeout(r, 800 * Math.pow(2, i)));
-    } catch (e) {
-      if (e.name === "AbortError" || i === maxRetries) throw e;
-      await new Promise(r => setTimeout(r, 800 * Math.pow(2, i)));
-    }
-  }
-}
-
 /* ═══ الحالة ═══ */
 let apiKey = "";
 let model = store.get("rosto_model", DEFAULT_MODEL) || DEFAULT_MODEL;
 let visionModel = store.get("rosto_vision", DEFAULT_VISION) || DEFAULT_VISION;
 let genModel = store.get("rosto_genmodel2", DEFAULT_GEN);
 let genSize = store.get("rosto_gensize2", "1:1");
-let enhanceOn = store.get("rosto_enhance2", "0") === "1";
+let enhanceOn = store.get("rosto_enhance2", "1") === "1";
 let systemPrompt = store.get("rosto_system", "") || "";
 let ttsEnabled = store.get("rosto_tts", "0") === "1";
 let streamEnabled = store.get("rosto_stream", "1") === "1";
@@ -632,7 +636,7 @@ let topP = parseFloat(store.get("rosto_topp", "1"));
 let maxHistory = parseInt(store.get("rosto_hist", "30"));
 let imgQuality = parseInt(store.get("rosto_imgq", "82"));
 let availableModels = DEFAULT_MODELS.slice();
-let imageModels = [];
+let imageModels = IMAGE_MODELS.slice();
 let menuFilter = "";
 const genCache = {};
 if (!/^\d+:\d+$/.test(genSize)) genSize = "1:1";
@@ -1169,7 +1173,7 @@ function renderAttachPreview() {
   });
 }
 
-/* ═══ بناء الطلب ═══ */
+/* ═══ بناء الطلب لـ Gemini ═══ */
 function prepareHistory(keepImages) {
   const h = messages.slice(-maxHistory).filter(m => !m.genId);
   let lastImgIdx = -1;
@@ -1184,29 +1188,51 @@ function prepareHistory(keepImages) {
   });
 }
 
-function clampTokens(m) {
-  return Math.min(maxTokens, modelMeta[m]?.maxOut || 8192);
+function toGeminiContents(history) {
+  return history.map(m => {
+    const role = m.role === "assistant" ? "model" : "user";
+    let parts = [];
+    if (Array.isArray(m.content)) {
+      parts = m.content.map(c => {
+        if (c.type === "text") return { text: c.text };
+        if (c.type === "image_url") {
+          const url = c.image_url.url;
+          const match = url.match(/^data:(image\/[\w+.-]+);base64,(.+)$/);
+          if (match) return { inline_data: { mime_type: match[1], data: match[2] } };
+          return { text: "[صورة]" };
+        }
+        return { text: "" };
+      });
+    } else {
+      parts = [{ text: String(m.content) }];
+    }
+    return { role, parts };
+  });
 }
 
-function buildBody(useModel, keepImages) {
-  const base = useModel.replace(/:online$/, "");
-  const hist = prepareHistory(keepImages && isVisionModel(base));
+function buildGeminiBody(useModel, history) {
   const body = {
-    model: useModel,
-    messages: systemPrompt ? [{ role: "system", content: systemPrompt.trim() }, ...hist] : hist,
-    stream: streamEnabled,
-    max_tokens: clampTokens(base),
-    temperature,
-    top_p: topP
+    contents: toGeminiContents(history),
+    generationConfig: {
+      temperature,
+      topP,
+      maxOutputTokens: maxTokens
+    }
   };
-  if (isReasoningModel(base)) body.reasoning = { effort: useThink ? "high" : "medium" };
+  if (systemPrompt.trim()) {
+    body.systemInstruction = { parts: [{ text: systemPrompt.trim() }] };
+  }
+  if (isReasoningModel(useModel) && useThink) {
+    body.generationConfig.thinkingConfig = { includeThoughts: true, thinkingBudget: 8192 };
+  }
   return body;
 }
 
 function apiErrorText(status, detail) {
-  if (status === 401) return "المفتاح غير صالح. تأكد من مفتاح OpenRouter في الإعدادات.";
-  if (status === 402) return "رصيد OpenRouter غير كافٍ. اشحن حسابك أو اختر موديل مجاني (اسمه ينتهي بـ :free).";
-  if (status === 429) return "تجاوزت حد الاستخدام، انتظر قليلاً أو جرّب موديل آخر.";
+  if (status === 400 && /API key not valid|API_KEY_INVALID/i.test(detail || "")) return "المفتاح غير صالح. تأكد من مفتاح Google AI Studio.";
+  if (status === 401 || status === 403) return "المفتاح غير مصرح أو منتهي. راجع الإعدادات.";
+  if (status === 429) return "تجاوزت حد الاستخدام، انتظر قليلاً.";
+  if (status === 404) return "الموديل غير موجود أو غير متاح لمفتاحك.";
   return "خطأ " + status + (detail ? ": " + detail : "");
 }
 
@@ -1218,22 +1244,22 @@ async function loadGen(id) {
   return u || null;
 }
 
-/* ═══ توليد الصور ═══ */
+/* ═══ تحسين الوصف ═══ */
 async function enhancePrompt(text, signal) {
-  const res = await fetch(API_URL, {
+  const url = `${API_BASE}/models/${ENHANCE_MODEL}:generateContent?key=${apiKey}`;
+  const res = await raceAbort(fetch(url, {
     method: "POST",
-    headers: { "Authorization": "Bearer " + apiKey, "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: ENHANCE_MODEL, temperature: 0.7, max_tokens: 800, reasoning: { effort: "low" },
-      messages: [
-        { role: "system", content: "Rewrite the user's idea as one vivid English image-generation prompt (max 60 words): subject, style, lighting, composition. Output only the prompt, no quotes." },
-        { role: "user", content: text }
-      ]
+      contents: [{ role: "user", parts: [{ text:
+        "Rewrite the user's idea as one vivid English image-generation prompt (max 60 words): subject, style, lighting, composition. Output only the prompt, no quotes.\n\nUser idea: " + text
+      }] }],
+      generationConfig: { temperature: 0.7, maxOutputTokens: 200 }
     })
-  });
+  }), signal);
   if (!res.ok) throw new Error("enhance " + res.status);
   const j = await res.json();
-  const out = (j.choices?.[0]?.message?.content || "").trim();
+  const out = (j.candidates?.[0]?.content?.parts?.[0]?.text || "").trim();
   if (!out) throw new Error("empty");
   return out;
 }
@@ -1259,9 +1285,10 @@ function placeholderMsg(label) {
   return el;
 }
 
+/* ═══ توليد الصور ═══ */
 async function generateImage(text) {
   if (controller) return;
-  if (!apiKey) { openSettings(); return toast("⚠️ أضف مفتاح OpenRouter أولاً"); }
+  if (!apiKey) { openSettings(); return toast("⚠️ أضف مفتاح Gemini أولاً"); }
   if (!messages.length) chatInner.innerHTML = "";
   messages.push({ role: "user", content: text });
   drawMessage(messages[messages.length - 1], messages.length - 1);
@@ -1274,29 +1301,54 @@ async function generateImage(text) {
   setBusy(true);
   try {
     let p = text;
-    if (enhanceOn) { try { p = await raceAbort(enhancePrompt(text), ctl.signal); } catch (e) { if (e.name === "AbortError") throw e; } }
-    const meta = modelMeta[genModel] || {};
-    const body = {
-      model: genModel,
-      messages: [{ role: "user", content: p }],
-      modalities: meta.outText === false ? ["image"] : ["image", "text"],
-      image_config: { aspect_ratio: genSize },
-      stream: false
-    };
-    const res = await raceAbort(fetch(API_URL, {
-      method: "POST",
-      headers: { "Authorization": "Bearer " + apiKey, "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-    }), ctl.signal);
-    if (!res.ok) {
-      let detail = "";
-      try { const j = await res.json(); detail = j.error?.message || ""; } catch {}
-      throw new Error(apiErrorText(res.status, detail));
+    if (enhanceOn) { try { p = await enhancePrompt(text, ctl.signal); } catch (e) { if (e.name === "AbortError") throw e; } }
+
+    let imgUrl = null;
+
+    if (genModel.startsWith("imagen")) {
+      const arMap = { "1:1": "1:1", "16:9": "16:9", "9:16": "9:16", "4:3": "4:3" };
+      const url = `${API_BASE}/models/${genModel}:predict?key=${apiKey}`;
+      const res = await raceAbort(fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          instances: [{ prompt: p }],
+          parameters: { sampleCount: 1, aspectRatio: arMap[genSize] || "1:1" }
+        })
+      }), ctl.signal);
+      if (!res.ok) {
+        let detail = ""; try { const j = await res.json(); detail = j.error?.message || ""; } catch {}
+        throw new Error(apiErrorText(res.status, detail));
+      }
+      const j = await raceAbort(res.json(), ctl.signal);
+      const pred = j.predictions?.[0];
+      const b64img = pred?.bytesBase64Encoded;
+      if (!b64img) throw new Error("لم يرجع Imagen صورة");
+      const mime = pred?.mimeType || "image/png";
+      imgUrl = `data:${mime};base64,${b64img}`;
+    } else {
+      const url = `${API_BASE}/models/${genModel}:generateContent?key=${apiKey}`;
+      const res = await raceAbort(fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: p }] }],
+          generationConfig: { responseModalities: ["TEXT", "IMAGE"] }
+        })
+      }), ctl.signal);
+      if (!res.ok) {
+        let detail = ""; try { const j = await res.json(); detail = j.error?.message || ""; } catch {}
+        throw new Error(apiErrorText(res.status, detail));
+      }
+      const j = await raceAbort(res.json(), ctl.signal);
+      const parts = j.candidates?.[0]?.content?.parts || [];
+      const imgPart = parts.find(x => x.inlineData || x.inline_data);
+      if (!imgPart) throw new Error("لم يرجع الموديل صورة");
+      const d = imgPart.inlineData || imgPart.inline_data;
+      imgUrl = `data:${d.mimeType || d.mime_type || "image/png"};base64,${d.data}`;
     }
-    const j = await raceAbort(res.json(), ctl.signal);
-    const msg = j.choices?.[0]?.message || {};
-    const imgUrl = msg.images?.[0]?.image_url?.url || msg.images?.[0]?.url;
-    if (!imgUrl) throw new Error(msg.content ? "الموديل ردّ بنص بدل صورة: " + String(msg.content).slice(0, 200) : "لم يرجع الموديل صورة. جرّب موديل توليد آخر من الإعدادات ← الصور.");
+
+    if (!imgUrl) throw new Error("لم يتم توليد صورة");
     const gid = "g" + Date.now() + Math.random().toString(36).slice(2, 6);
     genCache[gid] = imgUrl;
     await idb.set("gen_" + gid, imgUrl);
@@ -1325,24 +1377,13 @@ async function send(raw, forceGen = false) {
     if (!text) return;
     return generateImage(text);
   }
-  if (!apiKey) { openSettings(); return toast("⚠️ أضف مفتاح OpenRouter أولاً"); }
+  if (!apiKey) { openSettings(); return toast("⚠️ أضف مفتاح Gemini أولاً"); }
 
   messages = messages.filter(m => m && m.content);
   const needsVision = attachments.length > 0;
   let useModel = model;
-  if (needsVision && !isVisionModel(model)) {
-    if (!autoVision) { attachments = []; renderAttachPreview(); return toast("⚠️ الموديل الحالي لا يدعم الصور"); }
-    if (modelsLoaded && !availableModels.includes(visionModel)) {
-      const v = availableModels.find(isVisionModel);
-      if (!v) { attachments = []; renderAttachPreview(); return toast("⚠️ لا يوجد موديل رؤية متاح لمفتاحك حالياً"); }
-      visionModel = v; store.set("rosto_vision", v);
-    }
-    useModel = visionModel;
-    toast("🖼 تم التبديل لموديل الرؤية");
-  } else if (!needsVision) {
-    if (useThink && !isReasoningModel(useModel)) useModel = THINK_MODEL;
-    if (useSearch) useModel = useModel + ":online";
-  }
+  if (needsVision && !isVisionModel(model)) useModel = visionModel;
+  if (!needsVision && useThink && !isReasoningModel(useModel)) useModel = THINK_MODEL;
 
   const imgs = attachments.slice();
   const userContent = imgs.length
@@ -1408,67 +1449,51 @@ async function send(raw, forceGen = false) {
     errorBubble(msg);
   };
 
-  const mkOpts = () => ({
-    method: "POST",
-    headers: { "Authorization": "Bearer " + apiKey, "Content-Type": "application/json" },
-    body: JSON.stringify(buildBody(useModel, true))
-  });
-
   try {
-    let res = await raceAbort(fetchRetry(API_URL, mkOpts), ctl.signal);
-    if (!res.ok && useModel.endsWith(":online") && [400, 402, 403, 404].includes(res.status)) {
-      toast("🔍 البحث غير متاح لمفتاحك، سأجيب بدونه");
-      useModel = useModel.replace(/:online$/, "");
-      res = await raceAbort(fetchRetry(API_URL, mkOpts), ctl.signal);
-    }
-    if (!res.ok && res.status === 402 && !/:free$/.test(useModel.replace(/:online$/, ""))) {
-      const base = useModel.replace(/:online$/, "");
-      const needV = imgs.length > 0;
-      const free = availableModels.find(x => x === base + ":free")
-        || availableModels.find(x => /:free$/.test(x) && (!needV || isVisionModel(x)) && /gpt-oss-120b|llama-3\.3|gemini|qwen/i.test(x))
-        || availableModels.find(x => /:free$/.test(x) && (!needV || isVisionModel(x)));
-      if (free) {
-        toast("💳 الرصيد غير كافٍ، تم التحويل لموديل مجاني");
-        useModel = free;
-        res = await raceAbort(fetchRetry(API_URL, mkOpts), ctl.signal);
-      }
-    }
+    const history = prepareHistory(true);
+    const body = buildGeminiBody(useModel, history);
+    const method = streamEnabled ? "streamGenerateContent" : "generateContent";
+    const url = `${API_BASE}/models/${useModel}:${method}?key=${apiKey}` + (streamEnabled ? "&alt=sse" : "");
+
+    let res = await raceAbort(fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }), ctl.signal);
+
     if (!res.ok) {
       let detail = "";
-      try { const j = await res.json(); detail = j.error?.message || j.message || ""; } catch {}
-      if (res.status === 401) { store.del("rosto_key_or"); setTimeout(openSettings, 400); }
+      try { const j = await res.json(); detail = j.error?.message || ""; } catch {}
+      if (res.status === 400 && /api key not valid|API_KEY_INVALID/i.test(detail)) {
+        store.del("rosto_key_gem"); setTimeout(openSettings, 400);
+      }
       return fail(apiErrorText(res.status, detail));
     }
 
-    const handleLine = (line) => {
-      if (!line.startsWith("data:")) return;
-      const data = line.slice(5).trim();
-      if (!data || data === "[DONE]") return;
-      let json;
-      try { json = JSON.parse(data); } catch { return; }
-      if (json.error && !json.choices) throw new Error(json.error.message || "خطأ من الموديل");
-      usage = json.usage || usage;
-      const d = json.choices?.[0]?.delta;
-      if (!d) return;
+    const handleGeminiChunk = (json) => {
+      if (json.error) throw new Error(json.error.message || "خطأ");
+      const cand = json.candidates?.[0];
+      if (!cand) return;
+      const parts = cand.content?.parts || [];
       let changed = false;
-      const rs = d.reasoning_content ?? d.reasoning;
-      if (rs) { reasoningBuf += rs; changed = true; }
-      if (d.content) { partial += d.content; changed = true; }
+      for (const p of parts) {
+        if (p.thought && p.text) { reasoningBuf += p.text; changed = true; }
+        else if (p.text) { partial += p.text; changed = true; }
+      }
+      if (json.usageMetadata) {
+        usage = {
+          p: json.usageMetadata.promptTokenCount,
+          c: json.usageMetadata.candidatesTokenCount,
+          t: json.usageMetadata.totalTokenCount
+        };
+      }
       if (changed) paint();
     };
-    const readNonStream = async () => {
-      const raw = await raceAbort(res.text(), ctl.signal);
-      if (raw.trimStart().startsWith("data:")) { raw.split("\n").forEach(handleLine); paintNow(); return; }
-      const data = JSON.parse(raw);
-      const msg = data.choices?.[0]?.message || {};
-      partial = msg.content || "";
-      reasoningBuf = msg.reasoning || msg.reasoning_content || "";
-      usage = data.usage;
-      paintNow();
-    };
 
-    if (!streamEnabled || !res.body || typeof res.body.getReader !== "function") {
-      await readNonStream();
+    if (!streamEnabled) {
+      const data = await raceAbort(res.json(), ctl.signal);
+      handleGeminiChunk(data);
+      paintNow();
     } else {
       const reader = res.body.getReader();
       ctl.signal.addEventListener("abort", () => { try { reader.cancel(); } catch {} }, { once: true });
@@ -1480,7 +1505,12 @@ async function send(raw, forceGen = false) {
         buf += dec.decode(value, { stream: true });
         const lines = buf.split("\n");
         buf = lines.pop() || "";
-        lines.forEach(handleLine);
+        for (const line of lines) {
+          if (!line.startsWith("data:")) continue;
+          const data = line.slice(5).trim();
+          if (!data || data === "[DONE]") continue;
+          try { handleGeminiChunk(JSON.parse(data)); } catch (e) { console.warn(e); }
+        }
       }
     }
 
@@ -1495,7 +1525,7 @@ async function send(raw, forceGen = false) {
       msg.reasoning = think;
       msg.thinkSecs = Math.max(1, Math.round(((t1 || Date.now()) - (t0 || Date.now())) / 1000));
     }
-    if (usage?.total_tokens) msg.usage = { p: usage.prompt_tokens, c: usage.completion_tokens, t: usage.total_tokens };
+    if (usage?.t) msg.usage = usage;
     messages.push(msg);
     saveChat();
     restore();
@@ -1515,7 +1545,7 @@ async function send(raw, forceGen = false) {
       toast("⏹ تم الإيقاف");
     } else {
       console.error(e);
-      fail(/failed to fetch|networkerror/i.test(e.message || "") ? "تعذّر الاتصال بـ OpenRouter. غالباً المعاينة تمنع الإنترنت، افتح الملف في Chrome مباشرة من تطبيق الملفات." : "مشكلة في الاتصال: " + (e.message || e.name || "unknown"));
+      fail(/failed to fetch|networkerror/i.test(e.message || "") ? "تعذّر الاتصال بـ Google. تأكد من الإنترنت." : "خطأ: " + (e.message || e.name));
     }
   } finally {
     controller = null;
@@ -1550,7 +1580,7 @@ window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () 
 function updateMuteIcon() { $("muteBtn").innerHTML = ttsEnabled ? ICON.speaker : ICON.speakerOff; }
 function updateModelBadge() { $("modelBadgeName").textContent = shortModel(model); }
 
-/* ═══ قائمة الموديلات (مثل DeepSeek) ═══ */
+/* ═══ قائمة الموديلات ═══ */
 function fillSelect(sel, ids, current) {
   sel.innerHTML = "";
   const list = ids.includes(current) ? ids : [current, ...ids];
@@ -1569,12 +1599,12 @@ function buildModelMenu() {
     box.innerHTML = "";
     const q = menuFilter.trim().toLowerCase();
     const ids = availableModels.filter(id => !q || id.toLowerCase().includes(q));
-    [["مجانية", ids.filter(id => /:free$/.test(id))], ["مدفوعة", ids.filter(id => !/:free$/.test(id))]].forEach(([label, arr]) => {
+    [["موديلات Gemini", ids]].forEach(([label, arr]) => {
       if (!arr.length) return;
       const l = document.createElement("div");
-      l.className = "mm-label"; l.textContent = label + (arr.length > 100 ? " (أول 100، استخدم البحث)" : "");
+      l.className = "mm-label"; l.textContent = label;
       box.appendChild(l);
-      arr.slice(0, 100).forEach(id => {
+      arr.forEach(id => {
         const b = document.createElement("button");
         b.className = "mm-item" + (id === model ? " active" : "");
         const tags = (isReasoningModel(id) ? '<span class="mm-tag">تفكير</span>' : "") + (isVisionModel(id) ? '<span class="mm-tag">رؤية</span>' : "");
@@ -1674,7 +1704,7 @@ function openSettings() {
   fillSelect($("visionSelect"), availableModels.filter(isVisionModel).length ? availableModels.filter(isVisionModel) : [DEFAULT_VISION], visionModel);
   $("modelInput").value = "";
   $("systemInput").value = systemPrompt;
-  fillSelect($("genModelSelect"), imageModels.length ? imageModels : [DEFAULT_GEN], genModel);
+  fillSelect($("genModelSelect"), imageModels.length ? imageModels : IMAGE_MODELS, genModel);
   $("genSizeSelect").value = genSize;
   $("enhanceToggle").checked = enhanceOn;
   $("autoVisionToggle").checked = autoVision;
@@ -1771,7 +1801,14 @@ $("saveSettings").onclick = async () => {
   topP = parseFloat($("topPRange").value);
   maxHistory = parseInt($("histRange").value);
   imgQuality = parseInt($("imgQRange").value);
-  const S = { rosto_model: model, rosto_vision: visionModel, rosto_genmodel: genModel, rosto_gensize: genSize, rosto_enhance: enhanceOn ? "1" : "0", rosto_system: systemPrompt, rosto_autovision: autoVision ? "1" : "0", rosto_compress: compressOn ? "1" : "0", rosto_tts: ttsEnabled ? "1" : "0", rosto_stream: streamEnabled ? "1" : "0", rosto_reasoning: reasoningEnabled ? "1" : "0", rosto_temp: temperature, rosto_maxtok: maxTokens, rosto_topp: topP, rosto_hist: maxHistory, rosto_imgq: imgQuality };
+  const S = {
+    rosto_model: model, rosto_vision: visionModel, rosto_genmodel2: genModel, rosto_gensize2: genSize,
+    rosto_enhance2: enhanceOn ? "1" : "0", rosto_system: systemPrompt,
+    rosto_autovision: autoVision ? "1" : "0", rosto_compress: compressOn ? "1" : "0",
+    rosto_tts: ttsEnabled ? "1" : "0", rosto_stream: streamEnabled ? "1" : "0",
+    rosto_reasoning: reasoningEnabled ? "1" : "0", rosto_temp: temperature,
+    rosto_maxtok: maxTokens, rosto_topp: topP, rosto_hist: maxHistory, rosto_imgq: imgQuality
+  };
   Object.entries(S).forEach(([k, v]) => store.set(k, v));
   updateMuteIcon(); updateModelBadge(); closeSettings();
   toast("✓ تم الحفظ");
@@ -1795,44 +1832,45 @@ $$("button[data-theme]").forEach(b => {
 });
 
 async function loadModels(showToast = false) {
-  if (!apiKey || !apiKey.startsWith(KEY_PREFIX)) { if (showToast) toast("⚠️ أضف المفتاح أولاً"); return; }
+  if (!apiKey) { if (showToast) toast("⚠️ أضف المفتاح أولاً"); return; }
   try {
-    const r = await fetch(MODELS_URL, { headers: { Authorization: "Bearer " + apiKey } });
+    const url = `${API_BASE}/models?key=${apiKey}`;
+    const r = await fetch(url);
     if (!r.ok) throw new Error("HTTP " + r.status);
-    const { data } = await r.json();
+    const { models } = await r.json();
     const text = [], imgs = [];
-    (data || []).forEach(m => {
-      const arch = m.architecture || {};
-      const ins = arch.input_modalities || [], outs = arch.output_modalities || [];
-      const sp = m.supported_parameters || [];
-      modelMeta[m.id] = { vision: ins.includes("image"), reasoning: sp.includes("reasoning") || sp.includes("include_reasoning"), outText: outs.includes("text"), maxOut: m.top_provider?.max_completion_tokens || null };
-      if (outs.includes("image")) imgs.push(m.id);
-      else if (outs.includes("text")) text.push(m.id);
+    (models || []).forEach(m => {
+      const id = (m.name || "").replace("models/", "");
+      const methods = m.supportedGenerationMethods || [];
+      if (!methods.includes("generateContent")) return;
+      if (/imagen/i.test(id)) imgs.push(id);
+      else if (/gemini/i.test(id)) {
+        text.push(id);
+        modelMeta[id] = { vision: true, reasoning: /2\.5/.test(id), outText: true };
+      }
     });
-    if (!text.length) throw new Error("لا توجد موديلات");
-    availableModels = text.sort();
-    imageModels = imgs.sort();
+    if (text.length) availableModels = text.sort();
+    if (imgs.length) imageModels = imgs.sort();
     modelsLoaded = true;
     const pick = (arr, prefs) => { for (const re of prefs) { const f = arr.find(x => re.test(x)); if (f) return f; } return arr[0]; };
     if (!availableModels.includes(model)) {
-      model = pick(availableModels, [/^openai\/gpt-oss-120b:free$/, /^openai\/gpt-oss-120b$/, /gemini-2\.5-flash$/]);
+      model = pick(availableModels, [/^gemini-2\.5-flash$/, /^gemini-2\.0-flash$/, /flash/]);
       store.set("rosto_model", model); updateModelBadge();
     }
-    const vl = availableModels.filter(isVisionModel);
-    if (vl.length && !vl.includes(visionModel)) {
-      visionModel = pick(vl, [/^google\/gemini-2\.5-flash$/, /gemini.*flash/, /:free$/]);
+    if (!availableModels.includes(visionModel)) {
+      visionModel = pick(availableModels, [/^gemini-2\.5-flash$/, /flash/]);
       store.set("rosto_vision", visionModel);
     }
     if (imageModels.length && !imageModels.includes(genModel)) {
-      genModel = pick(imageModels, [/gemini.*flash.*image/, /image/]);
+      genModel = pick(imageModels, [/imagen-4\.0-generate-001/, /imagen/]);
       store.set("rosto_genmodel2", genModel);
     }
     if ($("settings").classList.contains("open")) {
-      fillSelect($("modelSelect"), availableModels, $("modelInput").value.trim() || model);
-      fillSelect($("visionSelect"), vl.length ? vl : [DEFAULT_VISION], visionModel);
-      fillSelect($("genModelSelect"), imageModels.length ? imageModels : [DEFAULT_GEN], genModel);
+      fillSelect($("modelSelect"), availableModels, model);
+      fillSelect($("visionSelect"), availableModels, visionModel);
+      fillSelect($("genModelSelect"), imageModels.length ? imageModels : IMAGE_MODELS, genModel);
     }
-    if (showToast) toast(`✓ ${availableModels.length} موديل نصي، ${imageModels.length} لتوليد الصور`);
+    if (showToast) toast(`✓ ${availableModels.length} موديل Gemini، ${imageModels.length} Imagen`);
   } catch (e) { if (showToast) toast("❌ فشل: " + e.message); }
 }
 $("reloadModels").onclick = () => loadModels(true);
@@ -1882,7 +1920,7 @@ $("micBtn").onclick = () => isRecording ? stopRecording() : startRecording();
 $("attachBtn").onclick = () => fileInput.click();
 fileInput.onchange = async (e) => { await attachImages(e.target.files); e.target.value = ""; };
 
-$("searchWebBtn").onclick = () => { setMode("search", !useSearch); toast(useSearch ? "🔍 البحث مفعّل" : "البحث متوقف"); };
+$("searchWebBtn").onclick = () => { setMode("search", !useSearch); toast(useSearch ? "🔍 البحث مفعّل (تجريبي)" : "البحث متوقف"); };
 $("thinkBtn").onclick = () => { setMode("think", !useThink); toast(useThink ? "🧠 DeepThink مفعّل" : "DeepThink متوقف"); };
 $("imageBtn").onclick = () => { setMode("image", !useImage); toast(useImage ? "🎨 وضع توليد الصور" : "وضع الدردشة"); };
 
@@ -1933,7 +1971,10 @@ document.addEventListener("keydown", (e) => {
   let savedKey = "";
   try { savedKey = await loadSecureKey(); } catch {}
   if (savedKey && savedKey.startsWith(KEY_PREFIX)) apiKey = savedKey;
-  else if (OPENROUTER_API_KEY.startsWith(KEY_PREFIX)) { apiKey = OPENROUTER_API_KEY; try { await saveSecureKey(apiKey); } catch {} }
+  else if (GEMINI_API_KEY_BUILTIN && GEMINI_API_KEY_BUILTIN !== "ضع_مفتاحك_هنا" && GEMINI_API_KEY_BUILTIN.startsWith(KEY_PREFIX)) {
+    apiKey = GEMINI_API_KEY_BUILTIN;
+    try { await saveSecureKey(apiKey); } catch {}
+  }
 
   const s = Sessions.all()[Sessions.current()];
   if (s?.messages?.length) messages = s.messages.slice();
@@ -1946,8 +1987,8 @@ document.addEventListener("keydown", (e) => {
   setBusy(false);
 
   if (apiKey) loadModels();
-  else setTimeout(() => { toast("أضف مفتاح OpenRouter من الإعدادات للبدء", 4000); openSettings(); }, 700);
+  else setTimeout(() => { toast("أضف مفتاح Google Gemini من الإعدادات للبدء", 4000); openSettings(); }, 700);
 })();
 </script>
 </body>
-</html>
+              </html>
