@@ -96,6 +96,7 @@
   .mm-name { flex: 1; direction: ltr; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .mm-tag { font-size: 11px; color: var(--ds-text-secondary); background: var(--ds-bg-tertiary); padding: 1px 8px; border-radius: 10px; flex-shrink: 0; }
 
+  .mm-search { width: 100%; background: var(--ds-bg-secondary); border: 1px solid var(--ds-border); border-radius: 10px; padding: 8px 12px; font: inherit; font-size: 13px; color: var(--ds-text); outline: none; margin-bottom: 4px; direction: rtl; }
   #chat { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 12px 0 24px; }
   .chat-inner { max-width: 820px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; gap: 26px; min-height: 100%; }
 
@@ -386,8 +387,8 @@
     </div>
 
     <div class="modal-tab-content active" id="t-general">
-      <label>🔑 مفتاح Groq API</label>
-      <input id="keyInput" type="password" placeholder="gsk_..." autocomplete="off" spellcheck="false">
+      <label>🔑 مفتاح OpenRouter</label>
+      <input id="keyInput" type="password" placeholder="sk-or-v1-..." autocomplete="off" spellcheck="false">
       <div class="hint">🔐 يُحفظ مشفّراً على جهازك فقط</div>
       <label>🤖 الموديل
         <button id="reloadModels" style="padding:2px 8px;font-size:11px;color:var(--ds-primary);margin-inline-start:6px;background:var(--ds-primary-light);border-radius:6px">🔄 تحديث</button>
@@ -407,17 +408,15 @@
       <select id="visionSelect"></select>
       <div class="hint">يُستخدم تلقائياً عند إرفاق صورة والموديل الحالي لا يدعم الرؤية.</div>
       <label>🎨 موديل توليد الصور</label>
-      <select id="genModelSelect">
-        <option value="flux">flux (جودة عالية)</option>
-        <option value="turbo">turbo (أسرع)</option>
-      </select>
+      <select id="genModelSelect"></select>
       <label>📐 حجم الصورة</label>
       <select id="genSizeSelect">
-        <option value="1024x1024">1024×1024 (مربع)</option>
-        <option value="1280x720">1280×720 (عرضي)</option>
-        <option value="720x1280">720×1280 (طولي)</option>
+        <option value="1:1">مربع 1:1</option>
+        <option value="16:9">عرضي 16:9</option>
+        <option value="9:16">طولي 9:16</option>
+        <option value="4:3">4:3</option>
       </select>
-      <div class="hint">التوليد عبر خدمة Pollinations المجانية، ولا يستخدم مفتاح Groq.</div>
+      <div class="hint">التوليد عبر OpenRouter بنفس المفتاح. الموديلات اللي بتولّد صور بتظهر في القائمة تلقائياً.</div>
       <div style="margin-top:12px">
         <div class="switch-row"><div>✨ تحسين الوصف تلقائياً (ترجمة للإنجليزية)</div><label class="switch"><input type="checkbox" id="enhanceToggle" checked><span class="slider"></span></label></div>
         <div class="switch-row"><div>🖼 Vision تلقائي</div><label class="switch"><input type="checkbox" id="autoVisionToggle" checked><span class="slider"></span></label></div>
@@ -473,25 +472,26 @@
 <script>
 "use strict";
 
-/* مفتاح Groq: أدخله من الإعدادات (لا تكتبه داخل الكود) */
-const GROQ_API_KEY = "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";
+/* المفتاح: أدخله من الإعدادات (لا تكتبه داخل الكود، خصوصاً لو الملف على GitHub) */
+const OPENROUTER_API_KEY = "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";
 
 const DEFAULT_MODEL = "openai/gpt-oss-120b";
-const API_URL = "https://api.groq.com/openai/v1/chat/completions";
-const MODELS_URL = "https://api.groq.com/openai/v1/models";
-const DEFAULT_VISION = "meta-llama/llama-4-scout-17b-16e-instruct";
+const API_URL = "https://openrouter.ai/api/v1/chat/completions";
+const MODELS_URL = "https://openrouter.ai/api/v1/models?output_modalities=all";
+const DEFAULT_VISION = "google/gemini-2.5-flash";
+const DEFAULT_GEN = "google/gemini-2.5-flash-image";
 const THINK_MODEL = "openai/gpt-oss-120b";
-const SEARCH_MODEL = "groq/compound";
-const ENHANCE_MODEL = "llama-3.1-8b-instant";
-const REASONING_MODELS = /qwen3|deepseek-r1|gpt-oss/i;
-const isVisionModel = (m) => /llama-4|vision/i.test(m || "");
-const isReasoningModel = (m) => REASONING_MODELS.test(m || "");
+const ENHANCE_MODEL = "openai/gpt-oss-20b";
+const KEY_PREFIX = "sk-or-";
+const modelMeta = {};
+let modelsLoaded = false;
+const isVisionModel = (m) => modelMeta[m] ? modelMeta[m].vision : /gemini|gpt-4o|gpt-5|claude|llama-4|vision|[-\/]vl\b|vl-/i.test(m || "");
+const isReasoningModel = (m) => modelMeta[m] ? modelMeta[m].reasoning : /qwen3|deepseek-r1|gpt-oss|thinking/i.test(m || "");
 const MAX_IMAGES = 5;
 
 const DEFAULT_MODELS = [
-  "openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3-32b",
-  "llama-3.3-70b-versatile", "llama-3.1-8b-instant",
-  "meta-llama/llama-4-scout-17b-16e-instruct", "meta-llama/llama-4-maverick-17b-128e-instruct"
+  "openai/gpt-oss-120b:free", "openai/gpt-oss-120b", "openai/gpt-oss-20b:free",
+  "google/gemini-2.5-flash", "meta-llama/llama-3.3-70b-instruct:free"
 ];
 
 const PERSONAS = {
@@ -569,16 +569,16 @@ async function getDeviceKey() {
   return k;
 }
 async function saveSecureKey(plain) {
-  if (!plain) { store.del("rosto_key_v3"); return; }
+  if (!plain) { store.del("rosto_key_or"); return; }
   try {
     const key = await getDeviceKey();
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(plain));
-    store.set("rosto_key_v3", b64.enc(iv) + "." + b64.enc(new Uint8Array(ct)));
+    store.set("rosto_key_or", b64.enc(iv) + "." + b64.enc(new Uint8Array(ct)));
   } catch (e) { console.warn("Encrypt failed:", e); }
 }
 async function loadSecureKey() {
-  const v3 = store.get("rosto_key_v3");
+  const v3 = store.get("rosto_key_or");
   if (!v3) return "";
   try {
     const [iv, ct] = v3.split(".").map(b64.dec);
@@ -617,9 +617,9 @@ async function fetchRetry(url, makeOpts, maxRetries = 3) {
 let apiKey = "";
 let model = store.get("rosto_model", DEFAULT_MODEL) || DEFAULT_MODEL;
 let visionModel = store.get("rosto_vision", DEFAULT_VISION) || DEFAULT_VISION;
-let genModel = store.get("rosto_genmodel", "flux");
-let genSize = store.get("rosto_gensize", "1024x1024");
-let enhanceOn = store.get("rosto_enhance", "1") === "1";
+let genModel = store.get("rosto_genmodel2", DEFAULT_GEN);
+let genSize = store.get("rosto_gensize2", "1:1");
+let enhanceOn = store.get("rosto_enhance2", "0") === "1";
 let systemPrompt = store.get("rosto_system", "") || "";
 let ttsEnabled = store.get("rosto_tts", "0") === "1";
 let streamEnabled = store.get("rosto_stream", "1") === "1";
@@ -633,6 +633,10 @@ let topP = parseFloat(store.get("rosto_topp", "1"));
 let maxHistory = parseInt(store.get("rosto_hist", "30"));
 let imgQuality = parseInt(store.get("rosto_imgq", "82"));
 let availableModels = DEFAULT_MODELS.slice();
+let imageModels = [];
+let menuFilter = "";
+const genCache = {};
+if (!/^\d+:\d+$/.test(genSize)) genSize = "1:1";
 let useSearch = false, useThink = false, useImage = false;
 
 let messages = [];
@@ -806,7 +810,7 @@ function addAssistantActions(el, text, idx) {
   const m = messages[idx];
   const a = document.createElement("div");
   a.className = "msg-actions";
-  if (!m?.genImage) a.append(mkBtn(ICON.copy, () => copyTo(text), "نسخ"), mkBtn(ICON.speaker, () => speak(text), "نطق"));
+  if (!m?.genId) a.append(mkBtn(ICON.copy, () => copyTo(text), "نسخ"), mkBtn(ICON.speaker, () => speak(text), "نطق"));
   a.append(mkBtn(ICON.refresh, () => regenerate(idx), "إعادة توليد"));
   const up = mkBtn(ICON.up, () => setFeedback(idx, "up"), "مفيد");
   const dn = mkBtn(ICON.down, () => setFeedback(idx, "down"), "غير مفيد");
@@ -851,7 +855,7 @@ function regenerate(idx) {
   const imgs = msgImgs(userMsg);
   attachments = imgs.map((url, i) => ({ dataUrl: url, name: "img" + (i + 1) }));
   renderAttachPreview();
-  send(msgText(userMsg), !!m.genImage);
+  send(msgText(userMsg), !!m.genId);
 }
 
 function editMessage(idx, el) {
@@ -951,14 +955,14 @@ function renderGenFigure(m) {
   const fig = document.createElement("div");
   fig.className = "gen-fig";
   const im = document.createElement("img");
-  im.src = m.genImage; im.alt = m.genPrompt || "صورة مولّدة"; im.loading = "lazy";
-  im.onclick = () => openImageViewer(m.genImage);
+  loadGen(m.genId).then(u => { if (u) im.src = u; else im.alt = "الصورة غير متاحة"; }); im.alt = m.genPrompt || "صورة مولّدة"; im.loading = "lazy";
+  im.onclick = () => openImageViewer(im.src);
   const cap = document.createElement("div");
   cap.className = "gen-cap";
   cap.textContent = m.genPrompt || "";
   const row = document.createElement("div");
   row.className = "msg-actions";
-  row.append(mkBtn(ICON.download, () => downloadImage(m.genImage), "تحميل الصورة"));
+  row.append(mkBtn(ICON.download, () => downloadImage(im.src), "تحميل الصورة"));
   fig.append(im, cap, row);
   return fig;
 }
@@ -969,7 +973,7 @@ async function downloadImage(url) {
     const b = await r.blob();
     const u = URL.createObjectURL(b);
     const a = document.createElement("a");
-    a.href = u; a.download = "rosto-" + Date.now() + ".jpg";
+    a.href = u; a.download = "rosto-" + Date.now() + "." + ((b.type || "image/png").split("/")[1] || "png");
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(u), 1000);
   } catch { window.open(url, "_blank"); }
@@ -982,7 +986,7 @@ function drawMessage(m, idx) {
     addUserActions(el, idx);
     return el;
   }
-  if (m.genImage) {
+  if (m.genId) {
     const el = renderAssistantMsg("", "", 0);
     el.querySelector(".msg-content").appendChild(renderGenFigure(m));
     addAssistantActions(el, m.genPrompt || "", idx);
@@ -1048,7 +1052,7 @@ function saveChat() {
   const slice = messages.filter(m => m && m.content).slice(-80);
   const toSave = slice.map((m, i) => {
     const out = { role: m.role, content: m.content };
-    ["usage", "reasoning", "thinkSecs", "genImage", "genPrompt", "fb"].forEach(k => { if (m[k]) out[k] = m[k]; });
+    ["usage", "reasoning", "thinkSecs", "genId", "genPrompt", "fb"].forEach(k => { if (m[k]) out[k] = m[k]; });
     return i < slice.length - KEEP_IMG_LAST ? stripImgs(out) : out;
   });
   const first = messages.find(m => m && m.role === "user");
@@ -1168,7 +1172,7 @@ function renderAttachPreview() {
 
 /* ═══ بناء الطلب ═══ */
 function prepareHistory(keepImages) {
-  const h = messages.slice(-maxHistory).filter(m => !m.genImage);
+  const h = messages.slice(-maxHistory).filter(m => !m.genId);
   let lastImgIdx = -1;
   if (keepImages) {
     for (let i = h.length - 1; i >= 0; i--) {
@@ -1182,44 +1186,46 @@ function prepareHistory(keepImages) {
 }
 
 function clampTokens(m) {
-  let cap = 32768;
-  if (/llama-4/i.test(m)) cap = 8192;
-  else if (/llama-3\.3-70b/i.test(m)) cap = 32768;
-  else if (/qwen3/i.test(m)) cap = 32768;
-  return Math.min(maxTokens, cap);
+  return Math.min(maxTokens, modelMeta[m]?.maxOut || 8192);
 }
 
 function buildBody(useModel, keepImages) {
-  const isCompound = /compound/i.test(useModel);
-  let sys = systemPrompt || "";
-  const hist = prepareHistory(keepImages && isVisionModel(useModel));
+  const base = useModel.replace(/:online$/, "");
+  const hist = prepareHistory(keepImages && isVisionModel(base));
   const body = {
     model: useModel,
-    messages: sys ? [{ role: "system", content: sys.trim() }, ...hist] : hist,
-    stream: streamEnabled
+    messages: systemPrompt ? [{ role: "system", content: systemPrompt.trim() }, ...hist] : hist,
+    stream: streamEnabled,
+    max_tokens: clampTokens(base),
+    temperature,
+    top_p: topP
   };
-  if (!isCompound) {
-    body.max_tokens = clampTokens(useModel);
-    body.temperature = temperature;
-    body.top_p = topP;
-    if (/gpt-oss/i.test(useModel)) { body.reasoning_effort = useThink ? "high" : "medium"; body.include_reasoning = true; }
-    else if (/qwen3|deepseek-r1/i.test(useModel)) body.reasoning_format = "parsed";
-  }
+  if (isReasoningModel(base)) body.reasoning = { effort: useThink ? "high" : "medium" };
   return body;
 }
 
-/* ═══ توليد الصور ═══ */
-function genUrl(p, seed) {
-  const [w, h] = genSize.split("x");
-  return `https://image.pollinations.ai/prompt/${encodeURIComponent(p)}?model=${genModel}&width=${w}&height=${h}&seed=${seed}&nologo=true`;
+function apiErrorText(status, detail) {
+  if (status === 401) return "المفتاح غير صالح. تأكد من مفتاح OpenRouter في الإعدادات.";
+  if (status === 402) return "رصيد OpenRouter غير كافٍ. اشحن حسابك أو اختر موديل مجاني (اسمه ينتهي بـ :free).";
+  if (status === 429) return "تجاوزت حد الاستخدام، انتظر قليلاً أو جرّب موديل آخر.";
+  return "خطأ " + status + (detail ? ": " + detail : "");
 }
 
+async function loadGen(id) {
+  if (!id) return null;
+  if (genCache[id]) return genCache[id];
+  const u = await idb.get("gen_" + id);
+  if (u) genCache[id] = u;
+  return u || null;
+}
+
+/* ═══ توليد الصور ═══ */
 async function enhancePrompt(text, signal) {
   const res = await fetch(API_URL, {
     method: "POST",
     headers: { "Authorization": "Bearer " + apiKey, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: ENHANCE_MODEL, temperature: 0.7, max_tokens: 200,
+      model: ENHANCE_MODEL, temperature: 0.7, max_tokens: 800, reasoning: { effort: "low" },
       messages: [
         { role: "system", content: "Rewrite the user's idea as one vivid English image-generation prompt (max 60 words): subject, style, lighting, composition. Output only the prompt, no quotes." },
         { role: "user", content: text }
@@ -1256,6 +1262,7 @@ function placeholderMsg(label) {
 
 async function generateImage(text) {
   if (controller) return;
+  if (!apiKey) { openSettings(); return toast("⚠️ أضف مفتاح OpenRouter أولاً"); }
   if (!messages.length) chatInner.innerHTML = "";
   messages.push({ role: "user", content: text });
   drawMessage(messages[messages.length - 1], messages.length - 1);
@@ -1268,17 +1275,33 @@ async function generateImage(text) {
   setBusy(true);
   try {
     let p = text;
-    if (enhanceOn && apiKey) { try { p = await raceAbort(enhancePrompt(text), ctl.signal); } catch (e) { if (e.name === "AbortError") throw e; } }
-    const url = genUrl(p, Math.floor(Math.random() * 1e9));
-    await new Promise((res, rej) => {
-      const im = new Image();
-      const timer = setTimeout(() => { im.src = ""; rej(new Error("انتهت مهلة توليد الصورة")); }, 90000);
-      ctl.signal.addEventListener("abort", () => { clearTimeout(timer); im.src = ""; rej(new DOMException("Aborted", "AbortError")); });
-      im.onload = () => { clearTimeout(timer); res(); };
-      im.onerror = () => { clearTimeout(timer); rej(new Error("فشل توليد الصورة، حاول مرة أخرى")); };
-      im.src = url;
-    });
-    messages.push({ role: "assistant", content: "🎨 " + text, genImage: url, genPrompt: p });
+    if (enhanceOn) { try { p = await raceAbort(enhancePrompt(text), ctl.signal); } catch (e) { if (e.name === "AbortError") throw e; } }
+    const meta = modelMeta[genModel] || {};
+    const body = {
+      model: genModel,
+      messages: [{ role: "user", content: p }],
+      modalities: meta.outText === false ? ["image"] : ["image", "text"],
+      image_config: { aspect_ratio: genSize },
+      stream: false
+    };
+    const res = await raceAbort(fetch(API_URL, {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }), ctl.signal);
+    if (!res.ok) {
+      let detail = "";
+      try { const j = await res.json(); detail = j.error?.message || ""; } catch {}
+      throw new Error(apiErrorText(res.status, detail));
+    }
+    const j = await raceAbort(res.json(), ctl.signal);
+    const msg = j.choices?.[0]?.message || {};
+    const imgUrl = msg.images?.[0]?.image_url?.url || msg.images?.[0]?.url;
+    if (!imgUrl) throw new Error(msg.content ? "الموديل ردّ بنص بدل صورة: " + String(msg.content).slice(0, 200) : "لم يرجع الموديل صورة. جرّب موديل توليد آخر من الإعدادات ← الصور.");
+    const gid = "g" + Date.now() + Math.random().toString(36).slice(2, 6);
+    genCache[gid] = imgUrl;
+    await idb.set("gen_" + gid, imgUrl);
+    messages.push({ role: "assistant", content: "🎨 " + text, genId: gid, genPrompt: p });
     saveChat();
     restore();
   } catch (e) {
@@ -1303,18 +1326,23 @@ async function send(raw, forceGen = false) {
     if (!text) return;
     return generateImage(text);
   }
-  if (!apiKey) { openSettings(); return toast("⚠️ أضف مفتاح Groq أولاً"); }
+  if (!apiKey) { openSettings(); return toast("⚠️ أضف مفتاح OpenRouter أولاً"); }
 
   messages = messages.filter(m => m && m.content);
   const needsVision = attachments.length > 0;
   let useModel = model;
   if (needsVision && !isVisionModel(model)) {
     if (!autoVision) { attachments = []; renderAttachPreview(); return toast("⚠️ الموديل الحالي لا يدعم الصور"); }
+    if (modelsLoaded && !availableModels.includes(visionModel)) {
+      const v = availableModels.find(isVisionModel);
+      if (!v) { attachments = []; renderAttachPreview(); return toast("⚠️ لا يوجد موديل رؤية متاح لمفتاحك حالياً"); }
+      visionModel = v; store.set("rosto_vision", v);
+    }
     useModel = visionModel;
     toast("🖼 تم التبديل لموديل الرؤية");
   } else if (!needsVision) {
     if (useThink && !isReasoningModel(useModel)) useModel = THINK_MODEL;
-    if (useSearch) useModel = SEARCH_MODEL;
+    if (useSearch) useModel = useModel + ":online";
   }
 
   const imgs = attachments.slice();
@@ -1389,15 +1417,15 @@ async function send(raw, forceGen = false) {
 
   try {
     let res = await raceAbort(fetchRetry(API_URL, mkOpts), ctl.signal);
-    if (!res.ok && useModel === SEARCH_MODEL && [400, 403, 404].includes(res.status)) {
+    if (!res.ok && useModel.endsWith(":online") && [400, 402, 403, 404].includes(res.status)) {
       toast("🔍 البحث غير متاح لمفتاحك، سأجيب بدونه");
-      useModel = (useThink && !isReasoningModel(model)) ? THINK_MODEL : model;
+      useModel = useModel.replace(/:online$/, "");
       res = await raceAbort(fetchRetry(API_URL, mkOpts), ctl.signal);
     }
     if (!res.ok) {
       let detail = "";
       try { const j = await res.json(); detail = j.error?.message || j.message || ""; } catch {}
-      return fail("خطأ " + res.status + (detail ? ": " + detail : ""));
+      return fail(apiErrorText(res.status, detail));
     }
 
     const handleLine = (line) => {
@@ -1406,7 +1434,8 @@ async function send(raw, forceGen = false) {
       if (!data || data === "[DONE]") return;
       let json;
       try { json = JSON.parse(data); } catch { return; }
-      usage = json.x_groq?.usage || json.usage || usage;
+      if (json.error && !json.choices) throw new Error(json.error.message || "خطأ من الموديل");
+      usage = json.usage || usage;
       const d = json.choices?.[0]?.delta;
       if (!d) return;
       let changed = false;
@@ -1474,7 +1503,7 @@ async function send(raw, forceGen = false) {
       toast("⏹ تم الإيقاف");
     } else {
       console.error(e);
-      fail(/failed to fetch|networkerror/i.test(e.message || "") ? "تعذّر الاتصال بـ Groq. غالباً المعاينة تمنع الإنترنت، افتح الملف في Chrome مباشرة من تطبيق الملفات." : "مشكلة في الاتصال: " + (e.message || e.name || "unknown"));
+      fail(/failed to fetch|networkerror/i.test(e.message || "") ? "تعذّر الاتصال بـ OpenRouter. غالباً المعاينة تمنع الإنترنت، افتح الملف في Chrome مباشرة من تطبيق الملفات." : "مشكلة في الاتصال: " + (e.message || e.name || "unknown"));
     }
   } finally {
     controller = null;
@@ -1520,31 +1549,39 @@ function fillSelect(sel, ids, current) {
 function buildModelMenu() {
   const menu = $("modelMenu");
   menu.innerHTML = "";
-  const groups = [
-    ["نصوص وتفكير", availableModels.filter(m => !isVisionModel(m))],
-    ["رؤية — تحليل الصور 🖼", availableModels.filter(isVisionModel)]
-  ];
-  groups.forEach(([label, ids]) => {
-    if (!ids.length) return;
-    const l = document.createElement("div");
-    l.className = "mm-label"; l.textContent = label;
-    menu.appendChild(l);
-    ids.forEach(id => {
-      const b = document.createElement("button");
-      b.className = "mm-item" + (id === model ? " active" : "");
-      const tags = (isReasoningModel(id) ? '<span class="mm-tag">تفكير</span>' : "") + (isVisionModel(id) ? '<span class="mm-tag">رؤية</span>' : "");
-      b.innerHTML = `<span class="mm-name">${esc(id)}</span>${tags}`;
-      b.onclick = () => {
-        model = id;
-        store.set("rosto_model", model);
-        if (isVisionModel(id)) { visionModel = id; store.set("rosto_vision", id); }
-        updateModelBadge();
-        closeModelMenu();
-        toast("✓ " + shortModel(id));
-      };
-      menu.appendChild(b);
+  const inp = document.createElement("input");
+  inp.type = "text"; inp.className = "mm-search"; inp.placeholder = "ابحث عن موديل..."; inp.value = menuFilter;
+  const box = document.createElement("div");
+  menu.append(inp, box);
+  const draw = () => {
+    box.innerHTML = "";
+    const q = menuFilter.trim().toLowerCase();
+    const ids = availableModels.filter(id => !q || id.toLowerCase().includes(q));
+    [["مجانية", ids.filter(id => /:free$/.test(id))], ["مدفوعة", ids.filter(id => !/:free$/.test(id))]].forEach(([label, arr]) => {
+      if (!arr.length) return;
+      const l = document.createElement("div");
+      l.className = "mm-label"; l.textContent = label + (arr.length > 100 ? " (أول 100، استخدم البحث)" : "");
+      box.appendChild(l);
+      arr.slice(0, 100).forEach(id => {
+        const b = document.createElement("button");
+        b.className = "mm-item" + (id === model ? " active" : "");
+        const tags = (isReasoningModel(id) ? '<span class="mm-tag">تفكير</span>' : "") + (isVisionModel(id) ? '<span class="mm-tag">رؤية</span>' : "");
+        b.innerHTML = `<span class="mm-name">${esc(id)}</span>${tags}`;
+        b.onclick = () => {
+          model = id;
+          store.set("rosto_model", model);
+          if (isVisionModel(id)) { visionModel = id; store.set("rosto_vision", id); }
+          updateModelBadge();
+          closeModelMenu();
+          toast("✓ " + shortModel(id));
+        };
+        box.appendChild(b);
+      });
     });
-  });
+    if (!box.firstChild) box.innerHTML = '<div class="mm-label">لا نتائج</div>';
+  };
+  inp.oninput = () => { menuFilter = inp.value; draw(); };
+  draw();
 }
 function openModelMenu() { buildModelMenu(); $("modelMenu").classList.add("open"); $("modelBadge").classList.add("open"); }
 function closeModelMenu() { $("modelMenu").classList.remove("open"); $("modelBadge").classList.remove("open"); }
@@ -1620,12 +1657,12 @@ function closeSidebar() { $("sidebar").classList.remove("open"); $("sidebarOverl
 
 /* ═══ الإعدادات ═══ */
 function openSettings() {
-  $("keyInput").value = apiKey.startsWith("gsk_") ? apiKey : "";
+  $("keyInput").value = apiKey.startsWith(KEY_PREFIX) ? apiKey : "";
   fillSelect($("modelSelect"), availableModels, model);
   fillSelect($("visionSelect"), availableModels.filter(isVisionModel).length ? availableModels.filter(isVisionModel) : [DEFAULT_VISION], visionModel);
   $("modelInput").value = "";
   $("systemInput").value = systemPrompt;
-  $("genModelSelect").value = genModel;
+  fillSelect($("genModelSelect"), imageModels.length ? imageModels : [DEFAULT_GEN], genModel);
   $("genSizeSelect").value = genSize;
   $("enhanceToggle").checked = enhanceOn;
   $("autoVisionToggle").checked = autoVision;
@@ -1746,21 +1783,44 @@ $$("button[data-theme]").forEach(b => {
 });
 
 async function loadModels(showToast = false) {
-  if (!apiKey || !apiKey.startsWith("gsk_")) { if (showToast) toast("⚠️ أضف المفتاح أولاً"); return; }
+  if (!apiKey || !apiKey.startsWith(KEY_PREFIX)) { if (showToast) toast("⚠️ أضف المفتاح أولاً"); return; }
   try {
     const r = await fetch(MODELS_URL, { headers: { Authorization: "Bearer " + apiKey } });
     if (!r.ok) throw new Error("HTTP " + r.status);
     const { data } = await r.json();
-    const list = (data || []).filter(m => m.active !== false && !/whisper|tts|guard|orpheus|playai|prompt-guard|safeguard/i.test(m.id)).map(m => m.id).sort();
-    if (list.length) {
-      availableModels = list;
-      if ($("settings").classList.contains("open")) {
-        fillSelect($("modelSelect"), list, $("modelInput").value.trim() || model);
-        const v = list.filter(isVisionModel);
-        fillSelect($("visionSelect"), v.length ? v : [DEFAULT_VISION], visionModel);
-      }
-      if (showToast) toast(`✓ ${list.length} موديل متاح`);
+    const text = [], imgs = [];
+    (data || []).forEach(m => {
+      const arch = m.architecture || {};
+      const ins = arch.input_modalities || [], outs = arch.output_modalities || [];
+      const sp = m.supported_parameters || [];
+      modelMeta[m.id] = { vision: ins.includes("image"), reasoning: sp.includes("reasoning") || sp.includes("include_reasoning"), outText: outs.includes("text"), maxOut: m.top_provider?.max_completion_tokens || null };
+      if (outs.includes("image")) imgs.push(m.id);
+      else if (outs.includes("text")) text.push(m.id);
+    });
+    if (!text.length) throw new Error("لا توجد موديلات");
+    availableModels = text.sort();
+    imageModels = imgs.sort();
+    modelsLoaded = true;
+    const pick = (arr, prefs) => { for (const re of prefs) { const f = arr.find(x => re.test(x)); if (f) return f; } return arr[0]; };
+    if (!availableModels.includes(model)) {
+      model = pick(availableModels, [/^openai\/gpt-oss-120b:free$/, /^openai\/gpt-oss-120b$/, /gemini-2\.5-flash$/]);
+      store.set("rosto_model", model); updateModelBadge();
     }
+    const vl = availableModels.filter(isVisionModel);
+    if (vl.length && !vl.includes(visionModel)) {
+      visionModel = pick(vl, [/^google\/gemini-2\.5-flash$/, /gemini.*flash/, /:free$/]);
+      store.set("rosto_vision", visionModel);
+    }
+    if (imageModels.length && !imageModels.includes(genModel)) {
+      genModel = pick(imageModels, [/gemini.*flash.*image/, /image/]);
+      store.set("rosto_genmodel2", genModel);
+    }
+    if ($("settings").classList.contains("open")) {
+      fillSelect($("modelSelect"), availableModels, $("modelInput").value.trim() || model);
+      fillSelect($("visionSelect"), vl.length ? vl : [DEFAULT_VISION], visionModel);
+      fillSelect($("genModelSelect"), imageModels.length ? imageModels : [DEFAULT_GEN], genModel);
+    }
+    if (showToast) toast(`✓ ${availableModels.length} موديل نصي، ${imageModels.length} لتوليد الصور`);
   } catch (e) { if (showToast) toast("❌ فشل: " + e.message); }
 }
 $("reloadModels").onclick = () => loadModels(true);
@@ -1785,7 +1845,7 @@ $("restoreFile").onchange = async (e) => {
     if (!confirm("⚠️ سيتم استبدال كل البيانات. متأكد؟")) { e.target.value = ""; return; }
     Sessions.save(d.sessions);
     if (d.current) store.set(Sessions.CURRENT, d.current);
-    const map = { model: "rosto_model", visionModel: "rosto_vision", genModel: "rosto_genmodel", genSize: "rosto_gensize", enhanceOn: "rosto_enhance", systemPrompt: "rosto_system", ttsEnabled: "rosto_tts", streamEnabled: "rosto_stream", autoVision: "rosto_autovision", compressOn: "rosto_compress", reasoningEnabled: "rosto_reasoning", themePref: "rosto_theme", temperature: "rosto_temp", maxTokens: "rosto_maxtok", topP: "rosto_topp", maxHistory: "rosto_hist", imgQuality: "rosto_imgq" };
+    const map = { model: "rosto_model", visionModel: "rosto_vision", genModel: "rosto_genmodel2", genSize: "rosto_gensize2", enhanceOn: "rosto_enhance2", systemPrompt: "rosto_system", ttsEnabled: "rosto_tts", streamEnabled: "rosto_stream", autoVision: "rosto_autovision", compressOn: "rosto_compress", reasoningEnabled: "rosto_reasoning", themePref: "rosto_theme", temperature: "rosto_temp", maxTokens: "rosto_maxtok", topP: "rosto_topp", maxHistory: "rosto_hist", imgQuality: "rosto_imgq" };
     Object.entries(d.settings || {}).forEach(([k, v]) => { if (map[k]) store.set(map[k], typeof v === "boolean" ? (v ? "1" : "0") : String(v)); });
     toast("✓ تمت الاستعادة");
     setTimeout(() => location.reload(), 1000);
@@ -1860,8 +1920,8 @@ document.addEventListener("keydown", (e) => {
 (async function init() {
   let savedKey = "";
   try { savedKey = await loadSecureKey(); } catch {}
-  if (savedKey && savedKey.startsWith("gsk_")) apiKey = savedKey;
-  else if (GROQ_API_KEY.startsWith("gsk_")) { apiKey = GROQ_API_KEY; try { await saveSecureKey(apiKey); } catch {} }
+  if (savedKey && savedKey.startsWith(KEY_PREFIX)) apiKey = savedKey;
+  else if (OPENROUTER_API_KEY.startsWith(KEY_PREFIX)) { apiKey = OPENROUTER_API_KEY; try { await saveSecureKey(apiKey); } catch {} }
 
   const s = Sessions.all()[Sessions.current()];
   if (s?.messages?.length) messages = s.messages.slice();
@@ -1874,7 +1934,7 @@ document.addEventListener("keydown", (e) => {
   setBusy(false);
 
   if (apiKey) loadModels();
-  else setTimeout(() => { toast("أضف مفتاح Groq من الإعدادات للبدء", 4000); openSettings(); }, 700);
+  else setTimeout(() => { toast("أضف مفتاح OpenRouter من الإعدادات للبدء", 4000); openSettings(); }, 700);
 })();
 </script>
 </body>
