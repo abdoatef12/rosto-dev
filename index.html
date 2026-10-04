@@ -473,16 +473,15 @@
 "use strict";
 
 /* المفتاح: أدخله من الإعدادات (لا تكتبه داخل الكود، خصوصاً لو الملف على GitHub) */
-const OPENROUTER_API_KEY = "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";
-
-const DEFAULT_MODEL = "openai/gpt-oss-120b";
-const API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const MODELS_URL = "https://openrouter.ai/api/v1/models?output_modalities=all";
-const DEFAULT_VISION = "google/gemini-2.5-flash";
-const DEFAULT_GEN = "google/gemini-2.5-flash-image";
-const THINK_MODEL = "openai/gpt-oss-120b";
-const ENHANCE_MODEL = "openai/gpt-oss-20b";
-const KEY_PREFIX = "sk-or-";
+const GEMINI_API_KEY = "AQ.Ab8RN6ImekXVvidAF4US_XSyCAYB5vh5CZWENDThQRJo_GXssg";
+  
+const DEFAULT_MODEL = "gemini-2.5-flash";
+const API_URL = "https://generativelanguage.googleapis.com/v1beta";
+const DEFAULT_VISION = "gemini-2.5-flash";
+const DEFAULT_GEN = "imagen-4.0-generate-001";
+const THINK_MODEL = "gemini-2.5-flash";
+const ENHANCE_MODEL = "gemini-2.5-flash";
+const KEY_PREFIX = "AQ.";
 const modelMeta = {};
 let modelsLoaded = false;
 const isVisionModel = (m) => modelMeta[m] ? modelMeta[m].vision : /gemini|gpt-4o|gpt-5|claude|llama-4|vision|[-\/]vl\b|vl-/i.test(m || "");
