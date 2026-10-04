@@ -307,7 +307,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
       </button>
       <div class="model-badge" id="modelBadge" role="button" tabindex="0" aria-haspopup="true">
-        <span class="model-badge-name" id="modelBadgeName">Stable Fast 1</span>
+        <span class="model-badge-name" id="modelBadgeName">deepseek-v4.1-flash</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
       </div>
     </div>
@@ -330,17 +330,21 @@
     <div class="composer-inner">
       <div class="attach-preview" id="attachPreview"></div>
       <div class="composer" id="composer">
-        <textarea class="composer-input" id="input" rows="1" placeholder="اكتب وصف الصورة..." aria-label="نص الرسالة"></textarea>
+        <textarea class="composer-input" id="input" rows="1" placeholder="أرسل رسالة إلى ROSTO..." aria-label="نص الرسالة"></textarea>
         <div class="composer-bottom">
-          <button class="mode-btn active" id="imageBtn" title="توليد صورة">
+          <button class="mode-btn" id="thinkBtn" title="تفكير عميق">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2z"/></svg>
+            <span>DeepThink</span>
+          </button>
+          <button class="mode-btn" id="searchWebBtn" title="بحث في الويب">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z"/></svg>
+            <span>بحث</span>
+          </button>
+          <button class="mode-btn" id="imageBtn" title="توليد صورة">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-            <span>توليد صورة</span>
+            <span>صورة</span>
           </button>
-          <button class="mode-btn" id="visionBtn" title="تحليل صورة">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            <span>تحليل صورة</span>
-          </button>
-          <button class="composer-btn" id="attachBtn" title="إرفاق صورة" aria-label="إرفاق">
+          <button class="composer-btn" id="attachBtn" title="إرفاق صورة للتحليل" aria-label="إرفاق">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
           </button>
           <button class="composer-btn" id="micBtn" title="إدخال صوتي" aria-label="الميكروفون">
@@ -352,7 +356,7 @@
           </button>
         </div>
       </div>
-      <div class="disclaimer">ROSTO + TheHive.ai — قد يخطئ، تحقق من المعلومات.</div>
+      <div class="disclaimer">ROSTO powered by TheHive.ai — قد يخطئ، تحقق من المعلومات المهمة.</div>
     </div>
   </footer>
 </main>
@@ -362,41 +366,78 @@
 <div class="modal-overlay" id="settings">
   <div class="modal">
     <h3>⚙️ الإعدادات</h3>
-    <p class="modal-sub">إعدادات TheHive.ai</p>
+    <p class="modal-sub">TheHive.ai API Settings</p>
     <div class="modal-tabs">
       <button class="modal-tab active" data-tab="t-general">عام</button>
       <button class="modal-tab" data-tab="t-images">الصور</button>
+      <button class="modal-tab" data-tab="t-persona">الشخصيات</button>
+      <button class="modal-tab" data-tab="t-advanced">متقدم</button>
       <button class="modal-tab" data-tab="t-theme">المظهر</button>
       <button class="modal-tab" data-tab="t-data">البيانات</button>
     </div>
 
     <div class="modal-tab-content active" id="t-general">
-      <label>🔑 مفتاح TheHive.ai API</label>
-      <input id="keyInput" type="password" placeholder="مفتاحك من thehive.ai" autocomplete="off" spellcheck="false">
-      <div class="hint">🔐 احصل على مفتاح من <a href="https://thehive.ai" target="_blank" style="color:var(--ds-primary)">thehive.ai</a> → Service API Keys</div>
+      <label>🔑 مفتاح TheHive.ai</label>
+      <input id="keyInput" type="password" placeholder="sk-..." autocomplete="off" spellcheck="false">
+      <div class="hint">🔐 احصل على مفتاح من <a href="https://thehive.ai" target="_blank" style="color:var(--ds-primary)">thehive.ai</a> ← Service API Keys</div>
+      <label>🤖 الموديل</label>
+      <select id="modelSelect">
+        <option value="deepseek-ai/deepseek-v4.1-flash">deepseek-v4.1-flash — سريع</option>
+        <option value="deepseek-ai/deepseek-v4.1-pro">deepseek-v4.1-pro — قوي</option>
+        <option value="zai-org/glm-5.3-flash">glm-5.3-flash — متعدد الوسائط</option>
+        <option value="deepseek-ai/deepseek-v3.2-exp">deepseek-v3.2-exp — تجريبي</option>
+      </select>
+      <label>✏️ أو اكتب مخصص</label>
+      <input id="modelInput" type="text" placeholder="deepseek-ai/deepseek-v4.1-flash" spellcheck="false">
+      <div style="margin-top:12px">
+        <div class="switch-row"><div>🔊 النطق التلقائي</div><label class="switch"><input type="checkbox" id="ttsToggle"><span class="slider"></span></label></div>
+        <div class="switch-row"><div>🌊 Streaming</div><label class="switch"><input type="checkbox" id="streamToggle" checked><span class="slider"></span></label></div>
+        <div class="switch-row"><div>🧠 عرض التفكير</div><label class="switch"><input type="checkbox" id="reasoningToggle" checked><span class="slider"></span></label></div>
+      </div>
+    </div>
+
+    <div class="modal-tab-content" id="t-images">
+      <label>🖼 موديل تحليل الصور (Vision)</label>
+      <select id="visionSelect">
+        <option value="deepseek-ai/deepseek-v4.1-flash">deepseek-v4.1-flash</option>
+        <option value="deepseek-ai/deepseek-v4.1-pro">deepseek-v4.1-pro</option>
+        <option value="zai-org/glm-5.3-flash">glm-5.3-flash</option>
+      </select>
+      <div class="hint">يُستخدم تلقائياً عند إرفاق صورة.</div>
       <label>🎨 موديل توليد الصور</label>
       <select id="genModelSelect">
-        <option value="sf1">Stable Fast 1 (sf1) — توليد صور</option>
-        <option value="va1">Vision AI 1 (va1) — تحليل صور</option>
+        <option value="black-forest-labs/flux-schnell">flux-schnell — سريع</option>
+        <option value="black-forest-labs/flux-dev">flux-dev — جودة أعلى</option>
+        <option value="stabilityai/stable-diffusion-xl-base-1.0">SDXL Base</option>
+        <option value="stabilityai/stable-diffusion-3.5-large">SD 3.5 Large</option>
       </select>
       <label>📐 حجم الصورة</label>
       <select id="genSizeSelect">
         <option value="1:1">مربع 1:1</option>
         <option value="16:9">عرضي 16:9</option>
         <option value="9:16">طولي 9:16</option>
+        <option value="4:3">4:3</option>
       </select>
-      <div class="hint">الموديلات المتاحة لمفتاحك: <code>sf1</code> للصور، <code>va1</code> للتحليل.</div>
+      <div style="margin-top:12px">
+        <div class="switch-row"><div>✨ تحسين الوصف تلقائياً</div><label class="switch"><input type="checkbox" id="enhanceToggle" checked><span class="slider"></span></label></div>
+        <div class="switch-row"><div>🖼 Vision تلقائي</div><label class="switch"><input type="checkbox" id="autoVisionToggle" checked><span class="slider"></span></label></div>
+        <div class="switch-row"><div>🗜 ضغط الصور</div><label class="switch"><input type="checkbox" id="compressToggle" checked><span class="slider"></span></label></div>
+      </div>
+      <div class="range-row"><label>🗜 جودة الصور <span><b id="imgQVal">82</b>%</span></label><input type="range" id="imgQRange" min="50" max="95" step="5" value="82"></div>
     </div>
 
-    <div class="modal-tab-content" id="t-images">
-      <label>🖼 موديل تحليل الصور</label>
-      <select id="visionSelect">
-        <option value="va1">Vision AI 1 (va1)</option>
-      </select>
-      <div class="hint">يُستخدم تلقائياً عند إرفاق صورة.</div>
-      <div class="switch-row"><div>✨ تحسين الوصف تلقائياً</div><label class="switch"><input type="checkbox" id="enhanceToggle" checked><span class="slider"></span></label></div>
-      <div class="switch-row"><div>🗜 ضغط الصور</div><label class="switch"><input type="checkbox" id="compressToggle" checked><span class="slider"></span></label></div>
-      <div class="range-row"><label>🗜 جودة الصور <span><b id="imgQVal">82</b>%</span></label><input type="range" id="imgQRange" min="50" max="95" step="5" value="82"></div>
+    <div class="modal-tab-content" id="t-persona">
+      <p style="color:var(--ds-text-secondary);font-size:13px;margin-bottom:12px">اختر شخصية جاهزة:</p>
+      <div id="personaList"></div>
+      <label style="margin-top:16px">📝 System Prompt مخصص</label>
+      <textarea id="systemInput" rows="5" placeholder="اكتب توجيهاتك هنا..."></textarea>
+    </div>
+
+    <div class="modal-tab-content" id="t-advanced">
+      <div class="range-row"><label>🌡 Temperature <span id="tempVal">0.7</span></label><input type="range" id="tempRange" min="0" max="2" step="0.05" value="0.7"></div>
+      <div class="range-row"><label>📏 Max Tokens <span id="maxTokVal">16384</span></label><input type="range" id="maxTokRange" min="256" max="32768" step="256" value="16384"></div>
+      <div class="range-row"><label>🎯 Top P <span id="topPVal">1.0</span></label><input type="range" id="topPRange" min="0.1" max="1" step="0.05" value="1"></div>
+      <div class="range-row"><label>📜 سياق الرسائل <span id="histVal">30</span></label><input type="range" id="histRange" min="2" max="60" step="1" value="30"></div>
     </div>
 
     <div class="modal-tab-content" id="t-theme">
@@ -410,8 +451,11 @@
 
     <div class="modal-tab-content" id="t-data">
       <p style="color:var(--ds-text-secondary);font-size:13px;margin-bottom:12px">إدارة بياناتك:</p>
+      <button class="preset-btn" id="exportChatBtn"><strong>💾 تصدير المحادثة الحالية</strong><small>TXT</small></button>
       <button class="preset-btn" id="exportAllBtn"><strong>💾 نسخة احتياطية كاملة</strong><small>JSON</small></button>
+      <button class="preset-btn" id="restoreAllBtn"><strong>📥 استعادة من نسخة</strong><small>ملف JSON</small></button>
       <button class="preset-btn" id="clearAllBtn" style="border-color:var(--ds-danger)"><strong style="color:var(--ds-danger)">🗑 مسح كل شيء</strong><small>لا يمكن التراجع</small></button>
+      <input type="file" id="restoreFile" accept=".json" hidden>
     </div>
 
     <div class="modal-actions">
@@ -423,30 +467,82 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/common.min.js"></script>
 <script>
 "use strict";
 
 /* ═══════════════════════════════════════════════════════════════════
-   TheHive.ai API — إعدادات
+   TheHive.ai API — OpenAI-compatible
    ═══════════════════════════════════════════════════════════════════ */
-const THEHIVE_KEY_BUILTIN = "B5kaCZS31f/1DlcWqKWWlw==";
+const THEHIVE_KEY_BUILTIN = "sk-bb2fc14011954e15864bbb4fbb545958";
+
+// الـ Base URL الرسمي
 const API_BASE = "https://api.thehive.ai/api/v3";
 
-const DEFAULT_GEN_MODEL = "sf1";
-const DEFAULT_VISION_MODEL = "va1";
+// Chat endpoint (OpenAI-compatible)
+const CHAT_URL = API_BASE + "/chat/completions";
+
+// Image generation endpoints
+const IMAGE_ENDPOINTS = {
+  "black-forest-labs/flux-schnell": API_BASE + "/black-forest-labs/flux-schnell",
+  "black-forest-labs/flux-dev": API_BASE + "/black-forest-labs/flux-dev",
+  "stabilityai/stable-diffusion-xl-base-1.0": API_BASE + "/stabilityai/stable-diffusion-xl-base-1.0",
+  "stabilityai/stable-diffusion-3.5-large": API_BASE + "/stabilityai/stable-diffusion-3.5-large"
+};
+
+const DEFAULT_MODEL = "deepseek-ai/deepseek-v4.1-flash";
+const DEFAULT_VISION = "deepseek-ai/deepseek-v4.1-flash";
+const DEFAULT_GEN = "black-forest-labs/flux-schnell";
+const THINK_MODEL = "deepseek-ai/deepseek-v4.1-pro";
+const ENHANCE_MODEL = "deepseek-ai/deepseek-v4.1-flash";
+
+const AVAILABLE_MODELS = [
+  "deepseek-ai/deepseek-v4.1-flash",
+  "deepseek-ai/deepseek-v4.1-pro",
+  "zai-org/glm-5.3-flash",
+  "deepseek-ai/deepseek-v3.2-exp"
+];
+
+const IMAGE_MODELS = [
+  "black-forest-labs/flux-schnell",
+  "black-forest-labs/flux-dev",
+  "stabilityai/stable-diffusion-xl-base-1.0",
+  "stabilityai/stable-diffusion-3.5-large"
+];
 
 const MAX_IMAGES = 5;
+
+const PERSONAS = {
+  "💻 مطور عام": "أنت مساعد مطور عربي محترف. تجيب بوضوح، تعطي كود كامل، تشرح بإيجاز مع أمثلة عملية.",
+  "⚙️ مدير Linux": "أنت مدير أنظمة Linux خبير. تقدم أوامر دقيقة مع شروحات للأخطاء المحتملة.",
+  "🚀 Full Stack": "أنت مطور Full Stack خبير. تبني حلول متكاملة Frontend + Backend + DB.",
+  "🖥️ Electron": "أنت خبير Electron.js. تبني تطبيقات سطح مكتب احترافية.",
+  "🌐 Web Apps": "أنت خبير Web Apps حديثة. تستخدم أحدث التقنيات والأداء الأمثل.",
+  "📱 موبايل": "أنت خبير تطبيقات موبايل React Native / Flutter.",
+  "🤖 بوتات": "أنت خبير بوتات Discord/Telegram.",
+  "🧠 AI/ML": "أنت مهندس ML ومحلل بيانات. تشرح المفاهيم بعمق.",
+  "⛓️ Blockchain": "أنت مطور Blockchain خبير في Solidity و Web3.",
+  "🚀 DevOps": "أنت مهندس DevOps. تبني CI/CD و Docker و Kubernetes.",
+  "🎮 ألعاب": "أنت مطور ألعاب. تستخدم Unity/Godot/Web Games.",
+  "🌍 مترجم": "أنت مترجم محترف عربي ↔ إنجليزي. تحافظ على الأسلوب والسياق.",
+  "📚 مدرس": "أنت مدرس صبور. تشرح خطوة بخطوة مع أمثلة بسيطة.",
+  "🔒 أمن سيبراني": "أنت خبير أمن سيبراني. تقدم نصائح دفاعية وأفضل الممارسات.",
+  "✍️ كاتب محتوى": "أنت كاتب محتوى إبداعي. تكتب بأسلوب جذاب ومنظم."
+};
 
 const $ = (id) => document.getElementById(id);
 const $$ = (sel) => document.querySelectorAll(sel);
 
 const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch { return d; } },
-  set(k, v) { try { localStorage.setItem(k, v); return true; } catch { return false; } },
+  set(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { console.warn("Storage:", e); return false; } },
   del(k) { try { localStorage.removeItem(k); } catch {} }
 };
 
 const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const shortModel = (id) => String(id || "").split("/").pop();
 
 function msgText(m) {
   if (!m) return "";
@@ -463,43 +559,148 @@ function stripImgs(m) {
   return { ...m, content: msgText(m) + " [صورة]" };
 }
 
+/* ═══ IndexedDB + تشفير المفتاح ═══ */
+const idb = {
+  open() {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open("rosto_v3", 1);
+      r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains("kv")) r.result.createObjectStore("kv"); };
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+  },
+  async get(k) {
+    try { const db = await this.open(); return await new Promise((res, rej) => { const q = db.transaction("kv").objectStore("kv").get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); } catch { return null; }
+  },
+  async set(k, v) {
+    try { const db = await this.open(); return await new Promise((res, rej) => { const t = db.transaction("kv", "readwrite"); t.objectStore("kv").put(v, k); t.oncomplete = () => res(); t.onerror = () => rej(t.error); }); } catch {}
+  },
+  async clear() {
+    try { const db = await this.open(); return await new Promise((res) => { const t = db.transaction("kv", "readwrite"); t.objectStore("kv").clear(); t.oncomplete = () => res(); t.onerror = () => res(); }); } catch {}
+  }
+};
+const b64 = {
+  enc(u8) { let s = ""; for (let i = 0; i < u8.length; i++) s += String.fromCharCode(u8[i]); return btoa(s); },
+  dec(s) { return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
+};
+async function getDeviceKey() {
+  let k = await idb.get("devkey");
+  if (!k) { k = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]); await idb.set("devkey", k); }
+  return k;
+}
+async function saveSecureKey(plain) {
+  if (!plain) { store.del("rosto_key_hive"); return; }
+  try {
+    const key = await getDeviceKey();
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(plain));
+    store.set("rosto_key_hive", b64.enc(iv) + "." + b64.enc(new Uint8Array(ct)));
+  } catch (e) { console.warn("Encrypt failed:", e); }
+}
+async function loadSecureKey() {
+  const v3 = store.get("rosto_key_hive");
+  if (!v3) return "";
+  try {
+    const [iv, ct] = v3.split(".").map(b64.dec);
+    const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, await getDeviceKey(), ct);
+    return new TextDecoder().decode(pt);
+  } catch { return ""; }
+}
+
+function raceAbort(promise, signal) {
+  if (!signal) return promise;
+  return new Promise((resolve, reject) => {
+    if (signal.aborted) return reject(new DOMException("Aborted", "AbortError"));
+    const onAbort = () => reject(new DOMException("Aborted", "AbortError"));
+    signal.addEventListener("abort", onAbort, { once: true });
+    promise.then(v => { signal.removeEventListener("abort", onAbort); resolve(v); },
+                 e => { signal.removeEventListener("abort", onAbort); reject(e); });
+  });
+}
+
 /* ═══ الحالة ═══ */
 let apiKey = "";
-let genModel = store.get("rosto_genmodel2", DEFAULT_GEN_MODEL) || DEFAULT_GEN_MODEL;
-let visionModel = store.get("rosto_vision2", DEFAULT_VISION_MODEL) || DEFAULT_VISION_MODEL;
+let model = store.get("rosto_model", DEFAULT_MODEL) || DEFAULT_MODEL;
+let visionModel = store.get("rosto_vision", DEFAULT_VISION) || DEFAULT_VISION;
+let genModel = store.get("rosto_genmodel2", DEFAULT_GEN) || DEFAULT_GEN;
 let genSize = store.get("rosto_gensize2", "1:1") || "1:1";
-let enhanceOn = store.get("rosto_enhance2", "0") === "1";
+let enhanceOn = store.get("rosto_enhance2", "1") === "1";
+let systemPrompt = store.get("rosto_system", "") || "";
+let ttsEnabled = store.get("rosto_tts", "0") === "1";
+let streamEnabled = store.get("rosto_stream", "1") === "1";
+let autoVision = store.get("rosto_autovision", "1") === "1";
 let compressOn = store.get("rosto_compress", "1") === "1";
+let reasoningEnabled = store.get("rosto_reasoning", "1") === "1";
 let themePref = store.get("rosto_theme", "light");
+let temperature = parseFloat(store.get("rosto_temp", "0.7"));
+let maxTokens = parseInt(store.get("rosto_maxtok", "16384"));
+let topP = parseFloat(store.get("rosto_topp", "1"));
+let maxHistory = parseInt(store.get("rosto_hist", "30"));
 let imgQuality = parseInt(store.get("rosto_imgq", "82"));
+let availableModels = AVAILABLE_MODELS.slice();
+let imageModels = IMAGE_MODELS.slice();
+let menuFilter = "";
+const genCache = {};
+
+let useSearch = false, useThink = false, useImage = false;
 
 let messages = [];
-let attachments = [];
 let controller = null;
+let attachments = [];
 let recognition = null;
 let isRecording = false;
 let scrollAuto = true;
 let chatFilter = "";
-let currentMode = "image"; // "image" أو "vision"
 
 const chat = $("chat"), chatInner = $("chatInner"), input = $("input"), sendBtn = $("sendBtn"), composer = $("composer"), fileInput = $("fileInput");
 
-/* ═══ Sessions (محادثات) ═══ */
 const Sessions = {
   KEY: "rosto_sessions_v3", CURRENT: "rosto_current_v3",
   all() { try { return JSON.parse(store.get(this.KEY) || "{}"); } catch { return {}; } },
-  save(all) { store.set(this.KEY, JSON.stringify(all)); },
-  current() { let c = store.get(this.CURRENT, ""); const all = this.all(); if (!c || !all[c]) c = this.create(); return c; },
+  save(all) {
+    if (!store.set(this.KEY, JSON.stringify(all))) {
+      Object.values(all).forEach(s => { s.messages = (s.messages || []).map(stripImgs); });
+      if (!store.set(this.KEY, JSON.stringify(all))) toast("⚠️ مساحة التخزين ممتلئة");
+    }
+  },
+  current() {
+    let c = store.get(this.CURRENT, "");
+    const all = this.all();
+    if (!c || !all[c]) c = this.create();
+    return c;
+  },
   create(name = "محادثة جديدة") {
     const id = "s_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7);
     const all = this.all();
     all[id] = { id, name, createdAt: Date.now(), updatedAt: Date.now(), messages: [] };
-    this.save(all); store.set(this.CURRENT, id); return id;
+    this.save(all);
+    store.set(this.CURRENT, id);
+    return id;
   },
-  update(id, patch) { const all = this.all(); if (!all[id]) return; all[id] = { ...all[id], ...patch, updatedAt: Date.now() }; this.save(all); },
-  delete(id) { const all = this.all(); delete all[id]; this.save(all); if (store.get(this.CURRENT) === id) { const r = Object.keys(all); if (r.length) store.set(this.CURRENT, r[0]); else this.create(); } },
+  update(id, patch) {
+    const all = this.all();
+    if (!all[id]) return;
+    all[id] = { ...all[id], ...patch, updatedAt: Date.now() };
+    this.save(all);
+  },
+  delete(id) {
+    const all = this.all();
+    delete all[id];
+    this.save(all);
+    if (store.get(this.CURRENT) === id) {
+      const r = Object.keys(all);
+      if (r.length) store.set(this.CURRENT, r[0]); else this.create();
+    }
+  },
   list() { return Object.values(this.all()).sort((a, b) => b.updatedAt - a.updatedAt); },
-  load(id) { const s = this.all()[id]; if (!s) return; store.set(this.CURRENT, id); messages = (s.messages || []).slice(); restore(); }
+  load(id) {
+    const s = this.all()[id];
+    if (!s) return;
+    if (controller) controller.abort();
+    store.set(this.CURRENT, id);
+    messages = (s.messages || []).slice();
+    restore();
+  }
 };
 
 let toastTimer;
@@ -511,31 +712,80 @@ function toast(msg, ms = 2400) {
   toastTimer = setTimeout(() => t.classList.remove("show"), ms);
 }
 
-/* ═══ IndexedDB للصور ═══ */
-const idb = {
-  open() { return new Promise((res, rej) => { const r = indexedDB.open("rosto_v3", 1); r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains("kv")) r.result.createObjectStore("kv"); }; r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); },
-  async get(k) { try { const db = await this.open(); return await new Promise((res, rej) => { const q = db.transaction("kv").objectStore("kv").get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); } catch { return null; } },
-  async set(k, v) { try { const db = await this.open(); return await new Promise((res, rej) => { const t = db.transaction("kv", "readwrite"); t.objectStore("kv").put(v, k); t.oncomplete = () => res(); t.onerror = () => rej(t.error); }); } catch {} },
-  async clear() { try { const db = await this.open(); return await new Promise((res) => { const t = db.transaction("kv", "readwrite"); t.objectStore("kv").clear(); t.oncomplete = () => res(); t.onerror = () => res(); }); } catch {} }
+/* ═══ Markdown ═══ */
+if (window.marked) marked.setOptions({ breaks: true, gfm: true });
+
+function renderSimple(text) {
+  return String(text).split(/```/).map((part, i) => {
+    if (i % 2 === 1) {
+      const m = part.match(/^([a-zA-Z0-9+#_-]*)\n([\s\S]*?)\n?$/);
+      const lang = m ? m[1] : "";
+      const code = m ? m[2] : part;
+      return `<pre><code class="language-${esc(lang)}">${esc(code)}</code><button class="copy-code" onclick="copyCode(this)">نسخ</button></pre>`;
+    }
+    let h = esc(part);
+    h = h.replace(/`([^`\n]+)`/g, "<code>$1</code>").replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>").replace(/\*([^*\n]+)\*/g, "<em>$1</em>");
+    return h.replace(/\n/g, "<br>");
+  }).join("");
+}
+
+function render(text) {
+  if (!window.marked || !window.DOMPurify) return renderSimple(text);
+  try {
+    const clean = DOMPurify.sanitize(marked.parse(String(text)), {
+      FORBID_TAGS: ["style", "form", "img", "iframe", "object", "embed", "input", "button", "script"],
+      FORBID_ATTR: ["style", "onclick", "onerror", "onload"],
+      ADD_ATTR: ["target"]
+    });
+    const tmp = document.createElement("div");
+    tmp.innerHTML = clean;
+    tmp.querySelectorAll("a[href]").forEach(a => { a.target = "_blank"; a.rel = "noopener noreferrer nofollow"; });
+    tmp.querySelectorAll("pre code").forEach(el => {
+      try { if (window.hljs && !el.dataset.hl) { window.hljs.highlightElement(el); el.dataset.hl = "1"; } } catch {}
+      const btn = document.createElement("button");
+      btn.className = "copy-code";
+      btn.textContent = "نسخ";
+      btn.setAttribute("onclick", "copyCode(this)");
+      el.parentElement.appendChild(btn);
+    });
+    return tmp.innerHTML;
+  } catch (e) { return renderSimple(text); }
+}
+
+window.copyCode = function (btn) {
+  const codeEl = btn.parentElement.querySelector("code");
+  if (!codeEl) return;
+  navigator.clipboard.writeText(codeEl.textContent).then(() => {
+    btn.textContent = "✓ تم";
+    setTimeout(() => btn.textContent = "نسخ", 1500);
+  }).catch(() => toast("فشل النسخ"));
 };
 
-function raceAbort(promise, signal) {
-  if (!signal) return promise;
-  return new Promise((resolve, reject) => {
-    if (signal.aborted) return reject(new DOMException("Aborted", "AbortError"));
-    const onAbort = () => reject(new DOMException("Aborted", "AbortError"));
-    signal.addEventListener("abort", onAbort, { once: true });
-    promise.then(v => { signal.removeEventListener("abort", onAbort); resolve(v); }, e => { signal.removeEventListener("abort", onAbort); reject(e); });
-  });
+function scrollDown(force = false) {
+  if (!force && !scrollAuto) return;
+  requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
+}
+
+function splitThink(t) {
+  if (!t) return { think: "", body: "" };
+  const m = String(t).match(/^\s*<think>([\s\S]*?)(<\/think>|$)/);
+  if (!m) return { think: "", body: t };
+  return { think: m[1].trim(), body: String(t).slice(m[0].length).trim() };
 }
 
 /* ═══ أيقونات ═══ */
 const svg = (d, extra = "") => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra}>${d}</svg>`;
 const ICON = {
   copy: svg('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>'),
+  edit: svg('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>'),
   trash: svg('<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>'),
   speaker: svg('<path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>'),
   speakerOff: svg('<path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/>'),
+  refresh: svg('<path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>'),
+  brain: svg('<path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2z"/>', 'class="think-icon"'),
+  chev: svg('<path d="M6 9l6 6 6-6"/>', 'class="chev"'),
+  up: svg('<path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>'),
+  down: svg('<path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>'),
   download: svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>'),
   pencil: svg('<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>'),
   robot: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 5.52 4.48 10 10 10 5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>'
@@ -549,6 +799,103 @@ function mkBtn(iconHtml, onclick, title = "") {
   return b;
 }
 const copyTo = (t) => navigator.clipboard.writeText(t).then(() => toast("✓ تم النسخ")).catch(() => toast("فشل النسخ"));
+
+function addUserActions(el, idx) {
+  const a = document.createElement("div");
+  a.className = "msg-actions";
+  a.append(
+    mkBtn(ICON.edit, () => editMessage(idx, el), "تعديل"),
+    mkBtn(ICON.copy, () => copyTo(msgText(messages[idx])), "نسخ"),
+    mkBtn(ICON.trash, () => deleteMessage(idx), "حذف")
+  );
+  el.querySelector(".msg-body").appendChild(a);
+}
+
+function addAssistantActions(el, text, idx) {
+  const m = messages[idx];
+  const a = document.createElement("div");
+  a.className = "msg-actions";
+  if (!m?.genUrl) a.append(mkBtn(ICON.copy, () => copyTo(text), "نسخ"), mkBtn(ICON.speaker, () => speak(text), "نطق"));
+  a.append(mkBtn(ICON.refresh, () => regenerate(idx), "إعادة توليد"));
+  const up = mkBtn(ICON.up, () => setFeedback(idx, "up"), "مفيد");
+  const dn = mkBtn(ICON.down, () => setFeedback(idx, "down"), "غير مفيد");
+  if (m?.fb === "up") up.classList.add("active");
+  if (m?.fb === "down") dn.classList.add("active");
+  a.append(up, dn);
+  if (m?.usage?.t) {
+    const badge = document.createElement("span");
+    badge.className = "usage-badge";
+    badge.textContent = `${m.usage.t} tokens`;
+    a.appendChild(badge);
+  }
+  a.append(mkBtn(ICON.trash, () => deleteMessage(idx), "حذف"));
+  el.querySelector(".msg-body").appendChild(a);
+}
+
+function setFeedback(idx, v) {
+  const m = messages[idx];
+  if (!m) return;
+  m.fb = m.fb === v ? null : v;
+  saveChat();
+  restore(false);
+}
+
+function deleteMessage(idx) {
+  if (controller) return toast("⏳ انتظر انتهاء الرد");
+  if (!messages[idx]) return;
+  messages.splice(idx, 1);
+  saveChat();
+  restore();
+}
+
+function regenerate(idx) {
+  if (controller) return;
+  const m = messages[idx];
+  if (m?.role !== "assistant" || idx !== messages.length - 1) return;
+  const userMsg = messages[idx - 1];
+  if (!userMsg || userMsg.role !== "user") return;
+  messages.splice(idx - 1, 2);
+  saveChat();
+  restore();
+  const imgs = msgImgs(userMsg);
+  attachments = imgs.map((url, i) => ({ dataUrl: url, name: "img" + (i + 1) }));
+  renderAttachPreview();
+  send(msgText(userMsg), !!m.genUrl);
+}
+
+function editMessage(idx, el) {
+  if (controller) return toast("⏳ انتظر");
+  const m = messages[idx];
+  if (!m) return;
+  const body = el.querySelector(".msg-body");
+  body.innerHTML = "";
+  const ta = document.createElement("textarea");
+  ta.style.cssText = "width:100%;background:var(--ds-bg-secondary);border:1px solid var(--ds-border);border-radius:12px;padding:10px;color:var(--ds-text);font:inherit;min-height:70px;";
+  ta.value = msgText(m).replace(/ \[صورة\]$/, "");
+  const row = document.createElement("div");
+  row.style.cssText = "display:flex;gap:6px;margin-top:8px";
+  const ok = document.createElement("button");
+  ok.textContent = "💾 حفظ وإرسال";
+  ok.style.cssText = "background:var(--ds-primary);color:#fff;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:500";
+  ok.onclick = () => {
+    const t = ta.value.trim();
+    const imgs = msgImgs(m);
+    if (!t && !imgs.length) return toast("لا يوجد نص");
+    messages.splice(idx);
+    saveChat();
+    restore();
+    attachments = imgs.map((url, i) => ({ dataUrl: url, name: "img" + (i + 1) }));
+    renderAttachPreview();
+    send(t);
+  };
+  const cancel = document.createElement("button");
+  cancel.textContent = "✕ إلغاء";
+  cancel.style.cssText = "background:var(--ds-bg-tertiary);padding:8px 14px;border-radius:10px;font-size:13px;border:1px solid var(--ds-border)";
+  cancel.onclick = () => restore(false);
+  row.append(ok, cancel);
+  body.append(ta, row);
+  ta.focus();
+}
 
 /* ═══ رسم الرسائل ═══ */
 function renderUserMsg(text, imgs = []) {
@@ -582,7 +929,9 @@ function renderUserMsg(text, imgs = []) {
   return el;
 }
 
-function renderAssistantMsg(text) {
+function thinkLabel(secs) { return secs ? `تم التفكير لمدة ${secs} ثانية` : "تفكير الموديل"; }
+
+function renderAssistantMsg(text, think, secs) {
   const el = document.createElement("div");
   el.className = "msg assistant";
   const avatar = document.createElement("div");
@@ -590,9 +939,17 @@ function renderAssistantMsg(text) {
   avatar.innerHTML = ICON.robot;
   const body = document.createElement("div");
   body.className = "msg-body";
+  if (think && reasoningEnabled) {
+    const d = document.createElement("details");
+    d.className = "reasoning";
+    d.innerHTML = `<summary>${ICON.brain}<span class="think-label"></span>${ICON.chev}</summary><div class="reasoning-content"></div>`;
+    d.querySelector(".think-label").textContent = thinkLabel(secs);
+    d.querySelector(".reasoning-content").textContent = think;
+    body.appendChild(d);
+  }
   const content = document.createElement("div");
   content.className = "msg-content";
-  content.textContent = text || "";
+  content.innerHTML = render(text || "");
   body.appendChild(content);
   el.append(avatar, body);
   chatInner.appendChild(el);
@@ -635,38 +992,16 @@ function drawMessage(m, idx) {
     return el;
   }
   if (m.genUrl) {
-    const el = renderAssistantMsg("");
+    const el = renderAssistantMsg("", "", 0);
     el.querySelector(".msg-content").appendChild(renderGenFigure(m));
-    addAssistantActions(el, "", idx);
+    addAssistantActions(el, m.genPrompt || "", idx);
     return el;
   }
-  const el = renderAssistantMsg(text);
-  addAssistantActions(el, text, idx);
+  const sp = splitThink(text);
+  const body = sp.body || text;
+  const el = renderAssistantMsg(body, m.reasoning || sp.think, m.thinkSecs);
+  addAssistantActions(el, body, idx);
   return el;
-}
-
-function addUserActions(el, idx) {
-  const a = document.createElement("div");
-  a.className = "msg-actions";
-  a.append(
-    mkBtn(ICON.copy, () => copyTo(msgText(messages[idx])), "نسخ"),
-    mkBtn(ICON.trash, () => deleteMessage(idx), "حذف")
-  );
-  el.querySelector(".msg-body").appendChild(a);
-}
-
-function addAssistantActions(el, text, idx) {
-  const a = document.createElement("div");
-  a.className = "msg-actions";
-  a.append(mkBtn(ICON.trash, () => deleteMessage(idx), "حذف"));
-  el.querySelector(".msg-body").appendChild(a);
-}
-
-function deleteMessage(idx) {
-  if (controller) return toast("⏳ انتظر انتهاء الرد");
-  messages.splice(idx, 1);
-  saveChat();
-  restore();
 }
 
 function showWelcome() {
@@ -676,8 +1011,16 @@ function showWelcome() {
   w.innerHTML = `
     <div class="welcome-logo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 5.52 4.48 10 10 10 5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg></div>
     <h1>مرحباً، أنا ROSTO</h1>
-    <p class="subtitle">مدعوم بـ TheHive.ai — لتوليد وتحليل الصور</p>
+    <p class="subtitle">كيف يمكنني مساعدتك اليوم؟</p>
     <div class="suggestions">
+      <button class="suggestion-card" data-act="prompt" data-prompt="اكتبلي كود Python لـ">
+        ${svg('<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>', 'class="suggestion-icon"')}
+        <span class="suggestion-title">اكتب كود</span><span class="suggestion-desc">ساعدني في كتابة كود احترافي</span>
+      </button>
+      <button class="suggestion-card" data-act="prompt" data-prompt="اشرحلي بالتفصيل عن:">
+        ${svg('<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>', 'class="suggestion-icon"')}
+        <span class="suggestion-title">اشرح لي</span><span class="suggestion-desc">اشرح موضوع معقد بطريقة بسيطة</span>
+      </button>
       <button class="suggestion-card" data-act="gen">
         ${svg('<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>', 'class="suggestion-icon"')}
         <span class="suggestion-title">ولّد صورة</span><span class="suggestion-desc">صف الصورة وسأرسمها لك</span>
@@ -689,8 +1032,10 @@ function showWelcome() {
     </div>`;
   w.querySelectorAll(".suggestion-card").forEach(b => {
     b.onclick = () => {
-      if (b.dataset.act === "gen") { setMode("image"); input.focus(); }
-      else if (b.dataset.act === "vision") { setMode("vision"); fileInput.click(); }
+      const act = b.dataset.act;
+      if (act === "gen") { setMode("image", true); input.focus(); }
+      else if (act === "vision") fileInput.click();
+      else { input.value = b.dataset.prompt + " "; autoGrow(); input.focus(); }
     };
   });
   chatInner.appendChild(w);
@@ -705,11 +1050,6 @@ function restore(scroll = true) {
   if (scroll) scrollDown(true); else chat.scrollTop = top;
 }
 
-function scrollDown(force = false) {
-  if (!force && !scrollAuto) return;
-  requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
-}
-
 const KEEP_IMG_LAST = 6;
 function saveChat() {
   const sid = Sessions.current();
@@ -717,11 +1057,11 @@ function saveChat() {
   const slice = messages.filter(m => m && m.content).slice(-80);
   const toSave = slice.map((m, i) => {
     const out = { role: m.role, content: m.content };
-    ["genUrl", "genPrompt"].forEach(k => { if (m[k]) out[k] = m[k]; });
+    ["usage", "reasoning", "thinkSecs", "genUrl", "genPrompt", "fb"].forEach(k => { if (m[k]) out[k] = m[k]; });
     return i < slice.length - KEEP_IMG_LAST ? stripImgs(out) : out;
   });
   const first = messages.find(m => m && m.role === "user");
-  const title = (msgText(first) || "صورة").replace(/\s+/g, " ").trim().slice(0, 40);
+  const title = msgText(first).replace(/\s+/g, " ").trim().slice(0, 40) || "محادثة جديدة";
   Sessions.update(sid, { messages: toSave, name: title });
   drawSidebar();
 }
@@ -741,10 +1081,13 @@ function autoGrow() {
 
 /* ═══ صوت ═══ */
 function speak(text) {
-  if (!("speechSynthesis" in window)) return;
+  if (!("speechSynthesis" in window)) return toast("النطق غير مدعوم");
   window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(String(text).slice(0, 500));
+  const clean = String(text).replace(/```[\s\S]*?```/g, " كود ").replace(/[`*#_>]/g, "").slice(0, 800);
+  const u = new SpeechSynthesisUtterance(clean);
   u.lang = "ar-SA";
+  const ar = window.speechSynthesis.getVoices().find(v => v.lang.startsWith("ar"));
+  if (ar) u.voice = ar;
   window.speechSynthesis.speak(u);
 }
 function initRecognition() {
@@ -752,15 +1095,20 @@ function initRecognition() {
   if (!SR) return null;
   const r = new SR();
   r.lang = "ar-EG"; r.continuous = false; r.interimResults = true;
-  r.onresult = (e) => { let t = ""; for (let i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript; input.value = t; autoGrow(); };
-  r.onerror = () => stopRecording();
+  r.onresult = (e) => {
+    let t = "";
+    for (let i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript;
+    input.value = t; autoGrow();
+  };
+  r.onerror = (e) => { if (e.error === "not-allowed") toast("❌ منع الميكروفون"); stopRecording(); };
   r.onend = () => stopRecording();
   return r;
 }
 function startRecording() {
   if (!recognition) recognition = initRecognition();
-  if (!recognition) return toast("الصوت غير مدعوم");
-  try { recognition.start(); isRecording = true; $("micBtn").classList.add("recording"); $("micWave").classList.add("show"); } catch {}
+  if (!recognition) return toast("الصوت غير مدعوم في متصفحك");
+  try { recognition.start(); isRecording = true; $("micBtn").classList.add("recording"); $("micWave").classList.add("show"); }
+  catch { toast("الميكروفون مشغول"); }
 }
 function stopRecording() {
   isRecording = false;
@@ -771,7 +1119,9 @@ function stopRecording() {
 
 /* ═══ الصور المرفقة ═══ */
 async function compressImage(file, maxDim = 1280, quality = imgQuality / 100) {
-  if (!compressOn) return new Promise((res, rej) => { const r = new FileReader(); r.onload = (e) => res(e.target.result); r.onerror = rej; r.readAsDataURL(file); });
+  if (!compressOn) {
+    return new Promise((res, rej) => { const r = new FileReader(); r.onload = (e) => res(e.target.result); r.onerror = rej; r.readAsDataURL(file); });
+  }
   return new Promise((res, rej) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
@@ -796,7 +1146,7 @@ async function compressImage(file, maxDim = 1280, quality = imgQuality / 100) {
 async function attachImages(files) {
   const arr = [...files].filter(f => f.type.startsWith("image/"));
   if (!arr.length) return;
-  setMode("vision");
+  if (useImage) setMode("image", false);
   for (const f of arr) {
     if (attachments.length >= MAX_IMAGES) { toast("الحد الأقصى " + MAX_IMAGES + " صور"); break; }
     try { attachments.push({ dataUrl: await compressImage(f), name: f.name || "image" }); }
@@ -826,8 +1176,63 @@ function renderAttachPreview() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   TheHive.ai API
+   بناء طلب TheHive (OpenAI-compatible)
    ═══════════════════════════════════════════════════════════════════ */
+function prepareHistory(keepImages) {
+  const h = messages.slice(-maxHistory).filter(m => !m.genUrl);
+  let lastImgIdx = -1;
+  if (keepImages) {
+    for (let i = h.length - 1; i >= 0; i--) {
+      if (Array.isArray(h[i].content) && h[i].content.some(c => c.type === "image_url")) { lastImgIdx = i; break; }
+    }
+  }
+  return h.map((m, i) => {
+    if (Array.isArray(m.content) && i !== lastImgIdx) return { role: m.role, content: msgText(m) + " [صورة]" };
+    return { role: m.role, content: m.content };
+  });
+}
+
+function buildBody(useModel, keepImages) {
+  const hist = prepareHistory(keepImages);
+  const body = {
+    model: useModel,
+    messages: systemPrompt ? [{ role: "system", content: systemPrompt.trim() }, ...hist] : hist,
+    stream: streamEnabled,
+    max_tokens: maxTokens,
+    temperature,
+    top_p: topP
+  };
+  return body;
+}
+
+function apiErrorText(status, detail) {
+  if (status === 401) return "المفتاح غير صالح. تأكد من مفتاح TheHive.ai (يبدأ بـ sk-).";
+  if (status === 402) return "رصيد TheHive.ai غير كافٍ. اشحن حسابك.";
+  if (status === 403) return "المفتاح ممنوع من الوصول لهذا الموديل. جرّب موديل آخر.";
+  if (status === 404) return "الموديل أو الـ endpoint غير موجود. جرّب موديل آخر.";
+  if (status === 429) return "تجاوزت حد الاستخدام، انتظر قليلاً.";
+  return "خطأ " + status + (detail ? ": " + detail : "");
+}
+
+/* ═══ توليد الصور عبر TheHive ═══ */
+async function enhancePrompt(text, signal) {
+  const res = await raceAbort(fetch(CHAT_URL, {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + apiKey, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: ENHANCE_MODEL, temperature: 0.7, max_tokens: 200,
+      messages: [
+        { role: "system", content: "Rewrite the user's idea as one vivid English image-generation prompt (max 60 words): subject, style, lighting, composition. Output only the prompt, no quotes." },
+        { role: "user", content: text }
+      ]
+    })
+  }), signal);
+  if (!res.ok) throw new Error("enhance " + res.status);
+  const j = await res.json();
+  const out = (j.choices?.[0]?.message?.content || "").trim();
+  if (!out) throw new Error("empty");
+  return out;
+}
 
 function errorBubble(msg) {
   const e = document.createElement("div");
@@ -843,21 +1248,13 @@ function placeholderMsg(label) {
   el.innerHTML = `
     <div class="msg-avatar">${ICON.robot}</div>
     <div class="msg-body">
+      <div class="msg-reason"></div>
       <div class="msg-content"><div class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span>${label ? `<span class="lbl">${esc(label)}</span>` : ""}</div></div>
     </div>`;
   chatInner.appendChild(el);
   return el;
 }
 
-/* تحسين الوصف — نستخدم موديل نصي محلي بدون API (تحسين بسيط) */
-function localEnhance(text) {
-  const clean = text.trim();
-  if (!clean) return text;
-  // إضافة تحسينات عامة للوصف الإنجليزي
-  return clean + ", highly detailed, professional photography, cinematic lighting, 4k quality, masterpiece";
-}
-
-/* توليد صورة عبر TheHive.ai — Stable Fast 1 */
 async function generateImage(text) {
   if (controller) return;
   if (!apiKey) { openSettings(); return toast("⚠️ أضف مفتاح TheHive.ai أولاً"); }
@@ -872,57 +1269,49 @@ async function generateImage(text) {
   const ctl = controller;
   setBusy(true);
   try {
-    let prompt = text;
-    if (enhanceOn) prompt = localEnhance(text);
+    let p = text;
+    if (enhanceOn) { try { p = await enhancePrompt(text, ctl.signal); } catch (e) { if (e.name === "AbortError") throw e; } }
 
-    // TheHive SF1 endpoint — نحاول عدة أشكال محتملة
-    const endpoints = [
-      `${API_BASE}/hive/models/${genModel}/v3/generate`,
-      `${API_BASE}/hive/models/${genModel}/v3/generate-image`,
-      `${API_BASE}/hive/models/${genModel}/v3/image`
-    ];
-
-    let lastErr = "";
-    let imgUrl = null;
-
-    for (const url of endpoints) {
-      try {
-        const res = await raceAbort(fetch(url, {
-          method: "POST",
-          headers: {
-            "Authorization": "Bearer " + apiKey,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            input: prompt,
-            params: { aspect_ratio: genSize }
-          })
-        }), ctl.signal);
-
-        if (!res.ok) {
-          lastErr = "HTTP " + res.status;
-          continue;
+    const endpoint = IMAGE_ENDPOINTS[genModel] || IMAGE_ENDPOINTS[DEFAULT_GEN];
+    const res = await raceAbort(fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + apiKey,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        input: {
+          prompt: p,
+          num_inference_steps: 4,
+          aspect_ratio: genSize
         }
-        const j = await raceAbort(res.json(), ctl.signal);
-        // محاولات متعددة لاستخراج الصورة من الرد
-        imgUrl = j?.output?.[0]?.url
+      })
+    }), ctl.signal);
+
+    if (!res.ok) {
+      let detail = "";
+      try { const j = await res.json(); detail = j.error?.message || j.message || ""; } catch {}
+      throw new Error(apiErrorText(res.status, detail));
+    }
+    const j = await raceAbort(res.json(), ctl.signal);
+
+    // محاولات لاستخراج الصورة من الرد
+    const imgUrl = j?.output?.[0]?.url
               || j?.output?.[0]?.image_url
-              || j?.output?.[0]?.data?.url
               || j?.output?.url
-              || j?.image_url
+              || j?.image?.url
               || j?.url
               || j?.data?.[0]?.url
+              || j?.artifacts?.[0]?.base64
               || null;
-        if (imgUrl) break;
-      } catch (e) {
-        if (e.name === "AbortError") throw e;
-        lastErr = e.message;
-      }
-    }
 
-    if (!imgUrl) throw new Error("لم يرجع TheHive صورة. " + (lastErr || "تأكد من المفتاح والموديل."));
+    if (!imgUrl) throw new Error("لم يرجع TheHive صورة. تأكد من المفتاح والموديل.");
 
-    messages.push({ role: "assistant", content: "🎨 " + text, genUrl: imgUrl, genPrompt: prompt });
+    const finalUrl = imgUrl.startsWith("http") || imgUrl.startsWith("data:")
+      ? imgUrl
+      : "data:image/png;base64," + imgUrl;
+
+    messages.push({ role: "assistant", content: "🎨 " + text, genUrl: finalUrl, genPrompt: p });
     saveChat();
     restore();
   } catch (e) {
@@ -937,100 +1326,193 @@ async function generateImage(text) {
   }
 }
 
-/* تحليل صورة عبر TheHive.ai — Vision AI 1 */
-async function analyzeImage(text) {
+/* ═══ الإرسال (شات) ═══ */
+async function send(raw, forceGen = false) {
   if (controller) return;
-  if (!apiKey) { openSettings(); return toast("⚠️ أضف مفتاح TheHive.ai أولاً"); }
-  if (!attachments.length) return toast("ارفع صورة أولاً");
+  const text = (raw || "").trim();
+  if (!text && !attachments.length) return;
 
-  const img = attachments[0];
-  const userText = text || "صف هذه الصورة بالتفصيل";
+  if ((useImage || forceGen) && !attachments.length) {
+    if (!text) return;
+    return generateImage(text);
+  }
+  if (!apiKey) { openSettings(); return toast("⚠️ أضف مفتاح TheHive.ai أولاً"); }
+
+  messages = messages.filter(m => m && m.content);
+  const needsVision = attachments.length > 0;
+  let useModel = model;
+  if (needsVision) useModel = visionModel;
+  if (!needsVision && useThink) useModel = THINK_MODEL;
+
+  const imgs = attachments.slice();
+  const userContent = imgs.length
+    ? [{ type: "text", text: text || "حلل هذه الصورة" }, ...imgs.map(a => ({ type: "image_url", image_url: { url: a.dataUrl } }))]
+    : text;
 
   if (!messages.length) chatInner.innerHTML = "";
-  messages.push({ role: "user", content: [{ type: "text", text: userText }, { type: "image_url", image_url: { url: img.dataUrl } }] });
+  messages.push({ role: "user", content: userContent });
   drawMessage(messages[messages.length - 1], messages.length - 1);
 
   attachments = [];
   renderAttachPreview();
-  input.value = ""; autoGrow(); scrollAuto = true;
-  placeholderMsg("جارٍ تحليل الصورة…");
+  input.value = "";
+  autoGrow();
+  scrollAuto = true;
+
+  const el = placeholderMsg("");
+  const rBox = el.querySelector(".msg-reason");
+  const cBox = el.querySelector(".msg-content");
   scrollDown(true);
 
   controller = new AbortController();
   const ctl = controller;
   setBusy(true);
+
+  let partial = "", reasoningBuf = "", usage = null;
+  let t0 = 0, t1 = 0, detailsEl = null, labelEl = null, rcEl = null;
+  let raf = 0;
+
+  const paintNow = () => {
+    raf = 0;
+    const sp = splitThink(partial);
+    const rt = reasoningBuf || sp.think;
+    if (rt && reasoningEnabled) {
+      if (!t0) t0 = Date.now();
+      if (!detailsEl) {
+        rBox.innerHTML = `<details class="reasoning live" open><summary>${ICON.brain}<span class="think-label">جارٍ التفكير…</span>${ICON.chev}</summary><div class="reasoning-content"></div></details>`;
+        detailsEl = rBox.firstChild;
+        labelEl = detailsEl.querySelector(".think-label");
+        rcEl = detailsEl.querySelector(".reasoning-content");
+      }
+      rcEl.textContent = rt;
+      rcEl.scrollTop = rcEl.scrollHeight;
+    }
+    if (sp.body) {
+      if (t0 && !t1) {
+        t1 = Date.now();
+        if (detailsEl) { detailsEl.classList.remove("live"); labelEl.textContent = thinkLabel(Math.max(1, Math.round((t1 - t0) / 1000))); }
+      }
+      cBox.innerHTML = render(sp.body);
+    }
+    scrollDown();
+  };
+  const paint = () => { if (!raf) raf = requestAnimationFrame(paintNow); };
+
+  const fail = (msg) => {
+    if (raf) cancelAnimationFrame(raf);
+    const last = messages[messages.length - 1];
+    if (last && last.role === "user") messages.pop();
+    input.value = text; autoGrow();
+    if (imgs.length) { attachments = imgs; renderAttachPreview(); }
+    restore();
+    errorBubble(msg);
+  };
+
   try {
-    const b64 = img.dataUrl.split(",")[1];
-    const endpoints = [
-      `${API_BASE}/hive/models/${visionModel}/v3/analyze`,
-      `${API_BASE}/hive/models/${visionModel}/v3/classify`,
-      `${API_BASE}/hive/models/${visionModel}/v3`
-    ];
+    const body = buildBody(useModel, true);
+    const res = await raceAbort(fetch(CHAT_URL, {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + apiKey,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    }), ctl.signal);
 
-    let lastErr = "";
-    let resultText = null;
+    if (!res.ok) {
+      let detail = "";
+      try { const j = await res.json(); detail = j.error?.message || j.message || ""; } catch {}
+      if (res.status === 401) { store.del("rosto_key_hive"); setTimeout(openSettings, 400); }
+      return fail(apiErrorText(res.status, detail));
+    }
 
-    for (const url of endpoints) {
-      try {
-        const res = await raceAbort(fetch(url, {
-          method: "POST",
-          headers: {
-            "Authorization": "Bearer " + apiKey,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            input: {
-              image: b64,
-              prompt: userText
-            }
-          })
-        }), ctl.signal);
+    const handleChunk = (json) => {
+      if (json.error) throw new Error(json.error.message || "خطأ");
+      usage = json.usage || usage;
+      const d = json.choices?.[0]?.delta;
+      if (!d) return;
+      let changed = false;
+      const rs = d.reasoning_content ?? d.reasoning;
+      if (rs) { reasoningBuf += rs; changed = true; }
+      if (d.content) { partial += d.content; changed = true; }
+      if (changed) paint();
+    };
 
-        if (!res.ok) { lastErr = "HTTP " + res.status; continue; }
-        const j = await raceAbort(res.json(), ctl.signal);
-        resultText = j?.output?.text
-                  || j?.output?.[0]?.text
-                  || j?.output?.description
-                  || j?.result
-                  || j?.text
-                  || JSON.stringify(j, null, 2);
-        if (resultText) break;
-      } catch (e) {
-        if (e.name === "AbortError") throw e;
-        lastErr = e.message;
+    if (!streamEnabled || !res.body || typeof res.body.getReader !== "function") {
+      const raw = await raceAbort(res.text(), ctl.signal);
+      if (raw.trimStart().startsWith("data:")) {
+        raw.split("\n").forEach(line => {
+          if (!line.startsWith("data:")) return;
+          const data = line.slice(5).trim();
+          if (!data || data === "[DONE]") return;
+          try { handleChunk(JSON.parse(data)); } catch {}
+        });
+        paintNow();
+      } else {
+        const data = JSON.parse(raw);
+        const msg = data.choices?.[0]?.message || {};
+        partial = msg.content || "";
+        reasoningBuf = msg.reasoning || msg.reasoning_content || "";
+        usage = data.usage;
+        paintNow();
+      }
+    } else {
+      const reader = res.body.getReader();
+      ctl.signal.addEventListener("abort", () => { try { reader.cancel(); } catch {} }, { once: true });
+      const dec = new TextDecoder();
+      let buf = "";
+      while (true) {
+        const { done, value } = await raceAbort(reader.read(), ctl.signal);
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        const lines = buf.split("\n");
+        buf = lines.pop() || "";
+        for (const line of lines) {
+          if (!line.startsWith("data:")) continue;
+          const data = line.slice(5).trim();
+          if (!data || data === "[DONE]") continue;
+          try { handleChunk(JSON.parse(data)); } catch {}
+        }
       }
     }
 
-    if (!resultText) throw new Error("لم يرجع TheHive تحليل. " + (lastErr || ""));
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+    const sp = splitThink(partial);
+    const finalText = sp.body || partial;
+    if (!finalText.trim()) return fail("لم يصل رد من الموديل");
 
-    messages.push({ role: "assistant", content: String(resultText) });
+    const msg = { role: "assistant", content: finalText };
+    const think = reasoningBuf || sp.think;
+    if (think) {
+      msg.reasoning = think;
+      msg.thinkSecs = Math.max(1, Math.round(((t1 || Date.now()) - (t0 || Date.now())) / 1000));
+    }
+    if (usage?.total_tokens) msg.usage = { p: usage.prompt_tokens, c: usage.completion_tokens, t: usage.total_tokens };
+    messages.push(msg);
     saveChat();
     restore();
+    if (ttsEnabled) speak(finalText);
   } catch (e) {
-    messages.pop();
-    input.value = text; autoGrow();
-    restore();
-    if (e.name === "AbortError") toast("⏹ تم الإيقاف");
-    else errorBubble(e.message || "خطأ غير معروف");
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+    if (e.name === "AbortError") {
+      const sp = splitThink(partial);
+      const finalText = sp.body || partial;
+      if (finalText.trim()) {
+        const msg = { role: "assistant", content: finalText };
+        if (reasoningBuf || sp.think) msg.reasoning = reasoningBuf || sp.think;
+        messages.push(msg);
+        saveChat();
+      }
+      restore();
+      toast("⏹ تم الإيقاف");
+    } else {
+      console.error(e);
+      fail(/failed to fetch|networkerror/i.test(e.message || "") ? "تعذّر الاتصال بـ TheHive.ai. تأكد من الإنترنت." : "خطأ: " + (e.message || e.name));
+    }
   } finally {
     controller = null;
     setBusy(false);
   }
-}
-
-/* ═══ الإرسال ═══ */
-async function send(raw) {
-  if (controller) return;
-  const text = (raw || "").trim();
-  if (!text && !attachments.length) return;
-
-  if (currentMode === "vision" || attachments.length) {
-    if (!attachments.length) return toast("ارفع صورة أولاً");
-    return analyzeImage(text);
-  }
-  // وضع توليد الصور
-  if (!text) return;
-  return generateImage(text);
 }
 
 function openImageViewer(src) {
@@ -1049,7 +1531,7 @@ function openImageViewer(src) {
   requestAnimationFrame(() => o.classList.add("show"));
 }
 
-/* ═══ الثيم ═══ */
+/* ═══ الثيم والشارة ═══ */
 function applyTheme() {
   let theme = themePref;
   if (themePref === "auto") theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -1057,7 +1539,54 @@ function applyTheme() {
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#FFFFFF" : "#1A1A1A");
 }
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (themePref === "auto") applyTheme(); });
-function updateMuteIcon() { $("muteBtn").innerHTML = ICON.speakerOff; }
+function updateMuteIcon() { $("muteBtn").innerHTML = ttsEnabled ? ICON.speaker : ICON.speakerOff; }
+function updateModelBadge() { $("modelBadgeName").textContent = shortModel(model); }
+
+/* ═══ قائمة الموديلات ═══ */
+function fillSelect(sel, ids, current) {
+  sel.innerHTML = "";
+  const list = ids.includes(current) ? ids : [current, ...ids];
+  list.forEach(id => { const o = document.createElement("option"); o.value = id; o.textContent = id; sel.appendChild(o); });
+  sel.value = current;
+}
+
+function buildModelMenu() {
+  const menu = $("modelMenu");
+  menu.innerHTML = "";
+  const inp = document.createElement("input");
+  inp.type = "text"; inp.className = "mm-search"; inp.placeholder = "ابحث عن موديل..."; inp.value = menuFilter;
+  const box = document.createElement("div");
+  menu.append(inp, box);
+  const draw = () => {
+    box.innerHTML = "";
+    const q = menuFilter.trim().toLowerCase();
+    const ids = availableModels.filter(id => !q || id.toLowerCase().includes(q));
+    if (!ids.length) { box.innerHTML = '<div class="mm-label">لا نتائج</div>'; return; }
+    const l = document.createElement("div");
+    l.className = "mm-label"; l.textContent = "موديلات TheHive";
+    box.appendChild(l);
+    ids.forEach(id => {
+      const b = document.createElement("button");
+      b.className = "mm-item" + (id === model ? " active" : "");
+      const tags = (/pro|v4\.1-pro/i.test(id) ? '<span class="mm-tag">تفكير</span>' : "") + (/:free$/i.test(id) ? '<span class="mm-tag">مجاني</span>' : "");
+      b.innerHTML = `<span class="mm-name">${esc(id)}</span>${tags}`;
+      b.onclick = () => {
+        model = id;
+        store.set("rosto_model", model);
+        visionModel = id;
+        store.set("rosto_vision", id);
+        updateModelBadge();
+        closeModelMenu();
+        toast("✓ " + shortModel(id));
+      };
+      box.appendChild(b);
+    });
+  };
+  inp.oninput = () => { menuFilter = inp.value; draw(); };
+  draw();
+}
+function openModelMenu() { buildModelMenu(); $("modelMenu").classList.add("open"); $("modelBadge").classList.add("open"); }
+function closeModelMenu() { $("modelMenu").classList.remove("open"); $("modelBadge").classList.remove("open"); }
 
 /* ═══ الشريط الجانبي ═══ */
 function groupLabel(ts) {
@@ -1076,7 +1605,7 @@ function drawSidebar() {
   const current = Sessions.current();
   const q = chatFilter.trim().toLowerCase();
   let sessions = Sessions.list();
-  if (q) sessions = sessions.filter(s => (s.name || "").toLowerCase().includes(q));
+  if (q) sessions = sessions.filter(s => (s.name || "").toLowerCase().includes(q) || (s.messages || []).some(m => msgText(m).toLowerCase().includes(q)));
   if (!sessions.length) {
     list.innerHTML = `<p style="text-align:center;color:var(--ds-text-tertiary);padding:20px;font-size:13px">${q ? "لا نتائج" : "لا توجد محادثات"}</p>`;
     return;
@@ -1130,29 +1659,64 @@ function closeSidebar() { $("sidebar").classList.remove("open"); $("sidebarOverl
 
 /* ═══ الإعدادات ═══ */
 function openSettings() {
-  $("keyInput").value = apiKey || "";
-  $("genModelSelect").value = genModel;
+  $("keyInput").value = apiKey && apiKey.length > 10 ? apiKey : "";
+  fillSelect($("modelSelect"), availableModels, model);
+  fillSelect($("visionSelect"), availableModels, visionModel);
+  $("modelInput").value = "";
+  $("systemInput").value = systemPrompt;
+  fillSelect($("genModelSelect"), imageModels.length ? imageModels : IMAGE_MODELS, genModel);
   $("genSizeSelect").value = genSize;
-  $("visionSelect").value = visionModel;
   $("enhanceToggle").checked = enhanceOn;
+  $("autoVisionToggle").checked = autoVision;
   $("compressToggle").checked = compressOn;
+  $("ttsToggle").checked = ttsEnabled;
+  $("streamToggle").checked = streamEnabled;
+  $("reasoningToggle").checked = reasoningEnabled;
+  $("tempRange").value = temperature; $("tempVal").textContent = temperature;
+  $("maxTokRange").value = maxTokens; $("maxTokVal").textContent = maxTokens;
+  $("topPRange").value = topP; $("topPVal").textContent = topP;
+  $("histRange").value = maxHistory; $("histVal").textContent = maxHistory;
   $("imgQRange").value = imgQuality; $("imgQVal").textContent = imgQuality;
   $("settings").classList.add("open");
 }
 function closeSettings() { $("settings").classList.remove("open"); }
 
-function setMode(mode) {
-  currentMode = mode;
-  $("imageBtn").classList.toggle("active", mode === "image");
-  $("visionBtn").classList.toggle("active", mode === "vision");
-  input.placeholder = mode === "image" ? "صف الصورة التي تريد توليدها..." : "اسأل عن الصورة المرفقة...";
+function buildPersonaList() {
+  const list = $("personaList");
+  list.innerHTML = "";
+  Object.entries(PERSONAS).forEach(([name, prompt]) => {
+    const b = document.createElement("button");
+    b.className = "preset-btn";
+    b.innerHTML = `<strong>${esc(name)}</strong><small>${esc(prompt.slice(0, 70))}...</small>`;
+    b.onclick = () => { $("systemInput").value = prompt; toast("✓ تم تحميل الشخصية"); };
+    list.appendChild(b);
+  });
+}
+
+function setMode(which, on) {
+  if (which === "image") {
+    useImage = on;
+    if (on) { useThink = false; useSearch = false; if (attachments.length) { attachments = []; renderAttachPreview(); } }
+  } else if (which === "think") { useThink = on; if (on) useImage = false; }
+  else if (which === "search") { useSearch = on; if (on) useImage = false; }
+  $("thinkBtn").classList.toggle("active", useThink);
+  $("searchWebBtn").classList.toggle("active", useSearch);
+  $("imageBtn").classList.toggle("active", useImage);
+  input.placeholder = useImage ? "صف الصورة التي تريد توليدها..." : "أرسل رسالة إلى ROSTO...";
 }
 
 /* ═══ الأحداث ═══ */
-$("menuBtn").onclick = () => { if (isMobile()) openSidebar(); else $("sidebar").classList.toggle("collapsed"); };
+$("menuBtn").onclick = () => {
+  if (isMobile()) openSidebar();
+  else $("sidebar").classList.toggle("collapsed");
+};
 $("sidebarOverlay").onclick = closeSidebar;
 $("sidebarLogo").onclick = () => { scrollDown(true); closeSidebar(); };
 $("chatSearch").oninput = (e) => { chatFilter = e.target.value; drawSidebar(); };
+
+$("modelBadge").onclick = (e) => { e.stopPropagation(); $("modelMenu").classList.contains("open") ? closeModelMenu() : openModelMenu(); };
+$("modelBadge").onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("modelBadge").click(); } };
+document.addEventListener("click", (e) => { if (!e.target.closest("#modelMenu")) closeModelMenu(); });
 
 $("themeBtn").onclick = () => {
   themePref = themePref === "light" ? "dark" : themePref === "dark" ? "auto" : "light";
@@ -1160,8 +1724,12 @@ $("themeBtn").onclick = () => {
   applyTheme();
   toast(themePref === "light" ? "☀️ فاتح" : themePref === "dark" ? "🌙 داكن" : "🌗 تلقائي");
 };
-$("muteBtn").onclick = () => toast("🔇 الصوت (غير مدعوم في وضع الصور)");
-
+$("muteBtn").onclick = () => {
+  ttsEnabled = !ttsEnabled;
+  store.set("rosto_tts", ttsEnabled ? "1" : "0");
+  updateMuteIcon();
+  toast(ttsEnabled ? "🔊 الصوت مفعّل" : "🔇 الصوت مكتوم");
+};
 $("newChatBtn").onclick = () => {
   if (controller) controller.abort();
   if (messages.length) saveChat();
@@ -1174,23 +1742,37 @@ $("openSettings").onclick = () => { closeSidebar(); openSettings(); };
 $("closeSettings").onclick = closeSettings;
 $("settings").onclick = (e) => { if (e.target.id === "settings") closeSettings(); };
 
-$("saveSettings").onclick = () => {
+$("saveSettings").onclick = async () => {
   const nk = $("keyInput").value.trim();
-  if (nk) { apiKey = nk; store.set("rosto_key_hive", nk); }
+  if (nk && nk !== apiKey) { await saveSecureKey(nk); apiKey = nk; }
+  model = $("modelInput").value.trim() || $("modelSelect").value;
+  visionModel = $("visionSelect").value || DEFAULT_VISION;
   genModel = $("genModelSelect").value;
   genSize = $("genSizeSelect").value;
-  visionModel = $("visionSelect").value;
   enhanceOn = $("enhanceToggle").checked;
+  systemPrompt = $("systemInput").value.trim();
+  autoVision = $("autoVisionToggle").checked;
   compressOn = $("compressToggle").checked;
+  ttsEnabled = $("ttsToggle").checked;
+  streamEnabled = $("streamToggle").checked;
+  reasoningEnabled = $("reasoningToggle").checked;
+  temperature = parseFloat($("tempRange").value);
+  maxTokens = parseInt($("maxTokRange").value);
+  topP = parseFloat($("topPRange").value);
+  maxHistory = parseInt($("histRange").value);
   imgQuality = parseInt($("imgQRange").value);
-  store.set("rosto_genmodel2", genModel);
-  store.set("rosto_gensize2", genSize);
-  store.set("rosto_vision2", visionModel);
-  store.set("rosto_enhance2", enhanceOn ? "1" : "0");
-  store.set("rosto_compress", compressOn ? "1" : "0");
-  store.set("rosto_imgq", imgQuality);
-  closeSettings();
+  const S = {
+    rosto_model: model, rosto_vision: visionModel, rosto_genmodel2: genModel, rosto_gensize2: genSize,
+    rosto_enhance2: enhanceOn ? "1" : "0", rosto_system: systemPrompt,
+    rosto_autovision: autoVision ? "1" : "0", rosto_compress: compressOn ? "1" : "0",
+    rosto_tts: ttsEnabled ? "1" : "0", rosto_stream: streamEnabled ? "1" : "0",
+    rosto_reasoning: reasoningEnabled ? "1" : "0", rosto_temp: temperature,
+    rosto_maxtok: maxTokens, rosto_topp: topP, rosto_hist: maxHistory, rosto_imgq: imgQuality
+  };
+  Object.entries(S).forEach(([k, v]) => store.set(k, v));
+  updateMuteIcon(); updateModelBadge(); closeSettings();
   toast("✓ تم الحفظ");
+  restore(false);
 };
 
 $$(".modal-tab").forEach(tab => {
@@ -1201,18 +1783,41 @@ $$(".modal-tab").forEach(tab => {
     $(tab.dataset.tab)?.classList.add("active");
   };
 });
-$("imgQRange").oninput = (e) => { $("imgQVal").textContent = e.target.value; };
+[["temp", "tempRange"], ["maxTok", "maxTokRange"], ["topP", "topPRange"], ["hist", "histRange"], ["imgQ", "imgQRange"]].forEach(([k, id]) => {
+  $(id).oninput = (e) => { $(k + "Val").textContent = e.target.value; };
+});
 $$("button[data-theme]").forEach(b => {
   b.onclick = () => { themePref = b.dataset.theme; store.set("rosto_theme", themePref); applyTheme(); toast("✓ تم تطبيق الثيم"); };
 });
 
+$("exportChatBtn").onclick = () => {
+  if (!messages.length) return toast("لا توجد رسائل");
+  const t = messages.map(m => `${m.role === "user" ? "👤 أنت" : "🐋 ROSTO"}:\n${msgText(m)}`).join("\n\n" + "─".repeat(50) + "\n\n");
+  download(t, "text/plain;charset=utf-8", `rosto-chat-${Date.now()}.txt`);
+};
 $("exportAllBtn").onclick = () => {
   const d = { version: 3, date: new Date().toISOString(), sessions: Sessions.all(), current: Sessions.current(),
-    settings: { genModel, visionModel, genSize, enhanceOn, compressOn, themePref, imgQuality } };
+    settings: { model, visionModel, genModel, genSize, enhanceOn, systemPrompt, ttsEnabled, streamEnabled, autoVision, compressOn, reasoningEnabled, themePref, temperature, maxTokens, topP, maxHistory, imgQuality } };
   download(JSON.stringify(d, null, 2), "application/json", `rosto-backup-${Date.now()}.json`);
+};
+$("restoreAllBtn").onclick = () => $("restoreFile").click();
+$("restoreFile").onchange = async (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (!d.sessions) throw new Error("ملف غير صالح");
+    if (!confirm("⚠️ سيتم استبدال كل البيانات. متأكد؟")) { e.target.value = ""; return; }
+    Sessions.save(d.sessions);
+    if (d.current) store.set(Sessions.CURRENT, d.current);
+    toast("✓ تمت الاستعادة");
+    setTimeout(() => location.reload(), 1000);
+  } catch (err) { toast("❌ فشل: " + err.message); }
+  e.target.value = "";
 };
 $("clearAllBtn").onclick = () => {
   if (!confirm("⚠️ سيتم مسح كل شيء نهائياً. متأكد؟")) return;
+  if (!confirm("🔴 تأكيد أخير!")) return;
   Object.keys(localStorage).filter(k => k.startsWith("rosto_")).forEach(k => localStorage.removeItem(k));
   idb.clear().finally(() => location.reload());
 };
@@ -1228,8 +1833,9 @@ $("micBtn").onclick = () => isRecording ? stopRecording() : startRecording();
 $("attachBtn").onclick = () => fileInput.click();
 fileInput.onchange = async (e) => { await attachImages(e.target.files); e.target.value = ""; };
 
-$("imageBtn").onclick = () => { setMode("image"); toast("🎨 وضع توليد الصور"); };
-$("visionBtn").onclick = () => { setMode("vision"); toast("👁️ وضع تحليل الصور"); };
+$("searchWebBtn").onclick = () => { setMode("search", !useSearch); toast(useSearch ? "🔍 البحث مفعّل (تجريبي)" : "البحث متوقف"); };
+$("thinkBtn").onclick = () => { setMode("think", !useThink); toast(useThink ? "🧠 DeepThink مفعّل" : "DeepThink متوقف"); };
+$("imageBtn").onclick = () => { setMode("image", !useImage); toast(useImage ? "🎨 وضع توليد الصور" : "وضع الدردشة"); };
 
 sendBtn.onclick = () => { if (controller) controller.abort(); else send(input.value); };
 input.addEventListener("input", autoGrow);
@@ -1265,31 +1871,35 @@ $("scrollDownBtn").onclick = () => { scrollAuto = true; scrollDown(true); $("scr
 
 document.addEventListener("keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === "k") { e.preventDefault(); $("newChatBtn").click(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === "/") { e.preventDefault(); $("themeBtn").click(); }
   if (e.key === "Escape") {
     if ($("settings").classList.contains("open")) closeSettings();
+    else if ($("modelMenu").classList.contains("open")) closeModelMenu();
     else if ($("sidebar").classList.contains("open")) closeSidebar();
   }
 });
 
 /* ═══ البدء ═══ */
 (async function init() {
-  const savedKey = store.get("rosto_key_hive", "");
-  if (savedKey) apiKey = savedKey;
-  else if (THEHIVE_KEY_BUILTIN && THEHIVE_KEY_BUILTIN !== "ضع_مفتاحك_هنا") {
+  let savedKey = "";
+  try { savedKey = await loadSecureKey(); } catch {}
+  if (savedKey && savedKey.startsWith("sk-")) apiKey = savedKey;
+  else if (THEHIVE_KEY_BUILTIN && THEHIVE_KEY_BUILTIN.startsWith("sk-")) {
     apiKey = THEHIVE_KEY_BUILTIN;
-    store.set("rosto_key_hive", apiKey);
+    try { await saveSecureKey(apiKey); } catch {}
   }
 
   const s = Sessions.all()[Sessions.current()];
   if (s?.messages?.length) messages = s.messages.slice();
+  buildPersonaList();
   applyTheme();
   updateMuteIcon();
+  updateModelBadge();
   restore();
   drawSidebar();
   setBusy(false);
-  setMode("image");
 
-  if (!apiKey) setTimeout(() => { toast("أضف مفتاح TheHive.ai من الإعدادات", 4000); openSettings(); }, 700);
+  if (!apiKey) setTimeout(() => { toast("أضف مفتاح TheHive.ai من الإعدادات للبدء", 4000); openSettings(); }, 700);
 })();
 </script>
 </body>
