@@ -1374,7 +1374,7 @@
           <circle cx="9" cy="13" r="1.5" fill="currentColor"/>
           <circle cx="15" cy="13" r="1.5" fill="currentColor"/>
         </svg>
-        <span class="model-badge-name" id="modelBadgeName">gemini-3.5-flash-lite</span>
+        <span class="model-badge-name" id="modelBadgeName">GPT-OSS 120B</span>
       </div>
     </div>
     <div class="topbar-right">
@@ -1467,8 +1467,8 @@
     </div>
 
     <div class="modal-tab-content active" id="t-general">
-      <label>🔑 مفتاح Gemini API</label>
-      <input id="keyInput" type="password" placeholder="AIza... / AQ...." autocomplete="off" spellcheck="false">
+      <label>🔑 مفتاح Groq API</label>
+      <input id="keyInput" type="password" placeholder="gsk_..." autocomplete="off" spellcheck="false">
       <div style="font-size:11px;color:var(--ds-text-tertiary);margin-top:6px">🔐 مشفّر محلياً على جهازك</div>
 
       <label>🤖 الموديل
@@ -1477,9 +1477,12 @@
         </button>
       </label>
       <select id="modelSelect">
-        <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite</option>
-        <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite</option>
-        <option value="gemini-3.6-flash">gemini-3.6-flash</option>
+        <option value="openai/gpt-oss-120b">openai/gpt-oss-120b</option>
+        <option value="openai/gpt-oss-20b">openai/gpt-oss-20b</option>
+        <option value="qwen/qwen3-32b">qwen/qwen3-32b</option>
+        <option value="llama-3.1-8b-instant">llama-3.1-8b-instant</option>
+        <option value="llama-3.2-11b-vision-preview">llama-3.2-11b-vision-preview</option>
+        <option value="meta-llama/llama-4-scout-17b-16e-instruct">llama-4-scout-17b</option>
       </select>
 
       <label>✏️ أو اكتب مخصص</label>
@@ -1543,16 +1546,16 @@
 "use strict";
 
 /* ═══════════════════════════════════════════════════════════════
-   ✏️ مكان المفتاح — حط مفتاح Gemini (AIza...) من الإعدادات
+   ✏️ مكان المفتاح — غيّر النص ده بمفتاحك
    ═══════════════════════════════════════════════════════════════ */
-const GROQ_API_KEY = "AQ.Ab8RN6KQr-BOLt2R7HUVR6lRmo8saSTJ4qURRvQ7lZxwL9rXvA";
-const KEY_PREFIX = ""; // أي مفتاح (AIza... أو AQ....)
+const GROQ_API_KEY = "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";
 
-const DEFAULT_MODEL = "gemini-3.5-flash-lite";
-const API_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
-const MODELS_URL = "https://generativelanguage.googleapis.com/v1beta/openai/models";
-const REASONING_MODELS = /reasoner|r1/i;
-const isVisionModel = () => true;
+const DEFAULT_MODEL = "openai/gpt-oss-120b";
+const API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const MODELS_URL = "https://api.groq.com/openai/v1/models";
+const VISION_FALLBACK = "meta-llama/llama-4-scout-17b-16e-instruct";
+const REASONING_MODELS = /qwen3|deepseek-r1|gpt-oss/i;
+const isVisionModel = (m) => /llama-4|vision|llama-3\.2.*vision/i.test(m || "");
 const MAX_IMAGES = 5;
 const DEFAULT_SYSTEM = "";
 
@@ -1686,15 +1689,10 @@ async function loadSecureKey() {
 async function fetchRetry(url, opts, maxRetries = 3, ctl = null) {
   for (let i = 0; i <= maxRetries; i++) {
     try {
-      let res;
-      try { res = await fetch(url, opts); }
-      catch (e0) {
-        if (e0 && e0.name === "DataCloneError") { const o2 = { ...opts }; delete o2.signal; res = await fetch(url, o2); }
-        else throw e0;
-      }
+      const res = await fetch(url, opts);
       if (res.ok || (res.status < 500 && res.status !== 429)) return res;
       if (i === maxRetries) return res;
-      await new Promise(r => setTimeout(r, res.status === 429 ? 7000 * (i + 1) : 800 * Math.pow(2, i)));
+      await new Promise(r => setTimeout(r, 800 * Math.pow(2, i)));
     } catch (e) {
       if (e.name === "AbortError") throw e;
       if (i === maxRetries) throw e;
@@ -1705,7 +1703,6 @@ async function fetchRetry(url, opts, maxRetries = 3, ctl = null) {
 
 let apiKey = "";
 let model = store.get("rosto_model", DEFAULT_MODEL) || DEFAULT_MODEL;
-if (!/^gemini-3/i.test(model) || /pro/i.test(model)) { model = DEFAULT_MODEL; store.set("rosto_model", model); }
 let systemPrompt = store.get("rosto_system", DEFAULT_SYSTEM) || DEFAULT_SYSTEM;
 let ttsEnabled = store.get("rosto_tts", "0") === "1";
 let streamEnabled = store.get("rosto_stream", "1") === "1";
@@ -2323,10 +2320,20 @@ async function send(raw) {
   if (controller) return;
   const text = (raw || "").trim();
   if (!text && !attachments.length) return;
-  if (!apiKey) { openSettings(); return toast("⚠️ أضف مفتاح Gemini أولاً"); }
+  if (!apiKey) { openSettings(); return toast("⚠️ أضف مفتاح Groq أولاً"); }
 
   messages = messages.filter(m => m && m.content);
-  const useModel = model;
+  const needsVision = attachments.length > 0;
+  let useModel = model;
+  if (needsVision && !isVisionModel(model)) {
+    if (!autoVision) {
+      attachments = [];
+      renderAttachPreview();
+      return toast("⚠️ الموديل الحالي لا يدعم الصور");
+    }
+    useModel = VISION_FALLBACK;
+    toast("🖼 تم التبديل لموديل الرؤية");
+  }
 
   const imgs = attachments.slice();
   const userContent = imgs.length
@@ -2405,6 +2412,7 @@ async function send(raw) {
     top_p: topP,
     stream: streamEnabled
   };
+  if (REASONING_MODELS.test(useModel)) body.reasoning_format = "parsed";
 
   try {
     const opts = {
@@ -2597,7 +2605,7 @@ function closeSidebar() {
 }
 
 function openSettings() {
-  $("keyInput").value = apiKey.startsWith(KEY_PREFIX) ? apiKey : "";
+  $("keyInput").value = apiKey.startsWith("gsk_") ? apiKey : "";
   $("modelInput").value = model;
   $("systemInput").value = systemPrompt;
   $("modelSelect").value = model;
@@ -2755,77 +2763,24 @@ $$("[data-theme]").forEach(b => {
   };
 });
 
-function fillModels(ids) {
-  const sel = $("modelSelect");
-  sel.innerHTML = "";
-  ids.forEach(id => {
-    const o = document.createElement("option");
-    o.value = id;
-    o.textContent = id;
-    sel.appendChild(o);
-  });
-  if (![...sel.options].some(o => o.value === model)) {
-    const o = document.createElement("option");
-    o.value = model;
-    o.textContent = model + " (مخصص)";
-    sel.appendChild(o);
-  }
-  sel.value = model;
-}
-
-async function testModel(id) {
-  try {
-    const r = await Promise.race([
-      fetch(API_URL, {
-        method: "POST",
-        headers: { "Authorization": "Bearer " + apiKey, "Content-Type": "application/json" },
-        body: JSON.stringify({ model: id, messages: [{ role: "user", content: "hi" }], max_tokens: 16 })
-      }),
-      new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 20000))
-    ]);
-    if (r.ok) return { ok: true };
-    let d = "";
-    try { const j = await r.json(); d = (Array.isArray(j) ? j[0] : j).error?.message || ""; } catch {}
-    return { ok: false, status: r.status, detail: d };
-  } catch (e) { return { ok: false, status: 0, detail: e.message }; }
-}
-
 $("reloadModels").onclick = async () => {
-  if (!apiKey) return toast("⚠️ أضف المفتاح أولاً");
+  if (!apiKey || !apiKey.startsWith("gsk_")) return toast("⚠️ أضف المفتاح أولاً");
   try {
     const r = await fetch(MODELS_URL, { headers: { Authorization: "Bearer " + apiKey } });
     if (!r.ok) throw new Error("HTTP " + r.status);
     const { data } = await r.json();
-    const ids = [...new Set((data || []).map(m => String(m.id).replace(/^models\//, "")))]
-      .filter(id => /^gemini/i.test(id) && !/embed|imagen|veo|aqa|image|live|tts|audio|robotics|computer-use|learnlm|exp/i.test(id))
-      .sort();
-    if (!ids.length) return toast("لا توجد موديلات");
-    toast("🔍 جاري فحص " + ids.length + " موديل...", 60000);
-    const working = [];
-    let firstErr = null;
-    let idx = 0;
-    const worker = async () => {
-      while (idx < ids.length) {
-        const id = ids[idx++];
-        const res = await testModel(id);
-        if (res.ok) working.push(id);
-        else if (!firstErr) firstErr = res;
-      }
-    };
-    await Promise.all([worker(), worker(), worker()]);
-    working.sort();
-    if (!working.length) {
-      return toast("❌ ولا موديل اشتغل" + (firstErr ? " — " + firstErr.status + ": " + String(firstErr.detail || "").slice(0, 120) : ""), 9000);
-    }
-    store.set("rosto_okmodels2", JSON.stringify(working));
-    if (!working.includes(model)) { model = working[0]; store.set("rosto_model", model); updateModelBadge(); }
-    fillModels(working);
-    $("modelInput").value = model;
-    toast("✓ " + working.length + " موديل شغال من " + ids.length, 5000);
+    const list = (data || []).filter(m => m.active !== false && !/whisper|tts|guard/i.test(m.id)).sort((a, b) => a.id.localeCompare(b.id));
+    const sel = $("modelSelect");
+    sel.innerHTML = "";
+    list.forEach(m => {
+      const o = document.createElement("option");
+      o.value = m.id;
+      o.textContent = m.id;
+      sel.appendChild(o);
+    });
+    toast(`✓ ${list.length} موديل متاح`);
   } catch (e) { toast("❌ فشل: " + e.message); }
 };
-
-$("modelSelect").onchange = () => { $("modelInput").value = $("modelSelect").value; };
 
 $("exportChatBtn").onclick = () => {
   if (!messages.length) return toast("لا توجد رسائل");
@@ -2894,9 +2849,31 @@ function download(content, mime, name) {
 }
 
 async function loadModels() {
+  if (!apiKey || !apiKey.startsWith("gsk_")) return;
   try {
-    const ok = JSON.parse(store.get("rosto_okmodels2", "[]"));
-    if (Array.isArray(ok) && ok.length) fillModels(ok);
+    const r = await fetch(MODELS_URL, { headers: { Authorization: "Bearer " + apiKey } });
+    if (!r.ok) return;
+    const { data } = await r.json();
+    const list = (data || []).filter(m => m.active !== false && !/whisper|tts|guard/i.test(m.id));
+    const sel = $("modelSelect");
+    if (list.length) {
+      sel.innerHTML = "";
+      list.sort((a, b) => a.id.localeCompare(b.id)).forEach(m => {
+        const o = document.createElement("option");
+        o.value = m.id;
+        o.textContent = m.id;
+        sel.appendChild(o);
+      });
+      if ([...sel.options].some(o => o.value === model)) {
+        sel.value = model;
+      } else {
+        const o = document.createElement("option");
+        o.value = model;
+        o.textContent = model + " (مخصص)";
+        sel.appendChild(o);
+        sel.value = model;
+      }
+    }
   } catch (e) { console.warn("loadModels:", e); }
 }
 
@@ -2984,10 +2961,11 @@ document.addEventListener("keydown", (e) => {
   let savedKey = "";
   try { savedKey = await loadSecureKey(); } catch { savedKey = ""; }
 
-  if (GROQ_API_KEY) {
-    apiKey = GROQ_API_KEY;
-  } else if (savedKey && savedKey.startsWith(KEY_PREFIX)) {
+  if (savedKey && savedKey.startsWith("gsk_")) {
     apiKey = savedKey;
+  } else if (GROQ_API_KEY && GROQ_API_KEY.startsWith("gsk_") && GROQ_API_KEY !== "ضع_مفتاحك_هنا") {
+    apiKey = GROQ_API_KEY;
+    try { await saveSecureKey(apiKey); } catch {}
   } else {
     apiKey = "";
   }
@@ -3005,11 +2983,11 @@ document.addEventListener("keydown", (e) => {
     loadModels();
   } else {
     setTimeout(() => {
-      toast("أضف مفتاح Gemini أولاً", 4000);
+      toast("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", 4000);
       openSettings();
     }, 900);
   }
 })();
 </script>
 </body>
-</html>
+  </html>
