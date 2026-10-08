@@ -1374,7 +1374,7 @@
           <circle cx="9" cy="13" r="1.5" fill="currentColor"/>
           <circle cx="15" cy="13" r="1.5" fill="currentColor"/>
         </svg>
-        <span class="model-badge-name" id="modelBadgeName">gemini-2.5-flash</span>
+        <span class="model-badge-name" id="modelBadgeName">gemini-2.5-flash-lite</span>
       </div>
     </div>
     <div class="topbar-right">
@@ -1477,9 +1477,8 @@
         </button>
       </label>
       <select id="modelSelect">
-        <option value="gemini-2.5-flash">gemini-2.5-flash</option>
         <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite</option>
-        <option value="gemini-2.5-pro">gemini-2.5-pro</option>
+        <option value="gemini-2.5-flash">gemini-2.5-flash</option>
       </select>
 
       <label>✏️ أو اكتب مخصص</label>
@@ -1545,10 +1544,10 @@
 /* ═══════════════════════════════════════════════════════════════
    ✏️ مكان المفتاح — حط مفتاح Gemini (AIza...) من الإعدادات
    ═══════════════════════════════════════════════════════════════ */
-const GROQ_API_KEY = "";
+const GROQ_API_KEY = "AQ.Ab8RN6KQr-BOLt2R7HUVR6lRmo8saSTJ4qURRvQ7lZxwL9rXvA";
 const KEY_PREFIX = ""; // أي مفتاح (AIza... أو AQ....)
 
-const DEFAULT_MODEL = "gemini-2.5-flash";
+const DEFAULT_MODEL = "gemini-2.5-flash-lite";
 const API_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
 const MODELS_URL = "https://generativelanguage.googleapis.com/v1beta/openai/models";
 const REASONING_MODELS = /reasoner|r1/i;
@@ -1694,7 +1693,7 @@ async function fetchRetry(url, opts, maxRetries = 3, ctl = null) {
       }
       if (res.ok || (res.status < 500 && res.status !== 429)) return res;
       if (i === maxRetries) return res;
-      await new Promise(r => setTimeout(r, 800 * Math.pow(2, i)));
+      await new Promise(r => setTimeout(r, res.status === 429 ? 7000 * (i + 1) : 800 * Math.pow(2, i)));
     } catch (e) {
       if (e.name === "AbortError") throw e;
       if (i === maxRetries) throw e;
@@ -1705,7 +1704,7 @@ async function fetchRetry(url, opts, maxRetries = 3, ctl = null) {
 
 let apiKey = "";
 let model = store.get("rosto_model", DEFAULT_MODEL) || DEFAULT_MODEL;
-if (!/^gemini/i.test(model)) { model = DEFAULT_MODEL; store.set("rosto_model", model); }
+if (!/^gemini/i.test(model) || /pro/i.test(model)) { model = DEFAULT_MODEL; store.set("rosto_model", model); }
 let systemPrompt = store.get("rosto_system", DEFAULT_SYSTEM) || DEFAULT_SYSTEM;
 let ttsEnabled = store.get("rosto_tts", "0") === "1";
 let streamEnabled = store.get("rosto_stream", "1") === "1";
@@ -2953,11 +2952,10 @@ document.addEventListener("keydown", (e) => {
   let savedKey = "";
   try { savedKey = await loadSecureKey(); } catch { savedKey = ""; }
 
-  if (savedKey && savedKey.startsWith(KEY_PREFIX)) {
-    apiKey = savedKey;
-  } else if (GROQ_API_KEY && GROQ_API_KEY.startsWith(KEY_PREFIX)) {
+  if (GROQ_API_KEY) {
     apiKey = GROQ_API_KEY;
-    try { await saveSecureKey(apiKey); } catch {}
+  } else if (savedKey && savedKey.startsWith(KEY_PREFIX)) {
+    apiKey = savedKey;
   } else {
     apiKey = "";
   }
