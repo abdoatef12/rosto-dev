@@ -2754,24 +2754,77 @@ $$("[data-theme]").forEach(b => {
   };
 });
 
+function fillModels(ids) {
+  const sel = $("modelSelect");
+  sel.innerHTML = "";
+  ids.forEach(id => {
+    const o = document.createElement("option");
+    o.value = id;
+    o.textContent = id;
+    sel.appendChild(o);
+  });
+  if (![...sel.options].some(o => o.value === model)) {
+    const o = document.createElement("option");
+    o.value = model;
+    o.textContent = model + " (مخصص)";
+    sel.appendChild(o);
+  }
+  sel.value = model;
+}
+
+async function testModel(id) {
+  try {
+    const r = await Promise.race([
+      fetch(API_URL, {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + apiKey, "Content-Type": "application/json" },
+        body: JSON.stringify({ model: id, messages: [{ role: "user", content: "hi" }], max_tokens: 16 })
+      }),
+      new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 20000))
+    ]);
+    if (r.ok) return { ok: true };
+    let d = "";
+    try { const j = await r.json(); d = (Array.isArray(j) ? j[0] : j).error?.message || ""; } catch {}
+    return { ok: false, status: r.status, detail: d };
+  } catch (e) { return { ok: false, status: 0, detail: e.message }; }
+}
+
 $("reloadModels").onclick = async () => {
-  if (!apiKey || !apiKey.startsWith(KEY_PREFIX)) return toast("⚠️ أضف المفتاح أولاً");
+  if (!apiKey) return toast("⚠️ أضف المفتاح أولاً");
   try {
     const r = await fetch(MODELS_URL, { headers: { Authorization: "Bearer " + apiKey } });
     if (!r.ok) throw new Error("HTTP " + r.status);
     const { data } = await r.json();
-    const list = (data || []).map(m => ({ ...m, id: String(m.id).replace(/^models\//, "") })).filter(m => m.active !== false && !/whisper|tts|guard|embed|imagen|veo|aqa|image|live/i.test(m.id)).sort((a, b) => a.id.localeCompare(b.id));
-    const sel = $("modelSelect");
-    sel.innerHTML = "";
-    list.forEach(m => {
-      const o = document.createElement("option");
-      o.value = m.id;
-      o.textContent = m.id;
-      sel.appendChild(o);
-    });
-    toast(`✓ ${list.length} موديل متاح`);
+    const ids = [...new Set((data || []).map(m => String(m.id).replace(/^models\//, "")))]
+      .filter(id => /^gemini/i.test(id) && !/embed|imagen|veo|aqa|image|live|tts|audio|robotics|computer-use|learnlm|exp/i.test(id))
+      .sort();
+    if (!ids.length) return toast("لا توجد موديلات");
+    toast("🔍 جاري فحص " + ids.length + " موديل...", 60000);
+    const working = [];
+    let firstErr = null;
+    let idx = 0;
+    const worker = async () => {
+      while (idx < ids.length) {
+        const id = ids[idx++];
+        const res = await testModel(id);
+        if (res.ok) working.push(id);
+        else if (!firstErr) firstErr = res;
+      }
+    };
+    await Promise.all([worker(), worker(), worker()]);
+    working.sort();
+    if (!working.length) {
+      return toast("❌ ولا موديل اشتغل" + (firstErr ? " — " + firstErr.status + ": " + String(firstErr.detail || "").slice(0, 120) : ""), 9000);
+    }
+    store.set("rosto_okmodels", JSON.stringify(working));
+    if (!working.includes(model)) { model = working[0]; store.set("rosto_model", model); updateModelBadge(); }
+    fillModels(working);
+    $("modelInput").value = model;
+    toast("✓ " + working.length + " موديل شغال من " + ids.length, 5000);
   } catch (e) { toast("❌ فشل: " + e.message); }
 };
+
+$("modelSelect").onchange = () => { $("modelInput").value = $("modelSelect").value; };
 
 $("exportChatBtn").onclick = () => {
   if (!messages.length) return toast("لا توجد رسائل");
@@ -2840,31 +2893,9 @@ function download(content, mime, name) {
 }
 
 async function loadModels() {
-  if (!apiKey || !apiKey.startsWith(KEY_PREFIX)) return;
   try {
-    const r = await fetch(MODELS_URL, { headers: { Authorization: "Bearer " + apiKey } });
-    if (!r.ok) return;
-    const { data } = await r.json();
-    const list = (data || []).map(m => ({ ...m, id: String(m.id).replace(/^models\//, "") })).filter(m => m.active !== false && !/whisper|tts|guard|embed|imagen|veo|aqa|image|live/i.test(m.id));
-    const sel = $("modelSelect");
-    if (list.length) {
-      sel.innerHTML = "";
-      list.sort((a, b) => a.id.localeCompare(b.id)).forEach(m => {
-        const o = document.createElement("option");
-        o.value = m.id;
-        o.textContent = m.id;
-        sel.appendChild(o);
-      });
-      if ([...sel.options].some(o => o.value === model)) {
-        sel.value = model;
-      } else {
-        const o = document.createElement("option");
-        o.value = model;
-        o.textContent = model + " (مخصص)";
-        sel.appendChild(o);
-        sel.value = model;
-      }
-    }
+    const ok = JSON.parse(store.get("rosto_okmodels", "[]"));
+    if (Array.isArray(ok) && ok.length) fillModels(ok);
   } catch (e) { console.warn("loadModels:", e); }
 }
 
