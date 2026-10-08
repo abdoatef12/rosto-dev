@@ -1374,7 +1374,7 @@
           <circle cx="9" cy="13" r="1.5" fill="currentColor"/>
           <circle cx="15" cy="13" r="1.5" fill="currentColor"/>
         </svg>
-        <span class="model-badge-name" id="modelBadgeName">GPT-OSS 120B</span>
+        <span class="model-badge-name" id="modelBadgeName">deepseek-chat</span>
       </div>
     </div>
     <div class="topbar-right">
@@ -1467,8 +1467,8 @@
     </div>
 
     <div class="modal-tab-content active" id="t-general">
-      <label>🔑 مفتاح Groq API</label>
-      <input id="keyInput" type="password" placeholder="gsk_..." autocomplete="off" spellcheck="false">
+      <label>🔑 مفتاح DeepSeek API</label>
+      <input id="keyInput" type="password" placeholder="sk-..." autocomplete="off" spellcheck="false">
       <div style="font-size:11px;color:var(--ds-text-tertiary);margin-top:6px">🔐 مشفّر محلياً على جهازك</div>
 
       <label>🤖 الموديل
@@ -1477,12 +1477,8 @@
         </button>
       </label>
       <select id="modelSelect">
-        <option value="openai/gpt-oss-120b">openai/gpt-oss-120b</option>
-        <option value="openai/gpt-oss-20b">openai/gpt-oss-20b</option>
-        <option value="qwen/qwen3-32b">qwen/qwen3-32b</option>
-        <option value="llama-3.1-8b-instant">llama-3.1-8b-instant</option>
-        <option value="llama-3.2-11b-vision-preview">llama-3.2-11b-vision-preview</option>
-        <option value="meta-llama/llama-4-scout-17b-16e-instruct">llama-4-scout-17b</option>
+        <option value="deepseek-chat">deepseek-chat (V3)</option>
+        <option value="deepseek-reasoner">deepseek-reasoner (R1)</option>
       </select>
 
       <label>✏️ أو اكتب مخصص</label>
@@ -1546,16 +1542,16 @@
 "use strict";
 
 /* ═══════════════════════════════════════════════════════════════
-   ✏️ مكان المفتاح — غيّر النص ده بمفتاحك
+   ✏️ مكان المفتاح — حط مفتاح DeepSeek (sk-...) هنا أو من الإعدادات
    ═══════════════════════════════════════════════════════════════ */
-const GROQ_API_KEY = "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";
+const GROQ_API_KEY = "";
+const KEY_PREFIX = "sk-";
 
-const DEFAULT_MODEL = "openai/gpt-oss-120b";
-const API_URL = "https://api.groq.com/openai/v1/chat/completions";
-const MODELS_URL = "https://api.groq.com/openai/v1/models";
-const VISION_FALLBACK = "meta-llama/llama-4-scout-17b-16e-instruct";
-const REASONING_MODELS = /qwen3|deepseek-r1|gpt-oss/i;
-const isVisionModel = (m) => /llama-4|vision|llama-3\.2.*vision/i.test(m || "");
+const DEFAULT_MODEL = "deepseek-chat";
+const API_URL = "https://api.deepseek.com/chat/completions";
+const MODELS_URL = "https://api.deepseek.com/models";
+const REASONING_MODELS = /reasoner|r1/i;
+const isVisionModel = () => false;
 const MAX_IMAGES = 5;
 const DEFAULT_SYSTEM = "";
 
@@ -1689,7 +1685,12 @@ async function loadSecureKey() {
 async function fetchRetry(url, opts, maxRetries = 3, ctl = null) {
   for (let i = 0; i <= maxRetries; i++) {
     try {
-      const res = await fetch(url, opts);
+      let res;
+      try { res = await fetch(url, opts); }
+      catch (e0) {
+        if (e0 && e0.name === "DataCloneError") { const o2 = { ...opts }; delete o2.signal; res = await fetch(url, o2); }
+        else throw e0;
+      }
       if (res.ok || (res.status < 500 && res.status !== 429)) return res;
       if (i === maxRetries) return res;
       await new Promise(r => setTimeout(r, 800 * Math.pow(2, i)));
@@ -1703,6 +1704,7 @@ async function fetchRetry(url, opts, maxRetries = 3, ctl = null) {
 
 let apiKey = "";
 let model = store.get("rosto_model", DEFAULT_MODEL) || DEFAULT_MODEL;
+if (!/^deepseek/i.test(model)) { model = DEFAULT_MODEL; store.set("rosto_model", model); }
 let systemPrompt = store.get("rosto_system", DEFAULT_SYSTEM) || DEFAULT_SYSTEM;
 let ttsEnabled = store.get("rosto_tts", "0") === "1";
 let streamEnabled = store.get("rosto_stream", "1") === "1";
@@ -2320,20 +2322,15 @@ async function send(raw) {
   if (controller) return;
   const text = (raw || "").trim();
   if (!text && !attachments.length) return;
-  if (!apiKey) { openSettings(); return toast("⚠️ أضف مفتاح Groq أولاً"); }
+  if (!apiKey) { openSettings(); return toast("SRP5/o5rJs03r945m0NKqQ=="); }
 
   messages = messages.filter(m => m && m.content);
-  const needsVision = attachments.length > 0;
-  let useModel = model;
-  if (needsVision && !isVisionModel(model)) {
-    if (!autoVision) {
-      attachments = [];
-      renderAttachPreview();
-      return toast("⚠️ الموديل الحالي لا يدعم الصور");
-    }
-    useModel = VISION_FALLBACK;
-    toast("🖼 تم التبديل لموديل الرؤية");
+  if (attachments.length) {
+    attachments = [];
+    renderAttachPreview();
+    return toast("⚠️ DeepSeek لا يدعم الصور");
   }
+  const useModel = model;
 
   const imgs = attachments.slice();
   const userContent = imgs.length
@@ -2407,12 +2404,11 @@ async function send(raw) {
   const body = {
     model: useModel,
     messages: finalSystem ? [{ role: "system", content: finalSystem.trim() }, ...prepareHistory()] : prepareHistory(),
-    max_tokens: maxTokens,
+    max_tokens: Math.min(maxTokens, 8192),
     temperature,
     top_p: topP,
     stream: streamEnabled
   };
-  if (REASONING_MODELS.test(useModel)) body.reasoning_format = "parsed";
 
   try {
     const opts = {
@@ -2605,7 +2601,7 @@ function closeSidebar() {
 }
 
 function openSettings() {
-  $("keyInput").value = apiKey.startsWith("gsk_") ? apiKey : "";
+  $("keyInput").value = apiKey.startsWith(KEY_PREFIX) ? apiKey : "";
   $("modelInput").value = model;
   $("systemInput").value = systemPrompt;
   $("modelSelect").value = model;
@@ -2764,7 +2760,7 @@ $$("[data-theme]").forEach(b => {
 });
 
 $("reloadModels").onclick = async () => {
-  if (!apiKey || !apiKey.startsWith("gsk_")) return toast("⚠️ أضف المفتاح أولاً");
+  if (!apiKey || !apiKey.startsWith(KEY_PREFIX)) return toast("⚠️ أضف المفتاح أولاً");
   try {
     const r = await fetch(MODELS_URL, { headers: { Authorization: "Bearer " + apiKey } });
     if (!r.ok) throw new Error("HTTP " + r.status);
@@ -2849,7 +2845,7 @@ function download(content, mime, name) {
 }
 
 async function loadModels() {
-  if (!apiKey || !apiKey.startsWith("gsk_")) return;
+  if (!apiKey || !apiKey.startsWith(KEY_PREFIX)) return;
   try {
     const r = await fetch(MODELS_URL, { headers: { Authorization: "Bearer " + apiKey } });
     if (!r.ok) return;
@@ -2961,9 +2957,9 @@ document.addEventListener("keydown", (e) => {
   let savedKey = "";
   try { savedKey = await loadSecureKey(); } catch { savedKey = ""; }
 
-  if (savedKey && savedKey.startsWith("gsk_")) {
+  if (savedKey && savedKey.startsWith(KEY_PREFIX)) {
     apiKey = savedKey;
-  } else if (GROQ_API_KEY && GROQ_API_KEY.startsWith("gsk_") && GROQ_API_KEY !== "ضع_مفتاحك_هنا") {
+  } else if (GROQ_API_KEY && GROQ_API_KEY.startsWith(KEY_PREFIX)) {
     apiKey = GROQ_API_KEY;
     try { await saveSecureKey(apiKey); } catch {}
   } else {
@@ -2983,11 +2979,11 @@ document.addEventListener("keydown", (e) => {
     loadModels();
   } else {
     setTimeout(() => {
-      toast("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", 4000);
+      toast("SRP5/o5rJs03r945m0NKqQ==ً", 4000);
       openSettings();
     }, 900);
   }
 })();
 </script>
 </body>
-        </html>
+</html>
